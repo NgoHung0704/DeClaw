@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+build/
+*.egg-info/
+
+# Env
+.env
+.env.local
+
+# Data
+*.db
+*.db-shm
+*.db-wal
+chroma_db/
+.declaw/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tauri / Rust
+target/
+src-tauri/target/
+
+# Coverage
+.coverage
+htmlcov/
+coverage.xml
