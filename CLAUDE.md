@@ -4,7 +4,7 @@
 
 ## Current state
 - Phase: 0 — Project Foundation
-- Current ticket: DCL-006 (next — Structured JSON logging with loguru)
+- Current ticket: DCL-007 (next — Pre-flight check script)
 - Last updated: 2026-05-20
 
 ## Locked architectural decisions
@@ -61,9 +61,10 @@ EU regulated professionals — lawyers, notaries, doctors, accountants — who c
 - **DCL-003** — Ollama integration + health check: `declaw/brain/ollama_client.py` provides an async `OllamaClient` (httpx-based) with `version()`, `list_models()`, and a never-raising `health() -> OllamaHealth` snapshot. `declaw status` now shows `ollama_reachable` and `ollama_has_<model>`. 6 unit tests in `tests/unit/test_ollama_client.py` cover the happy path, missing model, connection errors, and HTTP errors using `httpx.MockTransport` — no live daemon needed.
 - **DCL-004** — Config system with pydantic-settings: closeout ticket. `declaw/config.py` (delivered in DCL-001) provides typed `Settings` with `DECLAW_` prefix, `.env` support, loopback host validator, port range validator, language enum, path `~` expansion, and `OLLAMA_BASE_URL` unprefixed alias. `get_settings()` is the `@lru_cache` singleton. 10 unit tests in `tests/unit/test_config.py` cover defaults, env loading, type validation, loopback enforcement, path expansion, singleton behavior, and `.env` file loading. `.env.example` documents every knob.
 - **DCL-005** — SQLite + SQLModel + Alembic. `declaw/db/engine.py` exposes async aiosqlite engine, sessionmaker, and `get_session()` context manager. `declaw/db/models.py` ships baseline `Task` (UUID PK, status enum, prompt/result/error) and `AuditEvent` (append-only, JSON payload, optional FK to tasks — required by Principle #7). Alembic configured to read DB URL from `Settings` (override via `DECLAW_DB_URL` for tests), with `render_as_batch=True` for SQLite ALTER support. Initial migration `b067ce5acbad` creates both tables + indexes. 5 CRUD smoke tests in `tests/unit/test_db.py` cover insert/read/update tasks, JSON payload roundtrip, audit→task FK link, and schema sanity.
+- **DCL-006** — Structured JSON logging (loguru). `declaw/log.py` exposes `configure()`, the global `logger`, and `use_request_id()` context manager. Records emit single-line JSON with `timestamp` (ISO 8601 + tz), `level`, `message`, `request_id`, `logger`, plus `extra` (from `logger.bind`) and `exception`. Request ID is a `ContextVar` so it propagates correctly across `asyncio.Task` boundaries — concurrent requests can never cross wires. Level configurable via `DECLAW_LOG_LEVEL` setting (TRACE..CRITICAL). Operational logger is **separate** from the DB-backed audit trail (Principle #7) — those will live in `declaw/audit/` later. 8 unit tests in `tests/unit/test_log.py` cover JSON shape, ISO timestamp, level filtering, request_id propagation (nested + async-isolated), bound extras, and exception serialization.
 
 ## In progress
-- (none — ready to start DCL-006)
+- (none — ready to start DCL-007)
 
 ## Open decisions
 - (none yet)
@@ -74,4 +75,4 @@ EU regulated professionals — lawyers, notaries, doctors, accountants — who c
 - Vision-based agents, OS control beyond os-bridge, plugin marketplace, mobile apps — out of scope for v0.1
 
 ## Notes for next session
-- DCL-005 done. To run migrations: `uv run alembic upgrade head` (uses `~/.declaw/declaw.db` by default; override via `DECLAW_DB_URL`). To generate a new migration after changing models in `declaw/db/models.py`: `uv run alembic revision --autogenerate -m "<msg>"`. Next: DCL-006 — structured JSON logging with loguru.
+- DCL-006 done. To use the logger anywhere: `from declaw.log import logger, use_request_id`; call `configure()` once at process start (gateway entry, CLI entry). FastAPI middleware (later ticket) should wrap each request in `with use_request_id(req.headers.get("x-request-id") or uuid4()): ...`. Next: DCL-007 — pre-flight check script (Ollama running, Mistral pulled, Docker available, ports free).

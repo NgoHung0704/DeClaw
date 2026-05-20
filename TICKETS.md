@@ -43,7 +43,7 @@
 - **Dependencies**: DCL-004
 - **Estimate**: 0.5d
 
-### [ ] DCL-006 — Structured JSON logging (loguru)
+### [x] DCL-006 — Structured JSON logging (loguru)
 - **Description**: JSON sink, request ID propagation, log levels via env.
 - **Acceptance**: Log records are valid JSON with timestamp, level, request_id.
 - **Dependencies**: DCL-004

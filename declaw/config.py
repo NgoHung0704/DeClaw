@@ -21,6 +21,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 Language = Literal["en", "fr"]
+LogLevel = Literal["TRACE", "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
 
 
 class Settings(BaseSettings):
@@ -42,6 +43,9 @@ class Settings(BaseSettings):
     port: int = Field(default=7842, ge=1, le=65535, description="Gateway bind port.")
     debug: bool = Field(default=False, description="Enable verbose debug logging.")
     language: Language = Field(default="en", description="Default UI/system-prompt language.")
+    log_level: LogLevel = Field(
+        default="INFO", description="Minimum loguru log level (TRACE..CRITICAL)."
+    )
 
     # --- Ollama -------------------------------------------------------------
     ollama_base_url: str = Field(
