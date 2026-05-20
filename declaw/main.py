@@ -8,11 +8,14 @@ gateway started by ``start``).
 
 from __future__ import annotations
 
+import asyncio
+
 import typer
 from rich.console import Console
 from rich.table import Table
 
 from declaw import __version__
+from declaw.brain.ollama_client import OllamaClient, OllamaHealth
 from declaw.config import get_settings
 
 cli = typer.Typer(
@@ -32,8 +35,10 @@ def version() -> None:
 
 @cli.command()
 def status() -> None:
-    """Show core configuration and (eventually) runtime health."""
+    """Show core configuration and runtime health."""
     settings = get_settings()
+    health = asyncio.run(OllamaClient().health())
+
     table = Table(title="DeClaw status", show_lines=False)
     table.add_column("setting", style="cyan", no_wrap=True)
     table.add_column("value", style="white")
@@ -45,6 +50,11 @@ def status() -> None:
     table.add_row("sanitizer_model", settings.sanitizer_model)
     table.add_row("embedding_model", settings.embedding_model)
     table.add_row("ollama_base_url", settings.ollama_base_url)
+    table.add_row("ollama_reachable", _format_reachable(health))
+    table.add_row(
+        f"ollama_has_{settings.model}",
+        "[green]yes[/green]" if health.has_model(settings.model) else "[red]no[/red]",
+    )
     table.add_row("data_dir", str(settings.data_dir))
     table.add_row("workspace_dir", str(settings.workspace_dir))
     table.add_row("docker_sandbox_required", str(settings.require_docker_sandbox))
@@ -52,6 +62,12 @@ def status() -> None:
     table.add_row("plugin_signature_required", str(settings.plugin_signature_required))
     table.add_row("block_external_network", str(settings.block_external_network))
     console.print(table)
+
+
+def _format_reachable(health: OllamaHealth) -> str:
+    if health.reachable:
+        return f"[green]yes[/green] (v{health.version})"
+    return f"[red]no[/red] ({health.error})"
 
 
 @cli.command()
