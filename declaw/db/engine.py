@@ -15,6 +15,8 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import threading
+
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 from sqlmodel.ext.asyncio.session import AsyncSession
 
@@ -42,20 +44,25 @@ def build_sessionmaker(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
 
 _engine: AsyncEngine | None = None
 _sessionmaker: async_sessionmaker[AsyncSession] | None = None
+_lock = threading.Lock()
 
 
 def get_engine() -> AsyncEngine:
-    """Process-wide engine. Lazily created on first call."""
+    """Process-wide engine. Lazily created on first call (thread-safe)."""
     global _engine
     if _engine is None:
-        _engine = build_engine()
+        with _lock:
+            if _engine is None:
+                _engine = build_engine()
     return _engine
 
 
 def get_sessionmaker() -> async_sessionmaker[AsyncSession]:
     global _sessionmaker
     if _sessionmaker is None:
-        _sessionmaker = build_sessionmaker(get_engine())
+        with _lock:
+            if _sessionmaker is None:
+                _sessionmaker = build_sessionmaker(get_engine())
     return _sessionmaker
 
 
