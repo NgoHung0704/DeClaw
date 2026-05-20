@@ -23,7 +23,7 @@
 - **Dependencies**: DCL-001
 - **Estimate**: 0.25d
 
-### [ ] DCL-003 — Ollama integration + health check
+### [x] DCL-003 — Ollama integration + health check
 - **Description**: Async Ollama client wrapper, health check (model reachable, Mistral 7B pulled).
 - **Acceptance**:
   - `declaw status` reports Ollama up/down + Mistral 7B presence
@@ -31,13 +31,13 @@
 - **Dependencies**: DCL-001
 - **Estimate**: 0.5d
 
-### [ ] DCL-004 — Config system with pydantic-settings
+### [x] DCL-004 — Config system with pydantic-settings
 - **Description**: `declaw/config.py` typed settings, `.env` support, env var prefix `DECLAW_`.
 - **Acceptance**: Settings model loads from `.env`, validates types, exposes singleton.
 - **Dependencies**: DCL-001
 - **Estimate**: 0.25d
 
-### [ ] DCL-005 — SQLite + SQLModel setup with migrations
+### [x] DCL-005 — SQLite + SQLModel setup with migrations
 - **Description**: Engine, session, baseline models for tasks/audit; Alembic init.
 - **Acceptance**: `alembic upgrade head` creates schema; CRUD smoke test passes.
 - **Dependencies**: DCL-004
