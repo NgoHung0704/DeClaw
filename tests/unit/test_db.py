@@ -8,7 +8,9 @@ DCL-007 / preflight) will exercise the real ``alembic upgrade head`` path.
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
+from datetime import timezone
 from pathlib import Path
 
 import pytest
@@ -110,6 +112,42 @@ async def test_audit_event_links_to_task(session: AsyncSession) -> None:
     assert events[0].event_type == "tool.shell.blocked"
 
 
+# --- updated_at auto-update -------------------------------------------------
+
+
+async def test_updated_at_advances_on_update(session: AsyncSession) -> None:
+    task = Task(prompt="check updated_at")
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+    original = task.updated_at
+
+    # Small sleep so the timestamps differ even at sub-second resolution.
+    await asyncio.sleep(0.01)
+
+    task.status = TaskStatus.RUNNING
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+
+    assert task.updated_at > original
+
+
+# --- Timezone round-trip ----------------------------------------------------
+
+
+async def test_datetimes_are_timezone_aware_after_roundtrip(session: AsyncSession) -> None:
+    task = Task(prompt="tz check")
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+
+    fetched = (await session.exec(select(Task).where(Task.id == task.id))).one()
+    assert fetched.created_at.tzinfo is not None
+    assert fetched.created_at.tzinfo == timezone.utc
+    assert fetched.updated_at.tzinfo is not None
+
+
 # --- Schema sanity ----------------------------------------------------------
 
 
@@ -121,3 +159,14 @@ async def test_schema_creates_both_tables(engine: AsyncEngine) -> None:
 
     assert "tasks" in names
     assert "audit_events" in names
+
+
+async def test_composite_index_exists_on_audit_events(engine: AsyncEngine) -> None:
+    from sqlalchemy import inspect
+
+    async with engine.connect() as conn:
+        indexes = await conn.run_sync(
+            lambda c: inspect(c).get_indexes("audit_events")
+        )
+    index_names = {idx["name"] for idx in indexes}
+    assert "ix_audit_events_task_created" in index_names
