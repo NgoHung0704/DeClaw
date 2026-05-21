@@ -49,7 +49,7 @@
 - **Dependencies**: DCL-004
 - **Estimate**: 0.25d
 
-### [ ] DCL-007 — Pre-flight check script
+### [x] DCL-007 — Pre-flight check script
 - **Description**: `scripts/preflight.py` checks Ollama running, Mistral pulled, Docker available, ports free.
 - **Acceptance**: Returns non-zero with actionable message on failure.
 - **Dependencies**: DCL-003
