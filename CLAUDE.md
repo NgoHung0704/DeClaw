@@ -5,7 +5,7 @@
 ## Current state
 - Phase: 0 complete → Phase 1 — Core Brain
 - Current ticket: DCL-010 (next — LangGraph basic agentic loop)
-- Last updated: 2026-05-20
+- Last updated: 2026-05-27
 
 ## Locked architectural decisions
 - Python 3.12+ with uv (lockfile committed)
@@ -70,7 +70,15 @@ EU regulated professionals — lawyers, notaries, doctors, accountants — who c
 - (none — ready to start DCL-010, kicking off Phase 1)
 
 ## Open decisions
-- (none yet)
+- **Ollama lifecycle / end-user packaging** (raised 2026-05-27). MVP DoD requires "install in < 5 min, no terminal required" for non-technical users (lawyers, doctors). They cannot manually install Ollama, pull a model, or fix PATH — yet that is exactly the current dev setup. DeClaw must own the full Ollama lifecycle (install, start daemon, health-check, auto-pull missing model) and hide it from the user, surfacing only a "preparing AI engine…" progress UI. Options:
+  - **A — Bundle Ollama** inside the Tauri installer (heavier app ~hundreds of MB, must track Ollama versions).
+  - **B — Download on first run** (light installer, needs internet once for ~4GB model; must log the download to the audit trail per Principle #7 and clearly frame it as "one-time, then fully offline").
+  - **C — Embed llama.cpp/llamafile directly** (drop Ollama; full control but lose Ollama's model management + API, more work).
+  - End-user config (`ollama_base_url`, `model`) must default to sane values (run with zero config) and be changed only via the Phase 9 Settings UI — never via `.env`/terminal. **Likely needs a dedicated ticket** ("Ollama lifecycle management") around Phase 7 or earlier. Decision deferred — no option chosen yet.
+- **Docker requirement for end-users / shell execution in MVP** (raised 2026-05-27). Per Principle #3, Docker is mandatory *only for shell execution* — "disabled, not bypassed" when absent. So Docker's absence must **disable the shell tool, not block the app**. Key realization: **the v0.1 MVP feature set does not need shell execution.** The 5 DoD items (read PDF/DOCX/XLSX, cited Q&A, move/rename/summarize via NL, audit log, egress monitor) all work without a shell — file move/rename runs through the os-bridge plugin with **typed, validated parameters** (Principle #6) via Python `shutil`, not shell commands. Meanwhile Docker Desktop is a *heavier* burden on non-technical users than Ollama: (a) needs WSL2 + BIOS virtualization + admin rights, which lawyers/doctors typically can't set up; (b) **Docker Desktop licensing is paid** for orgs >250 employees OR >$10M revenue — law firms / medical practices may fall under this, a real cost/legal risk; (c) multi-GB RAM footprint. Options:
+  - **A — Drop shell execution from v0.1** (recommended leaning): no Docker dependency at all for MVP → lightweight install, matches "< 5 min, no terminal". Shell + sandbox deferred to post-MVP.
+  - **B — Keep shell in v0.1** but solve the sandbox-for-non-technical-user problem without forcing Docker Desktop: candidates are Windows Sandbox (Win Pro built-in), WSL2 directly (avoids Desktop licensing), gVisor/Firecracker/nsjail (Linux-first), or bundling Docker Engine (not Desktop).
+  - Two follow-ups regardless of choice: (1) the **end-user runtime startup** must treat a failed Docker check as "disable shell tool + warn", unlike the current dev `scripts/preflight.py` which exits 1 — `declaw/preflight.py` does not yet distinguish these two modes. (2) **Phase-gating impact**: Phase 3 (sandbox) is currently a gate for Phase 9 (Web UI); if shell is deferred, Phase 3 may drop off the MVP critical path (Phase 4 sanitizer remains the real gate) — revisit gating separately. Decision deferred — no option chosen yet.
 
 ## Future ideas (out of scope for current phase)
 - Browser automation (Playwright) — deferred to Phase 2 / post-MVP
