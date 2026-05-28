@@ -95,7 +95,7 @@
 - **Dependencies**: DCL-014
 - **Estimate**: 1d
 
-### [ ] DCL-016 — CLI test interface
+### [x] DCL-016 — CLI test interface
 - **Description**: `declaw chat --debug` REPL using the brain.
 - **Acceptance**: Multi-turn chat works against running Ollama.
 - **Dependencies**: DCL-010
