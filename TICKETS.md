@@ -89,7 +89,7 @@
 - **Dependencies**: DCL-011
 - **Estimate**: 0.5d
 
-### [ ] DCL-015 — Context compaction strategy on overflow
+### [x] DCL-015 — Context compaction strategy on overflow
 - **Description**: Summarize oldest N turns into a compact note; preserve task plan + recent.
 - **Acceptance**: Compaction triggered at threshold; downstream behavior intact.
 - **Dependencies**: DCL-014
