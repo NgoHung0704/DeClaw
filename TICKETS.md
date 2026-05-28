@@ -65,7 +65,7 @@
 - **Dependencies**: DCL-003
 - **Estimate**: 1d
 
-### [ ] DCL-011 — AgentState schema with typed slots
+### [x] DCL-011 — AgentState schema with typed slots
 - **Description**: Pydantic state: messages, scratchpad, current plan, tool calls, audit refs.
 - **Acceptance**: State serializes/deserializes; mypy strict passes.
 - **Dependencies**: DCL-010
