@@ -16,7 +16,13 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from typing import Any
 
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessage,
+    HumanMessage,
+    SystemMessage,
+    ToolMessage,
+)
 from langchain_core.tools import BaseTool
 from langgraph.graph.state import CompiledStateGraph
 
@@ -66,14 +72,16 @@ async def run_chat(
     read: Callable[[], str | None],
     write: Callable[[str], None],
     debug: bool = False,
+    system: SystemMessage | None = None,
 ) -> None:
     """Drive a multi-turn REPL over ``graph``.
 
     ``read`` returns the next user line (or ``None`` to stop); ``write`` emits a
     line of output. The whole conversation is threaded back into the graph each
-    turn, so the model keeps multi-turn memory.
+    turn, so the model keeps multi-turn memory. When ``system`` is given it is
+    seeded as the leading message (the localized system prompt, DCL-017).
     """
-    history: list[BaseMessage] = []
+    history: list[BaseMessage] = [] if system is None else [system]
     while True:
         line = read()
         if line is None:

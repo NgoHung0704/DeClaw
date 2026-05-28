@@ -101,7 +101,7 @@
 - **Dependencies**: DCL-010
 - **Estimate**: 0.5d
 
-### [ ] DCL-017 — System prompt template (FR + EN)
+### [x] DCL-017 — System prompt template (FR + EN)
 - **Description**: Templated prompts with locale switch; embed 7 principles.
 - **Acceptance**: `DECLAW_LANGUAGE=fr` switches prompt language.
 - **Dependencies**: DCL-010
