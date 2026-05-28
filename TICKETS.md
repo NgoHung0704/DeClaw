@@ -77,7 +77,7 @@
 - **Dependencies**: DCL-010
 - **Estimate**: 1d
 
-### [ ] DCL-013 — Tool output parser + retry/repair
+### [x] DCL-013 — Tool output parser + retry/repair
 - **Description**: Parse model output; on malformed JSON, retry with corrective prompt (max 2).
 - **Acceptance**: Malformed outputs from corpus pass after retry.
 - **Dependencies**: DCL-012
