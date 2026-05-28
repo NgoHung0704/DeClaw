@@ -90,6 +90,7 @@ def chat(
 ) -> None:
     """Start an interactive chat REPL backed by the local brain."""
     # Imported lazily so `version`/`status` don't pay the langchain import cost.
+    from declaw.brain.prompts import system_message
     from declaw.brain.repl import build_brain, run_chat
 
     settings = get_settings()
@@ -122,7 +123,7 @@ def chat(
     def write(line: str) -> None:
         console.print(line)
 
-    asyncio.run(run_chat(graph, read=read, write=write, debug=debug))
+    asyncio.run(run_chat(graph, read=read, write=write, debug=debug, system=system_message()))
     console.print("[dim]bye[/dim]")
 
 

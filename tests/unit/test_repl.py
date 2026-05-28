@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-from langchain_core.messages import AIMessage, BaseMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 
 from declaw.brain.loop import build_agent_graph
 from declaw.brain.repl import build_brain, run_chat
@@ -96,3 +96,15 @@ async def test_run_chat_debug_shows_tool_call_and_result() -> None:
     assert "[tool call] echo" in joined
     assert "[tool result] echo: hi" in joined
     assert "done" in joined
+
+
+async def test_run_chat_seeds_system_message() -> None:
+    system = SystemMessage(content="rules of the game")
+    model = _ScriptedModel([AIMessage(content="ok")])
+    graph = build_agent_graph(model=model, tools=[echo])
+
+    await run_chat(graph, read=_Reader(["hi", "/exit"]), write=_Writer(), system=system)
+
+    first_turn = model.received[0]
+    assert first_turn[0] is system  # the system prompt leads the conversation
+    assert isinstance(first_turn[1], HumanMessage)
