@@ -3,9 +3,9 @@
 > Living document. **Update after every completed ticket.** This is what future sessions read first.
 
 ## Current state
-- Phase: 0 complete → Phase 1 — Core Brain
-- Current ticket: DCL-010 (next — LangGraph basic agentic loop)
-- Last updated: 2026-05-27
+- Phase: 1 — Core Brain (in progress)
+- Current ticket: DCL-011 (next — AgentState schema with typed slots)
+- Last updated: 2026-05-28
 
 ## Locked architectural decisions
 - Python 3.12+ with uv (lockfile committed)
@@ -66,8 +66,11 @@ EU regulated professionals — lawyers, notaries, doctors, accountants — who c
 
 **🎉 Phase 0 — Project Foundation: COMPLETE.**
 
+### Phase 1 — Core Brain
+- **DCL-010** — LangGraph basic agentic loop. `declaw/brain/loop.py` exposes `build_agent_graph(model, tools)`: a two-node LangGraph state machine implementing think → tool-call → observe — an `agent` node (calls the injected async model) and a `tools` node (`ToolNode` runs requested tools). `tools_condition` loops back to `agent` while the model emits `tool_calls`, else routes to `END`. State is LangGraph's `MessagesState` (DCL-011 will extend it). The model is **injected** as an async `ModelCallable` (`Sequence[BaseMessage] -> Awaitable[BaseMessage]`) so the loop is testable with no live Ollama — real Mistral wiring via langchain-ollama `bind_tools` is DCL-012. `declaw/brain/stub_tools.py` ships an `echo` stub tool (real typed tools arrive in Phase 2 / DCL-020+). 2 unit tests in `tests/unit/test_loop.py` drive the loop with a scripted fake model: one proves the full `Human → AI(tool_call) → Tool → AI(answer)` trace with the stub tool, the other proves the no-tool-call path ends after a single think. mypy-strict gotchas: `CompiledStateGraph` takes 4 type params; the model param must be `Sequence` (list is invariant); the agent node must be an inline `async def` for mypy to infer `NodeInputT`.
+
 ## In progress
-- (none — ready to start DCL-010, kicking off Phase 1)
+- (none — ready to start DCL-011)
 
 ## Open decisions
 - **Ollama lifecycle / end-user packaging** (raised 2026-05-27). MVP DoD requires "install in < 5 min, no terminal required" for non-technical users (lawyers, doctors). They cannot manually install Ollama, pull a model, or fix PATH — yet that is exactly the current dev setup. DeClaw must own the full Ollama lifecycle (install, start daemon, health-check, auto-pull missing model) and hide it from the user, surfacing only a "preparing AI engine…" progress UI. Options:
@@ -79,6 +82,10 @@ EU regulated professionals — lawyers, notaries, doctors, accountants — who c
   - **A — Drop shell execution from v0.1** (recommended leaning): no Docker dependency at all for MVP → lightweight install, matches "< 5 min, no terminal". Shell + sandbox deferred to post-MVP.
   - **B — Keep shell in v0.1** but solve the sandbox-for-non-technical-user problem without forcing Docker Desktop: candidates are Windows Sandbox (Win Pro built-in), WSL2 directly (avoids Desktop licensing), gVisor/Firecracker/nsjail (Linux-first), or bundling Docker Engine (not Desktop).
   - Two follow-ups regardless of choice: (1) the **end-user runtime startup** must treat a failed Docker check as "disable shell tool + warn", unlike the current dev `scripts/preflight.py` which exits 1 — `declaw/preflight.py` does not yet distinguish these two modes. (2) **Phase-gating impact**: Phase 3 (sandbox) is currently a gate for Phase 9 (Web UI); if shell is deferred, Phase 3 may drop off the MVP critical path (Phase 4 sanitizer remains the real gate) — revisit gating separately. Decision deferred — no option chosen yet.
+- **Proactive "heartbeat" agent loop (OpenClaw-style)** (raised 2026-05-28). OpenClaw (Peter Steinberger's self-hosted local AI assistant — close in philosophy to DeClaw) has a *heartbeat*: on a fixed interval (~30 min) the system wakes the agent, which reads a `HEARTBEAT.md`, performs configured checks (email, calendar, metrics), and either reports or stays silent (`HEARTBEAT_OK`, <1k tokens). This turns a **reactive** agent (waits for commands) into a **proactive** one (acts on a schedule). DeClaw is currently reactive-only, but the roadmap already has the foundation: **APScheduler** (listed under Future ideas, Phase 2 / post-MVP). Reasoning on whether DeClaw should adopt this:
+  - **For**: genuinely useful for the target professionals (watch a folder for new docs, remind about deadlines, summarize newly-arrived email); a differentiator vs purely reactive assistants; scheduler infra already planned.
+  - **Against (tensions with DeClaw's DNA)**: (1) conflicts with the **confirmation-required** model (MVP DoD #4) — who confirms an autonomous action when the user is away? (2) **legal-liability risk** for regulated professionals — an agent auto-acting on privileged email without supervision is dangerous; (3) **privacy/audit** — scheduled access to email/calendar even when the user is absent must be fully local + logged (Principles #5, #7); (4) **LLM reliability** — DeClaw runs local Mistral 7B, far weaker than the cloud models OpenClaw likely assumes; autonomous decisions on a 7B model are risky; (5) cost is compute/electricity on the user's machine (not API $, since Ollama is local).
+  - **Leaning**: keep DeClaw **reactive for v0.1**; treat proactive heartbeat as **post-MVP**, built on APScheduler. Even then, default to **"observe + notify"** (watch and surface findings), **not "act autonomously"** — any action still routes through the confirmation queue + audit trail. Decision deferred — no option chosen yet.
 
 ## Future ideas (out of scope for current phase)
 - Browser automation (Playwright) — deferred to Phase 2 / post-MVP
@@ -86,4 +93,4 @@ EU regulated professionals — lawyers, notaries, doctors, accountants — who c
 - Vision-based agents, OS control beyond os-bridge, plugin marketplace, mobile apps — out of scope for v0.1
 
 ## Notes for next session
-- Phase 0 done. Run `uv run python scripts/preflight.py` to verify the dev environment. Next: DCL-010 — LangGraph basic agentic loop (think → tool-call → observe). Will need a stub tool to prove the loop end-to-end; real tools come in later tickets. Dependency is DCL-003 (already done).
+- DCL-010 done. The agentic loop lives in `declaw/brain/loop.py` (`build_agent_graph`), tested with a scripted fake model (no Ollama needed). Next: DCL-011 — `AgentState` schema with typed slots (extend `MessagesState` with scratchpad, plan, tool-call refs, audit refs; must pass mypy strict). Then DCL-012 wires the real Mistral model into the loop via langchain-ollama `bind_tools` — the injected `ModelCallable` is exactly that seam. Run `uv run pytest` and `uv run mypy declaw` before commits.

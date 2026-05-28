@@ -59,7 +59,7 @@
 
 ## 🧠 PHASE 1 — CORE BRAIN (Weeks 2-3)
 
-### [ ] DCL-010 — LangGraph basic agentic loop
+### [x] DCL-010 — LangGraph basic agentic loop
 - **Description**: Minimal think → tool-call → observe loop.
 - **Acceptance**: Loop processes a user turn end-to-end with a stub tool.
 - **Dependencies**: DCL-003
