@@ -88,10 +88,42 @@ def stop() -> None:
 def chat(
     debug: bool = typer.Option(False, "--debug", help="Enable verbose tracing."),
 ) -> None:
-    """Start an interactive chat REPL. (Implemented in DCL-016.)"""
-    _ = debug
-    console.print("[yellow]chat[/yellow]: REPL not implemented yet (DCL-016).")
-    raise typer.Exit(code=1)
+    """Start an interactive chat REPL backed by the local brain."""
+    # Imported lazily so `version`/`status` don't pay the langchain import cost.
+    from declaw.brain.repl import build_brain, run_chat
+
+    settings = get_settings()
+    health = asyncio.run(OllamaClient().health())
+    if not health.reachable:
+        console.print(
+            f"[red]Ollama not reachable[/red] at {settings.ollama_base_url} "
+            f"({health.error}). Start Ollama, then try again."
+        )
+        raise typer.Exit(code=1)
+    if not health.has_model(settings.model):
+        console.print(
+            f"[red]Model {settings.model!r} not pulled.[/red] "
+            f"Run: [bold]ollama pull {settings.model}[/bold]"
+        )
+        raise typer.Exit(code=1)
+
+    graph = build_brain()
+    console.print(
+        f"[green]DeClaw chat[/green] - model [bold]{settings.model}[/bold]. "
+        "Type [bold]/exit[/bold] to quit."
+    )
+
+    def read() -> str | None:
+        try:
+            return console.input("[bold cyan]you>[/bold cyan] ")
+        except (EOFError, KeyboardInterrupt):
+            return None
+
+    def write(line: str) -> None:
+        console.print(line)
+
+    asyncio.run(run_chat(graph, read=read, write=write, debug=debug))
+    console.print("[dim]bye[/dim]")
 
 
 def main() -> None:
