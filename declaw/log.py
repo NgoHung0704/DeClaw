@@ -21,11 +21,14 @@ import sys
 from collections.abc import Iterator
 from contextlib import contextmanager
 from contextvars import ContextVar
-from typing import Any, TextIO
+from typing import TYPE_CHECKING, Any, TextIO
 
 from loguru import logger
 
 from declaw.config import get_settings
+
+if TYPE_CHECKING:
+    from loguru import Record
 
 _request_id: ContextVar[str | None] = ContextVar("declaw_request_id", default=None)
 
@@ -52,7 +55,7 @@ def use_request_id(value: str) -> Iterator[None]:
         _request_id.reset(token)
 
 
-def _patcher(record: dict[str, Any]) -> None:
+def _patcher(record: Record) -> None:
     # loguru calls this for every record before sinks see it. We attach the
     # current contextvar value so JSON sinks can serialize it.
     record["extra"]["request_id"] = _request_id.get()
