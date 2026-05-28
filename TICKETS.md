@@ -83,7 +83,7 @@
 - **Dependencies**: DCL-012
 - **Estimate**: 0.5d
 
-### [ ] DCL-014 — Context window management (Mistral 32k)
+### [x] DCL-014 — Context window management (Mistral 32k)
 - **Description**: Token counter, soft/hard caps with eviction policy.
 - **Acceptance**: Long conversation does not exceed 32k tokens.
 - **Dependencies**: DCL-011
