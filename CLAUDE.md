@@ -4,7 +4,7 @@
 
 ## Current state
 - Phase: 1 — Core Brain (in progress)
-- Current ticket: DCL-011 (next — AgentState schema with typed slots)
+- Current ticket: DCL-012 (next — Ollama function calling integration)
 - Last updated: 2026-05-28
 
 ## Locked architectural decisions
@@ -67,10 +67,11 @@ EU regulated professionals — lawyers, notaries, doctors, accountants — who c
 **🎉 Phase 0 — Project Foundation: COMPLETE.**
 
 ### Phase 1 — Core Brain
+- **DCL-011** — AgentState schema with typed slots. `declaw/brain/state.py` defines `AgentState`, a Pydantic `BaseModel` used as the LangGraph state schema — it replaces the placeholder `MessagesState` from DCL-010 and is now wired into `build_agent_graph`. Five slots: `messages` (`Annotated[list[AnyMessage], add_messages]` — the only reducer field, so it appends rather than overwrites; `AnyMessage` is a discriminated union, so message subclasses survive JSON round-trips), `scratchpad` (str), `plan` (`list[str]`), `tool_calls` (`list[ToolCall]`), `audit_refs` (`list[str]`, for Principle #7). Being a `BaseModel`, it serializes via `model_dump_json()`/`model_validate_json()`. The loop's `think` node now reads `state.messages` (attribute) instead of `state["messages"]`; `ainvoke` still returns a plain dict, so callers/tests are unchanged. 2 unit tests in `tests/unit/test_state.py` cover empty defaults and a full serialize→deserialize round-trip (4 mixed messages + populated slots, asserting subclass preservation and `restored == state`). Planning/audit slots are defined now; later tickets populate them.
 - **DCL-010** — LangGraph basic agentic loop. `declaw/brain/loop.py` exposes `build_agent_graph(model, tools)`: a two-node LangGraph state machine implementing think → tool-call → observe — an `agent` node (calls the injected async model) and a `tools` node (`ToolNode` runs requested tools). `tools_condition` loops back to `agent` while the model emits `tool_calls`, else routes to `END`. State is LangGraph's `MessagesState` (DCL-011 will extend it). The model is **injected** as an async `ModelCallable` (`Sequence[BaseMessage] -> Awaitable[BaseMessage]`) so the loop is testable with no live Ollama — real Mistral wiring via langchain-ollama `bind_tools` is DCL-012. `declaw/brain/stub_tools.py` ships an `echo` stub tool (real typed tools arrive in Phase 2 / DCL-020+). 2 unit tests in `tests/unit/test_loop.py` drive the loop with a scripted fake model: one proves the full `Human → AI(tool_call) → Tool → AI(answer)` trace with the stub tool, the other proves the no-tool-call path ends after a single think. mypy-strict gotchas: `CompiledStateGraph` takes 4 type params; the model param must be `Sequence` (list is invariant); the agent node must be an inline `async def` for mypy to infer `NodeInputT`.
 
 ## In progress
-- (none — ready to start DCL-011)
+- (none — ready to start DCL-012)
 
 ## Open decisions
 - **Ollama lifecycle / end-user packaging** (raised 2026-05-27). MVP DoD requires "install in < 5 min, no terminal required" for non-technical users (lawyers, doctors). They cannot manually install Ollama, pull a model, or fix PATH — yet that is exactly the current dev setup. DeClaw must own the full Ollama lifecycle (install, start daemon, health-check, auto-pull missing model) and hide it from the user, surfacing only a "preparing AI engine…" progress UI. Options:
@@ -93,4 +94,4 @@ EU regulated professionals — lawyers, notaries, doctors, accountants — who c
 - Vision-based agents, OS control beyond os-bridge, plugin marketplace, mobile apps — out of scope for v0.1
 
 ## Notes for next session
-- DCL-010 done. The agentic loop lives in `declaw/brain/loop.py` (`build_agent_graph`), tested with a scripted fake model (no Ollama needed). Next: DCL-011 — `AgentState` schema with typed slots (extend `MessagesState` with scratchpad, plan, tool-call refs, audit refs; must pass mypy strict). Then DCL-012 wires the real Mistral model into the loop via langchain-ollama `bind_tools` — the injected `ModelCallable` is exactly that seam. Run `uv run pytest` and `uv run mypy declaw` before commits.
+- DCL-010 + DCL-011 done. The agentic loop (`declaw/brain/loop.py`, `build_agent_graph`) now runs on the typed `AgentState` (`declaw/brain/state.py`), tested with a scripted fake model — no Ollama needed. Next: DCL-012 — Ollama function calling integration: build a real `ModelCallable` from `langchain_ollama.ChatOllama(...).bind_tools(tools)` and feed it to `build_agent_graph` (that injected seam is exactly where the real model plugs in). Watch tool-call parsing reliability on Mistral 7B — DCL-013 adds retry/repair. Run `uv run pytest` and `uv run mypy declaw` before commits.
