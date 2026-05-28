@@ -71,7 +71,7 @@
 - **Dependencies**: DCL-010
 - **Estimate**: 0.5d
 
-### [ ] DCL-012 — Ollama function calling integration
+### [x] DCL-012 — Ollama function calling integration
 - **Description**: Wire Mistral tool-use through langchain-ollama.
 - **Acceptance**: Model returns structured tool call; brain routes to executor.
 - **Dependencies**: DCL-010
