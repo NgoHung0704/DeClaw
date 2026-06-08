@@ -5,7 +5,7 @@
 ## Current state
 - Phase: 1 (Core Brain) complete → Phase 2 — Tool Layer
 - Current ticket: DCL-020 (next — BaseTool abstract class with typed params)
-- Last updated: 2026-05-28
+- Last updated: 2026-06-08
 
 ## Locked architectural decisions
 - Python 3.12+ with uv (lockfile committed)
@@ -83,6 +83,8 @@ EU regulated professionals — lawyers, notaries, doctors, accountants — who c
 - `scripts/probe_mistral.py` — refactored into a thin runner over `eval`. Defaults to a raw graph that matches the production `build_brain`; pass `--with-repair` to also measure the repair-wrapped variant.
 - **`with_tool_call_repair` (DCL-013) removed from `build_brain` default.** First probe run on a 19-prompt subset showed raw `10/15` correct tool vs `9/15` with repair — re-prompting after a bad tool call traded "wrong tool" for "no tool" on Mistral 7B and lowered net accuracy. Two of the three detection branches (`invalid_tool_calls` and unknown tool name) never fired on real Ollama output (Mistral picks the closest real tool rather than hallucinating names; Ollama populates `tool_calls`, not `invalid_tool_calls`). Repair remains composable; the wrapper itself is unchanged.
 - Implications for Phase 2 design (DCL-020+): tool names must be visibly distinct (Mistral falls back to the closest real tool when confused — risk for `file_move` vs `file_copy`); tool descriptions need bilingual support (FR reliability noticeably lower than EN); write/destructive tools must go through a confirmation queue (raw accuracy ~60–67% is too low to act on autonomously); compaction stays off the default until latency budget allows it (single-turn p50 ≈ 14 s, p95 ≈ 40 s on dev hardware).
+- **v0 baseline (50-prompt `BENCHMARK_CORPUS_V0`, 2026-06-08, raw graph):** 24/38 correct tool when expected, 14/38 missed, 0 wrong tool, 4/12 called when no tool expected, 0 `invalid_tool_calls` / unknown name / schema-invalid args. p50 = 15.4 s, p95 = 29.4 s. By category — EN direct **8/8**, FR direct **5/8**, EN implicit **6/8**, **FR implicit 0/5** (model never picks up tools from natural French phrasing), no-tool EN 4/5 silent, no-tool FR 3/5 (model hallucinates `echo` on factual French questions), ambiguous handled reasonably (math → `add`, "repeat after me" → `echo`), adversarial: declined the bad-args case and the prompt injection, picked `add` for the `multiply` prompt rather than hallucinating a name. Three runs now confirm `invalid_tool_calls`, unknown-tool, and schema-invalid-args branches of repair never fire on real Ollama output.
+- Sharper Phase 2 guidance from the baseline: **bilingual tool descriptions are not optional** (FR implicit is 0% without them); a few FR few-shot examples in the system prompt likely needed; 63% global accuracy is well below the ≥ 85% bar for autonomous action — the confirmation queue for write/destructive tools is a *product feature*, not a fallback.
 
 ## In progress
 - (none — Phase 1 complete; ready to start DCL-020, kicking off Phase 2)
