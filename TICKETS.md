@@ -117,7 +117,7 @@
 - **Dependencies**: DCL-011
 - **Estimate**: 0.5d
 
-### [ ] DCL-021 — Tool: filesystem_read (workspace-scoped)
+### [x] DCL-021 — Tool: filesystem_read (workspace-scoped)
 - **Description**: Reads file content limited to workspace root; rejects traversal.
 - **Acceptance**: Path outside workspace raises; tests cover `..`, symlink, NTFS short names.
 - **Dependencies**: DCL-020
