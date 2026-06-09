@@ -1,7 +1,8 @@
-"""filesystem_read: workspace-scoped, traversal-safe (DCL-021).
+"""Workspace-scoped filesystem tools (DCL-021 / DCL-022).
 
-This is the first real built-in tool, so it is also the first place where a
-path coming from the model can reach the actual filesystem. Defence-in-depth:
+These tools are the first place where a path coming from the model can reach
+the user's filesystem, so the path resolver is the security boundary.
+Defence-in-depth:
 
 1. Absolute paths are rejected before resolution (no ``/etc/passwd``).
 2. The user-supplied path is joined to the workspace root, then ``.resolve()``
@@ -12,6 +13,12 @@ path coming from the model can reach the actual filesystem. Defence-in-depth:
 
 ``WorkspacePathError`` extends ``ValueError`` so LangGraph's ``ToolNode``
 surfaces it as a ``ToolMessage`` error the model (and the audit trail) can see.
+
+Classifications: ``filesystem_read`` is READ (the confirmation queue lets it
+auto-run); ``filesystem_write`` is WRITE (every call goes through
+``declaw.tools.confirmation`` before reaching ``_arun``). The write tool itself
+is *unaware* of the confirmation gate — that gate is layered in by the brain
+when the tool is wired into ``ToolNode``.
 """
 
 from __future__ import annotations
@@ -80,6 +87,71 @@ class FilesystemReadTool(DeclawTool[FilesystemReadArgs]):
                 f"File is {size} bytes (max_bytes={args.max_bytes}); refusing to read."
             )
         return resolved.read_text(encoding="utf-8")
+
+
+class FilesystemWriteArgs(BaseModel):
+    """Args for :class:`FilesystemWriteTool`."""
+
+    path: str = Field(
+        ...,
+        description=(
+            "Path to the file, relative to the workspace root. "
+            "Absolute paths and '..' segments are rejected."
+        ),
+    )
+    content: str = Field(..., description="UTF-8 text content to write.")
+    overwrite: bool = Field(
+        default=False,
+        description="Set true to overwrite an existing file (default false).",
+    )
+
+
+_WRITE_DESCRIPTION_EN = (
+    "Write a UTF-8 text file in the user's workspace. PATH is relative to the "
+    "workspace root; absolute paths and '..' traversal are rejected. "
+    "OVERWRITE=true is required to replace an existing file. The parent "
+    "directory must already exist (this tool does not create directories)."
+)
+
+_WRITE_DESCRIPTION_FR = (
+    "Écrit un fichier texte UTF-8 dans l'espace de travail de l'utilisateur. "
+    "PATH est relatif à la racine du workspace ; les chemins absolus et la "
+    "traversée '..' sont refusés. OVERWRITE=true est requis pour remplacer un "
+    "fichier existant. Le dossier parent doit déjà exister (cet outil ne crée "
+    "pas de dossiers)."
+)
+
+
+class FilesystemWriteTool(DeclawTool[FilesystemWriteArgs]):
+    """Write a UTF-8 text file in the workspace (workspace-scoped, WRITE-class).
+
+    Classification is WRITE: every call MUST go through the confirmation gate
+    in ``declaw.tools.confirmation`` before reaching this ``_arun``. This tool
+    is intentionally unaware of confirmation - the gate is layered outside.
+    """
+
+    name: str = "filesystem_write"
+    description_en: str = _WRITE_DESCRIPTION_EN
+    description_fr: str = _WRITE_DESCRIPTION_FR
+    classification: ToolClass = ToolClass.WRITE
+    args_schema: type[FilesystemWriteArgs] = FilesystemWriteArgs
+
+    async def _arun(self, args: FilesystemWriteArgs) -> str:
+        resolved = _resolve_in_workspace(args.path)
+        if resolved.exists():
+            if not resolved.is_file():
+                raise WorkspacePathError(f"Not a regular file: {args.path!r}")
+            if not args.overwrite:
+                raise WorkspacePathError(
+                    f"File already exists: {args.path!r} "
+                    "(set overwrite=true to replace)."
+                )
+        if not resolved.parent.exists():
+            raise WorkspacePathError(
+                f"Parent directory does not exist for: {args.path!r}"
+            )
+        resolved.write_text(args.content, encoding="utf-8")
+        return f"Wrote {len(args.content)} characters to {args.path}."
 
 
 def _resolve_in_workspace(raw_path: str) -> Path:
