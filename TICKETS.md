@@ -123,7 +123,7 @@
 - **Dependencies**: DCL-020
 - **Estimate**: 0.5d
 
-### [ ] DCL-022 — Tool: filesystem_write (+ confirmation)
+### [x] DCL-022 — Tool: filesystem_write (+ confirmation)
 - **Description**: Workspace-scoped write; user confirmation required.
 - **Acceptance**: Without confirmation token, write rejected.
 - **Dependencies**: DCL-020

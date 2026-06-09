@@ -15,7 +15,11 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from declaw.tools.builtin.filesystem import FilesystemReadTool, WorkspacePathError
+from declaw.tools.builtin.filesystem import (
+    FilesystemReadTool,
+    FilesystemWriteTool,
+    WorkspacePathError,
+)
 
 
 # --- Fixtures ----------------------------------------------------------------
@@ -151,3 +155,108 @@ async def test_max_bytes_must_be_positive(tool: FilesystemReadTool) -> None:
 async def test_path_is_required(tool: FilesystemReadTool) -> None:
     with pytest.raises(ValidationError):
         await tool.run_validated({})
+
+
+# ============================================================================
+# FilesystemWriteTool (DCL-022)
+# ============================================================================
+
+
+@pytest.fixture
+def write_tool() -> FilesystemWriteTool:
+    return FilesystemWriteTool()
+
+
+# --- Write: happy path -----------------------------------------------------
+
+
+async def test_write_creates_new_file(
+    workspace: Path, write_tool: FilesystemWriteTool
+) -> None:
+    result = await write_tool.run_validated({"path": "out.txt", "content": "Hello"})
+    assert (workspace / "out.txt").read_text(encoding="utf-8") == "Hello"
+    assert "out.txt" in result  # the tool's reply names the file it wrote
+
+
+async def test_write_round_trips_unicode_content(
+    workspace: Path, write_tool: FilesystemWriteTool
+) -> None:
+    await write_tool.run_validated(
+        {"path": "fr.txt", "content": "Café — chocolat"}
+    )
+    assert (workspace / "fr.txt").read_text(encoding="utf-8") == "Café — chocolat"
+
+
+async def test_write_overwrites_when_flag_is_true(
+    workspace: Path, write_tool: FilesystemWriteTool
+) -> None:
+    (workspace / "existing.txt").write_text("old", encoding="utf-8")
+    await write_tool.run_validated(
+        {"path": "existing.txt", "content": "new", "overwrite": True}
+    )
+    assert (workspace / "existing.txt").read_text(encoding="utf-8") == "new"
+
+
+# --- Write: overwrite guardrail --------------------------------------------
+
+
+async def test_write_refuses_to_overwrite_by_default(
+    workspace: Path, write_tool: FilesystemWriteTool
+) -> None:
+    """Without ``overwrite=true`` an existing file must not be clobbered."""
+    (workspace / "existing.txt").write_text("original", encoding="utf-8")
+    with pytest.raises(WorkspacePathError):
+        await write_tool.run_validated(
+            {"path": "existing.txt", "content": "clobber"}
+        )
+    assert (workspace / "existing.txt").read_text(encoding="utf-8") == "original"
+
+
+# --- Write: traversal & escape ---------------------------------------------
+
+
+async def test_write_rejects_dotdot_traversal(
+    workspace: Path, write_tool: FilesystemWriteTool
+) -> None:
+    with pytest.raises(WorkspacePathError):
+        await write_tool.run_validated({"path": "../leak.txt", "content": "secret"})
+    assert not (workspace.parent / "leak.txt").exists()
+
+
+async def test_write_rejects_absolute_path(
+    workspace: Path, write_tool: FilesystemWriteTool
+) -> None:
+    absolute = "C:\\temp\\evil.txt" if sys.platform == "win32" else "/tmp/evil.txt"
+    with pytest.raises(WorkspacePathError):
+        await write_tool.run_validated({"path": absolute, "content": "x"})
+
+
+# --- Write: pre-conditions -------------------------------------------------
+
+
+async def test_write_refuses_missing_parent_directory(
+    workspace: Path, write_tool: FilesystemWriteTool
+) -> None:
+    """We never silently mkdir -p; the parent directory must already exist."""
+    with pytest.raises(WorkspacePathError):
+        await write_tool.run_validated(
+            {"path": "nonexistent_dir/file.txt", "content": "x"}
+        )
+
+
+async def test_write_refuses_when_path_is_a_directory(
+    workspace: Path, write_tool: FilesystemWriteTool
+) -> None:
+    (workspace / "subdir").mkdir()
+    with pytest.raises(WorkspacePathError):
+        await write_tool.run_validated(
+            {"path": "subdir", "content": "x", "overwrite": True}
+        )
+
+
+# --- Write: schema ---------------------------------------------------------
+
+
+async def test_write_requires_content(write_tool: FilesystemWriteTool) -> None:
+    with pytest.raises(ValidationError):
+        await write_tool.run_validated({"path": "x.txt"})
