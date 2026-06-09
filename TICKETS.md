@@ -111,7 +111,7 @@
 
 ## 🛠️ PHASE 2 — TOOL LAYER (Week 3-4)
 
-### [ ] DCL-020 — BaseTool abstract class with typed params
+### [x] DCL-020 — BaseTool abstract class with typed params
 - **Description**: Pydantic-validated tool inputs/outputs. NO raw shell strings.
 - **Acceptance**: A subclass passes mypy strict; runtime rejects invalid params.
 - **Dependencies**: DCL-011
