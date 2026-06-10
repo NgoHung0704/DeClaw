@@ -91,7 +91,12 @@ def chat(
     """Start an interactive chat REPL backed by the local brain."""
     # Imported lazily so `version`/`status` don't pay the langchain import cost.
     from declaw.brain.prompts import system_message
-    from declaw.brain.repl import build_brain, run_chat
+    from declaw.brain.repl import (
+        build_brain,
+        make_console_confirmation_provider,
+        run_chat,
+    )
+    from declaw.tools.registry import default_registry
 
     settings = get_settings()
     health = asyncio.run(OllamaClient().health())
@@ -108,9 +113,22 @@ def chat(
         )
         raise typer.Exit(code=1)
 
-    graph = build_brain()
+    # The filesystem tools operate inside the workspace; make sure it exists.
+    settings.workspace_dir.mkdir(parents=True, exist_ok=True)
+
+    # WRITE/DESTRUCTIVE tools are gated behind a console confirmation prompt;
+    # READ tools auto-run. markup=False so the "[y/N]" hint and any "[" in the
+    # rendered args are not parsed as Rich tags.
+    def confirm_prompt(question: str) -> str:
+        return console.input(question, markup=False, emoji=False)
+
+    approve = make_console_confirmation_provider(confirm_prompt, settings.language)
+    tools = default_registry().langchain_tools(settings.language, approve)
+    graph = build_brain(tools)
+
     console.print(
-        f"[green]DeClaw chat[/green] - model [bold]{settings.model}[/bold]. "
+        f"[green]DeClaw chat[/green] - model [bold]{settings.model}[/bold], "
+        f"workspace [bold]{settings.workspace_dir}[/bold]. "
         "Type [bold]/exit[/bold] to quit."
     )
 
