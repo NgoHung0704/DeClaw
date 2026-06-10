@@ -1,4 +1,4 @@
-"""Workspace-scoped filesystem tools (DCL-021 / DCL-022).
+"""Workspace-scoped filesystem tools (DCL-021 / DCL-022 / DCL-023).
 
 These tools are the first place where a path coming from the model can reach
 the user's filesystem, so the path resolver is the security boundary.
@@ -15,10 +15,10 @@ Defence-in-depth:
 surfaces it as a ``ToolMessage`` error the model (and the audit trail) can see.
 
 Classifications: ``filesystem_read`` is READ (the confirmation queue lets it
-auto-run); ``filesystem_write`` is WRITE (every call goes through
-``declaw.tools.confirmation`` before reaching ``_arun``). The write tool itself
-is *unaware* of the confirmation gate — that gate is layered in by the brain
-when the tool is wired into ``ToolNode``.
+auto-run); ``filesystem_write`` and ``filesystem_move`` are WRITE (every call
+goes through ``declaw.tools.confirmation`` before reaching ``_arun``). The tools
+themselves are *unaware* of the confirmation gate — that gate is layered in by
+the brain when the tool is wired into ``ToolNode``.
 """
 
 from __future__ import annotations
@@ -152,6 +152,94 @@ class FilesystemWriteTool(DeclawTool[FilesystemWriteArgs]):
             )
         resolved.write_text(args.content, encoding="utf-8")
         return f"Wrote {len(args.content)} characters to {args.path}."
+
+
+class FilesystemMoveArgs(BaseModel):
+    """Args for :class:`FilesystemMoveTool`."""
+
+    source: str = Field(
+        ...,
+        description=(
+            "Path of the file to move, relative to the workspace root. "
+            "Absolute paths and '..' segments are rejected."
+        ),
+    )
+    destination: str = Field(
+        ...,
+        description=(
+            "Destination path, relative to the workspace root. "
+            "Absolute paths and '..' segments are rejected."
+        ),
+    )
+    overwrite: bool = Field(
+        default=False,
+        description="Set true to overwrite an existing destination (default false).",
+    )
+
+
+_MOVE_DESCRIPTION_EN = (
+    "Move or rename a file within the user's workspace. SOURCE and DESTINATION "
+    "are both relative to the workspace root; absolute paths and '..' traversal "
+    "are rejected, and moves across volumes are refused. OVERWRITE=true is "
+    "required to replace an existing destination. The destination's parent "
+    "directory must already exist."
+)
+
+_MOVE_DESCRIPTION_FR = (
+    "Déplace ou renomme un fichier dans l'espace de travail de l'utilisateur. "
+    "SOURCE et DESTINATION sont relatifs à la racine du workspace ; les chemins "
+    "absolus et la traversée '..' sont refusés, et les déplacements entre "
+    "volumes sont refusés. OVERWRITE=true est requis pour remplacer une "
+    "destination existante. Le dossier parent de la destination doit déjà exister."
+)
+
+
+class FilesystemMoveTool(DeclawTool[FilesystemMoveArgs]):
+    """Move/rename a file within the workspace (workspace-scoped, WRITE-class).
+
+    Both paths go through ``_resolve_in_workspace``, so traversal/symlink/short-
+    name escapes are rejected on either side. Cross-volume moves are refused as
+    defence-in-depth (containment already keeps both paths on the workspace
+    volume, but an explicit check makes the guarantee auditable). Like the write
+    tool, this is unaware of confirmation - the gate is layered outside.
+    """
+
+    name: str = "filesystem_move"
+    description_en: str = _MOVE_DESCRIPTION_EN
+    description_fr: str = _MOVE_DESCRIPTION_FR
+    classification: ToolClass = ToolClass.WRITE
+    args_schema: type[FilesystemMoveArgs] = FilesystemMoveArgs
+
+    async def _arun(self, args: FilesystemMoveArgs) -> str:
+        source = _resolve_in_workspace(args.source)
+        destination = _resolve_in_workspace(args.destination)
+
+        if not source.exists():
+            raise FileNotFoundError(f"Source file not found: {args.source!r}")
+        if not source.is_file():
+            raise WorkspacePathError(f"Source is not a regular file: {args.source!r}")
+        if source.drive != destination.drive:
+            raise WorkspacePathError(
+                f"Refusing to move across volumes: "
+                f"{args.source!r} -> {args.destination!r}."
+            )
+        if destination.exists():
+            if not destination.is_file():
+                raise WorkspacePathError(
+                    f"Destination is not a regular file: {args.destination!r}"
+                )
+            if not args.overwrite:
+                raise WorkspacePathError(
+                    f"Destination already exists: {args.destination!r} "
+                    "(set overwrite=true to replace)."
+                )
+        if not destination.parent.exists():
+            raise WorkspacePathError(
+                f"Destination parent directory does not exist for: "
+                f"{args.destination!r}"
+            )
+        source.replace(destination)
+        return f"Moved {args.source} to {args.destination}."
 
 
 def _resolve_in_workspace(raw_path: str) -> Path:
