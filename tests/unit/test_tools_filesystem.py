@@ -16,6 +16,7 @@ import pytest
 from pydantic import ValidationError
 
 from declaw.tools.builtin.filesystem import (
+    FilesystemMoveTool,
     FilesystemReadTool,
     FilesystemWriteTool,
     WorkspacePathError,
@@ -260,3 +261,149 @@ async def test_write_refuses_when_path_is_a_directory(
 async def test_write_requires_content(write_tool: FilesystemWriteTool) -> None:
     with pytest.raises(ValidationError):
         await write_tool.run_validated({"path": "x.txt"})
+
+
+# ============================================================================
+# FilesystemMoveTool (DCL-023)
+# ============================================================================
+
+
+@pytest.fixture
+def move_tool() -> FilesystemMoveTool:
+    return FilesystemMoveTool()
+
+
+# --- Move: happy path ------------------------------------------------------
+
+
+async def test_move_renames_file_in_place(
+    workspace: Path, move_tool: FilesystemMoveTool
+) -> None:
+    (workspace / "old.txt").write_text("data", encoding="utf-8")
+    result = await move_tool.run_validated(
+        {"source": "old.txt", "destination": "new.txt"}
+    )
+    assert not (workspace / "old.txt").exists()
+    assert (workspace / "new.txt").read_text(encoding="utf-8") == "data"
+    assert "new.txt" in result
+
+
+async def test_move_into_existing_subdirectory(
+    workspace: Path, move_tool: FilesystemMoveTool
+) -> None:
+    (workspace / "doc.txt").write_text("data", encoding="utf-8")
+    (workspace / "archive").mkdir()
+    await move_tool.run_validated(
+        {"source": "doc.txt", "destination": "archive/doc.txt"}
+    )
+    assert not (workspace / "doc.txt").exists()
+    assert (workspace / "archive" / "doc.txt").read_text(encoding="utf-8") == "data"
+
+
+async def test_move_overwrites_destination_when_flag_is_true(
+    workspace: Path, move_tool: FilesystemMoveTool
+) -> None:
+    (workspace / "src.txt").write_text("fresh", encoding="utf-8")
+    (workspace / "dst.txt").write_text("stale", encoding="utf-8")
+    await move_tool.run_validated(
+        {"source": "src.txt", "destination": "dst.txt", "overwrite": True}
+    )
+    assert not (workspace / "src.txt").exists()
+    assert (workspace / "dst.txt").read_text(encoding="utf-8") == "fresh"
+
+
+# --- Move: overwrite guardrail (source must survive a refused move) --------
+
+
+async def test_move_refuses_to_overwrite_by_default(
+    workspace: Path, move_tool: FilesystemMoveTool
+) -> None:
+    (workspace / "src.txt").write_text("fresh", encoding="utf-8")
+    (workspace / "dst.txt").write_text("stale", encoding="utf-8")
+    with pytest.raises(WorkspacePathError):
+        await move_tool.run_validated(
+            {"source": "src.txt", "destination": "dst.txt"}
+        )
+    # Both files must be untouched after a refused move.
+    assert (workspace / "src.txt").read_text(encoding="utf-8") == "fresh"
+    assert (workspace / "dst.txt").read_text(encoding="utf-8") == "stale"
+
+
+# --- Move: traversal & escape on either side -------------------------------
+
+
+async def test_move_rejects_dotdot_in_source(
+    workspace: Path, move_tool: FilesystemMoveTool
+) -> None:
+    (workspace.parent / "outside.txt").write_text("secret", encoding="utf-8")
+    with pytest.raises(WorkspacePathError):
+        await move_tool.run_validated(
+            {"source": "../outside.txt", "destination": "stolen.txt"}
+        )
+    assert not (workspace / "stolen.txt").exists()
+
+
+async def test_move_rejects_dotdot_in_destination(
+    workspace: Path, move_tool: FilesystemMoveTool
+) -> None:
+    (workspace / "src.txt").write_text("data", encoding="utf-8")
+    with pytest.raises(WorkspacePathError):
+        await move_tool.run_validated(
+            {"source": "src.txt", "destination": "../leak.txt"}
+        )
+    # Source must remain in place; nothing leaked outside.
+    assert (workspace / "src.txt").exists()
+    assert not (workspace.parent / "leak.txt").exists()
+
+
+async def test_move_rejects_absolute_destination(
+    workspace: Path, move_tool: FilesystemMoveTool
+) -> None:
+    (workspace / "src.txt").write_text("data", encoding="utf-8")
+    absolute = "C:\\temp\\evil.txt" if sys.platform == "win32" else "/tmp/evil.txt"
+    with pytest.raises(WorkspacePathError):
+        await move_tool.run_validated({"source": "src.txt", "destination": absolute})
+    assert (workspace / "src.txt").exists()
+
+
+# --- Move: pre-conditions --------------------------------------------------
+
+
+async def test_move_raises_on_missing_source(
+    workspace: Path, move_tool: FilesystemMoveTool
+) -> None:
+    with pytest.raises(FileNotFoundError):
+        await move_tool.run_validated(
+            {"source": "ghost.txt", "destination": "new.txt"}
+        )
+
+
+async def test_move_refuses_directory_source(
+    workspace: Path, move_tool: FilesystemMoveTool
+) -> None:
+    (workspace / "adir").mkdir()
+    with pytest.raises(WorkspacePathError):
+        await move_tool.run_validated(
+            {"source": "adir", "destination": "moved"}
+        )
+
+
+async def test_move_refuses_missing_destination_parent(
+    workspace: Path, move_tool: FilesystemMoveTool
+) -> None:
+    (workspace / "src.txt").write_text("data", encoding="utf-8")
+    with pytest.raises(WorkspacePathError):
+        await move_tool.run_validated(
+            {"source": "src.txt", "destination": "no_such_dir/dst.txt"}
+        )
+    assert (workspace / "src.txt").exists()  # source untouched
+
+
+# --- Move: schema ----------------------------------------------------------
+
+
+async def test_move_requires_source_and_destination(
+    move_tool: FilesystemMoveTool,
+) -> None:
+    with pytest.raises(ValidationError):
+        await move_tool.run_validated({"source": "only.txt"})

@@ -129,7 +129,7 @@
 - **Dependencies**: DCL-020
 - **Estimate**: 0.5d
 
-### [ ] DCL-023 — Tool: filesystem_move (+ confirmation)
+### [x] DCL-023 — Tool: filesystem_move (+ confirmation)
 - **Description**: Move within workspace only; never cross-volume; confirmation required.
 - **Acceptance**: Cross-volume rejected; confirmation enforced.
 - **Dependencies**: DCL-020
