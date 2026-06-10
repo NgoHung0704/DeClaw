@@ -141,7 +141,7 @@
 - **Dependencies**: DCL-020
 - **Estimate**: 0.25d
 
-### [ ] DCL-025 — Tool registry (typed registration)
+### [x] DCL-025 — Tool registry (typed registration)
 - **Description**: Registration via decorator; no dynamic `eval`/`exec`.
 - **Acceptance**: Unknown tool ID rejected; registry exposes JSON schema.
 - **Dependencies**: DCL-020
