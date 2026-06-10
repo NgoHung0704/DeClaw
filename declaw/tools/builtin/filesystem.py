@@ -1,4 +1,4 @@
-"""Workspace-scoped filesystem tools (DCL-021 / DCL-022 / DCL-023).
+"""Workspace-scoped filesystem tools (DCL-021 / DCL-022 / DCL-023 / DCL-024).
 
 These tools are the first place where a path coming from the model can reach
 the user's filesystem, so the path resolver is the security boundary.
@@ -23,6 +23,7 @@ the brain when the tool is wired into ``ToolNode``.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 from pydantic import BaseModel, Field
@@ -240,6 +241,66 @@ class FilesystemMoveTool(DeclawTool[FilesystemMoveArgs]):
             )
         source.replace(destination)
         return f"Moved {args.source} to {args.destination}."
+
+
+class FilesystemListArgs(BaseModel):
+    """Args for :class:`FilesystemListTool`."""
+
+    path: str = Field(
+        default=".",
+        description=(
+            "Directory to list, relative to the workspace root (default '.', "
+            "the workspace root itself). Absolute paths and '..' are rejected."
+        ),
+    )
+
+
+_LIST_DESCRIPTION_EN = (
+    "List the entries of a directory in the user's workspace, with each entry's "
+    "type (dir/file), size in bytes, and last-modified time. PATH is relative "
+    "to the workspace root (default '.'); absolute paths and '..' traversal are "
+    "rejected."
+)
+
+_LIST_DESCRIPTION_FR = (
+    "Liste le contenu d'un dossier de l'espace de travail, avec pour chaque "
+    "entrée son type (dir/file), sa taille en octets et sa date de "
+    "modification. PATH est relatif à la racine du workspace (par défaut '.') ; "
+    "les chemins absolus et la traversée '..' sont refusés."
+)
+
+
+class FilesystemListTool(DeclawTool[FilesystemListArgs]):
+    """List a workspace directory's entries with metadata (workspace-scoped, READ)."""
+
+    name: str = "filesystem_list"
+    description_en: str = _LIST_DESCRIPTION_EN
+    description_fr: str = _LIST_DESCRIPTION_FR
+    classification: ToolClass = ToolClass.READ
+    args_schema: type[FilesystemListArgs] = FilesystemListArgs
+
+    async def _arun(self, args: FilesystemListArgs) -> str:
+        resolved = _resolve_in_workspace(args.path)
+        if not resolved.exists():
+            raise FileNotFoundError(f"Directory not found: {args.path!r}")
+        if not resolved.is_dir():
+            raise WorkspacePathError(f"Not a directory: {args.path!r}")
+
+        entries = sorted(resolved.iterdir(), key=lambda p: p.name)
+        if not entries:
+            return f"{args.path} is empty."
+
+        lines = [f"{'type':4}  {'size':>10}  {'modified':19}  name"]
+        for entry in entries:
+            stat = entry.stat()
+            is_dir = entry.is_dir()
+            kind = "dir" if is_dir else "file"
+            size = "-" if is_dir else str(stat.st_size)
+            mtime = datetime.fromtimestamp(stat.st_mtime, tz=UTC).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
+            lines.append(f"{kind:4}  {size:>10}  {mtime:19}  {entry.name}")
+        return "\n".join(lines)
 
 
 def _resolve_in_workspace(raw_path: str) -> Path:
