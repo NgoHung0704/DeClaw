@@ -135,7 +135,7 @@
 - **Dependencies**: DCL-020
 - **Estimate**: 0.5d
 
-### [ ] DCL-024 — Tool: filesystem_list (workspace-scoped)
+### [x] DCL-024 — Tool: filesystem_list (workspace-scoped)
 - **Description**: List entries with metadata (size, mtime, type).
 - **Acceptance**: Out-of-scope paths rejected.
 - **Dependencies**: DCL-020

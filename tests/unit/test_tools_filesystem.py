@@ -16,6 +16,7 @@ import pytest
 from pydantic import ValidationError
 
 from declaw.tools.builtin.filesystem import (
+    FilesystemListTool,
     FilesystemMoveTool,
     FilesystemReadTool,
     FilesystemWriteTool,
@@ -407,3 +408,103 @@ async def test_move_requires_source_and_destination(
 ) -> None:
     with pytest.raises(ValidationError):
         await move_tool.run_validated({"source": "only.txt"})
+
+
+# ============================================================================
+# FilesystemListTool (DCL-024)
+# ============================================================================
+
+
+@pytest.fixture
+def list_tool() -> FilesystemListTool:
+    return FilesystemListTool()
+
+
+# --- List: happy path ------------------------------------------------------
+
+
+async def test_list_defaults_to_workspace_root(
+    workspace: Path, list_tool: FilesystemListTool
+) -> None:
+    (workspace / "a.txt").write_text("hi", encoding="utf-8")
+    (workspace / "sub").mkdir()
+    result = await list_tool.run_validated({})  # no path -> defaults to '.'
+    assert "a.txt" in result
+    assert "sub" in result
+
+
+async def test_list_reports_type_and_size(
+    workspace: Path, list_tool: FilesystemListTool
+) -> None:
+    (workspace / "data.txt").write_text("12345", encoding="utf-8")  # 5 bytes
+    (workspace / "folder").mkdir()
+    result = await list_tool.run_validated({})
+    lines = result.splitlines()
+    file_line = next(line for line in lines if "data.txt" in line)
+    dir_line = next(line for line in lines if "folder" in line)
+    assert "file" in file_line
+    assert "5" in file_line  # size in bytes
+    assert "dir" in dir_line
+
+
+async def test_list_entries_are_sorted_by_name(
+    workspace: Path, list_tool: FilesystemListTool
+) -> None:
+    for name in ("zebra.txt", "alpha.txt", "mango.txt"):
+        (workspace / name).write_text("x", encoding="utf-8")
+    result = await list_tool.run_validated({})
+    assert result.index("alpha.txt") < result.index("mango.txt") < result.index("zebra.txt")
+
+
+async def test_list_subdirectory(
+    workspace: Path, list_tool: FilesystemListTool
+) -> None:
+    sub = workspace / "docs"
+    sub.mkdir()
+    (sub / "inside.txt").write_text("x", encoding="utf-8")
+    result = await list_tool.run_validated({"path": "docs"})
+    assert "inside.txt" in result
+
+
+async def test_list_empty_directory(
+    workspace: Path, list_tool: FilesystemListTool
+) -> None:
+    (workspace / "empty").mkdir()
+    result = await list_tool.run_validated({"path": "empty"})
+    assert "empty" in result.lower()
+
+
+# --- List: traversal & escape ----------------------------------------------
+
+
+async def test_list_rejects_dotdot_traversal(
+    workspace: Path, list_tool: FilesystemListTool
+) -> None:
+    with pytest.raises(WorkspacePathError):
+        await list_tool.run_validated({"path": ".."})
+
+
+async def test_list_rejects_absolute_path(
+    workspace: Path, list_tool: FilesystemListTool
+) -> None:
+    absolute = "C:\\Windows" if sys.platform == "win32" else "/etc"
+    with pytest.raises(WorkspacePathError):
+        await list_tool.run_validated({"path": absolute})
+
+
+# --- List: pre-conditions --------------------------------------------------
+
+
+async def test_list_raises_on_missing_directory(
+    workspace: Path, list_tool: FilesystemListTool
+) -> None:
+    with pytest.raises(FileNotFoundError):
+        await list_tool.run_validated({"path": "no_such_dir"})
+
+
+async def test_list_rejects_file_path(
+    workspace: Path, list_tool: FilesystemListTool
+) -> None:
+    (workspace / "afile.txt").write_text("x", encoding="utf-8")
+    with pytest.raises(WorkspacePathError):
+        await list_tool.run_validated({"path": "afile.txt"})
