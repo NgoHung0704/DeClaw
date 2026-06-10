@@ -147,7 +147,7 @@
 - **Dependencies**: DCL-020
 - **Estimate**: 0.5d
 
-### [ ] DCL-026 — Path traversal protection unit tests
+### [x] DCL-026 — Path traversal protection unit tests
 - **Description**: 30+ adversarial paths (UTF-8 tricks, double encoding, alt streams).
 - **Acceptance**: All adversarial paths rejected.
 - **Dependencies**: DCL-021
