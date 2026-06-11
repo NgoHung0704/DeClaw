@@ -90,7 +90,6 @@ def chat(
 ) -> None:
     """Start an interactive chat REPL backed by the local brain."""
     # Imported lazily so `version`/`status` don't pay the langchain import cost.
-    from declaw.brain.prompts import system_message
     from declaw.brain.repl import (
         build_brain,
         make_console_confirmation_provider,
@@ -141,7 +140,12 @@ def chat(
     def write(line: str) -> None:
         console.print(line)
 
-    asyncio.run(run_chat(graph, read=read, write=write, debug=debug, system=system_message()))
+    # No system prompt is seeded: the prompt-variant probe (scripts/
+    # probe_prompt_variants.py, 2026-06-11) showed that ANY instruction text -
+    # system role or human prefix, minimal or full - collapses Mistral 7B's
+    # tool-calling (62% bare vs 0-23% with text). DCL-017's system_message()
+    # stays available for compositions that don't bind tools.
+    asyncio.run(run_chat(graph, read=read, write=write, debug=debug))
     console.print("[dim]bye[/dim]")
 
 
