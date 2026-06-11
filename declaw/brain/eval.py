@@ -175,12 +175,23 @@ def _invalid_tool_calls_count(messages: list[BaseMessage]) -> int:
 
 
 async def run_prompt(
-    graph: Any, prompt: Prompt, tools_by_name: dict[str, Any]
+    graph: Any,
+    prompt: Prompt,
+    tools_by_name: dict[str, Any],
+    *,
+    system: BaseMessage | None = None,
 ) -> TurnResult:
-    """Run one prompt through ``graph`` and capture the metrics for the eval report."""
+    """Run one prompt through ``graph`` and capture the metrics for the eval report.
+
+    ``system`` optionally seeds a leading message (e.g. the localized system
+    prompt) so a run can measure the system prompt's effect on tool-calling.
+    """
+    messages: list[BaseMessage] = [HumanMessage(content=prompt.text)]
+    if system is not None:
+        messages.insert(0, system)
     t0 = time.perf_counter()
     try:
-        result = await graph.ainvoke({"messages": [HumanMessage(content=prompt.text)]})
+        result = await graph.ainvoke({"messages": messages})
     except Exception as exc:  # keep the probe running on any failure
         return TurnResult(
             prompt=prompt,
