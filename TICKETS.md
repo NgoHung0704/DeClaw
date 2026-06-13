@@ -59,49 +59,49 @@
 
 ## 🧠 PHASE 1 — CORE BRAIN (Weeks 2-3)
 
-### [ ] DCL-010 — LangGraph basic agentic loop
+### [x] DCL-010 — LangGraph basic agentic loop
 - **Description**: Minimal think → tool-call → observe loop.
 - **Acceptance**: Loop processes a user turn end-to-end with a stub tool.
 - **Dependencies**: DCL-003
 - **Estimate**: 1d
 
-### [ ] DCL-011 — AgentState schema with typed slots
+### [x] DCL-011 — AgentState schema with typed slots
 - **Description**: Pydantic state: messages, scratchpad, current plan, tool calls, audit refs.
 - **Acceptance**: State serializes/deserializes; mypy strict passes.
 - **Dependencies**: DCL-010
 - **Estimate**: 0.5d
 
-### [ ] DCL-012 — Ollama function calling integration
+### [x] DCL-012 — Ollama function calling integration
 - **Description**: Wire Mistral tool-use through langchain-ollama.
 - **Acceptance**: Model returns structured tool call; brain routes to executor.
 - **Dependencies**: DCL-010
 - **Estimate**: 1d
 
-### [ ] DCL-013 — Tool output parser + retry/repair
+### [x] DCL-013 — Tool output parser + retry/repair
 - **Description**: Parse model output; on malformed JSON, retry with corrective prompt (max 2).
 - **Acceptance**: Malformed outputs from corpus pass after retry.
 - **Dependencies**: DCL-012
 - **Estimate**: 0.5d
 
-### [ ] DCL-014 — Context window management (Mistral 32k)
+### [x] DCL-014 — Context window management (Mistral 32k)
 - **Description**: Token counter, soft/hard caps with eviction policy.
 - **Acceptance**: Long conversation does not exceed 32k tokens.
 - **Dependencies**: DCL-011
 - **Estimate**: 0.5d
 
-### [ ] DCL-015 — Context compaction strategy on overflow
+### [x] DCL-015 — Context compaction strategy on overflow
 - **Description**: Summarize oldest N turns into a compact note; preserve task plan + recent.
 - **Acceptance**: Compaction triggered at threshold; downstream behavior intact.
 - **Dependencies**: DCL-014
 - **Estimate**: 1d
 
-### [ ] DCL-016 — CLI test interface
+### [x] DCL-016 — CLI test interface
 - **Description**: `declaw chat --debug` REPL using the brain.
 - **Acceptance**: Multi-turn chat works against running Ollama.
 - **Dependencies**: DCL-010
 - **Estimate**: 0.5d
 
-### [ ] DCL-017 — System prompt template (FR + EN)
+### [x] DCL-017 — System prompt template (FR + EN)
 - **Description**: Templated prompts with locale switch; embed 7 principles.
 - **Acceptance**: `DECLAW_LANGUAGE=fr` switches prompt language.
 - **Dependencies**: DCL-010
@@ -111,7 +111,7 @@
 
 ## 🛠️ PHASE 2 — TOOL LAYER (Week 3-4)
 
-### [ ] DCL-020 — BaseTool abstract class with typed params
+### [x] DCL-020 — BaseTool abstract class with typed params
 - **Description**: Pydantic-validated tool inputs/outputs. NO raw shell strings.
 - **Acceptance**: A subclass passes mypy strict; runtime rejects invalid params.
 - **Dependencies**: DCL-011
