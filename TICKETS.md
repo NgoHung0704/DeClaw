@@ -215,55 +215,55 @@
 
 ## 🛡️ PHASE 4 — SANITIZER LAYER (Week 5-6) ⚠️ CRITICAL
 
-### [ ] DCL-040 — Second Mistral instance for sanitizer
+### [x] DCL-040 — Second Mistral instance for sanitizer
 - **Description**: Separate Ollama session/context.
 - **Acceptance**: Sanitizer has no shared state with brain.
 - **Dependencies**: DCL-003
 - **Estimate**: 0.5d
 
-### [ ] DCL-041 — Sanitizer system prompt (locked)
+### [x] DCL-041 — Sanitizer system prompt (locked)
 - **Description**: No tool access; cannot see conversation.
 - **Acceptance**: Prompt rejects requests outside SAFE/UNSAFE schema.
 - **Dependencies**: DCL-040
 - **Estimate**: 0.5d
 
-### [ ] DCL-042 — Structured output schema (verdict + reason)
+### [x] DCL-042 — Structured output schema (verdict + reason)
 - **Description**: Pydantic `SanitizerVerdict`.
 - **Acceptance**: Invalid outputs trigger retry.
 - **Dependencies**: DCL-041
 - **Estimate**: 0.25d
 
-### [ ] DCL-043 — Integration into tool input pipeline
+### [x] DCL-043 — Integration into tool input pipeline
 - **Description**: All external content passes sanitizer before brain sees it.
 - **Acceptance**: Unsanitized external content path is unreachable.
 - **Dependencies**: DCL-042, DCL-021
 - **Estimate**: 0.5d
 
-### [ ] DCL-044 — Quarantine system for UNSAFE content
+### [x] DCL-044 — Quarantine system for UNSAFE content
 - **Description**: Store quarantined content; never surface to brain.
 - **Acceptance**: Quarantined items visible in UI only.
 - **Dependencies**: DCL-043
 - **Estimate**: 0.5d
 
-### [ ] DCL-045 — Audit trail for quarantine events
+### [x] DCL-045 — Audit trail for quarantine events
 - **Description**: Log every quarantine with hash + source.
 - **Acceptance**: Quarantine appears in audit log.
 - **Dependencies**: DCL-044, DCL-061
 - **Estimate**: 0.25d
 
-### [ ] DCL-046 — Injection corpus (FR + EN, 50+)
+### [x] DCL-046 — Injection corpus (FR + EN, 50+)
 - **Description**: Known payloads; tag with severity.
 - **Acceptance**: Corpus stored in `declaw/sanitizer/corpus/`.
 - **Dependencies**: DCL-040
 - **Estimate**: 0.5d
 
-### [ ] DCL-047 — False positive benchmark (< 2%)
+### [x] DCL-047 — False positive benchmark (< 2%)
 - **Description**: Benign corpus; measure FP rate.
 - **Acceptance**: FP < 2%.
 - **Dependencies**: DCL-046
 - **Estimate**: 0.5d
 
-### [ ] DCL-048 — Latency benchmark (< 500ms p95)
+### [x] DCL-048 — Latency benchmark (< 500ms p95)
 - **Description**: Measure per-chunk latency on dev hardware.
 - **Acceptance**: p95 < 500ms.
 - **Dependencies**: DCL-046
