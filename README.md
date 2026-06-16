@@ -5,7 +5,7 @@
 DeClaw is a local-first AI agent designed for **EU regulated professionals** — lawyers, notaries, doctors, accountants — who cannot legally use cloud AI on client data because of GDPR and professional secrecy.
 
 - **Private by default** — Mistral 7B runs 100% local via Ollama. Nothing leaves the machine. Ever.
-- **Safe by architecture** — Tool execution runs in a mandatory Docker sandbox. No exceptions.
+- **Safe by architecture** — Every tool takes typed, validated parameters scoped to your workspace; external content is screened by a dual-model sanitizer before the agent acts on it; file changes require your confirmation. (Shell execution and its mandatory Docker sandbox are deferred to post-MVP — v0.1 needs no shell.)
 - **Transparent always** — Every task produces a natural-language audit log; a network egress monitor proves nothing left the device.
 - **Easy for everyone** — One-click installer, native desktop app (Tauri), no terminal required.
 - **Scalable by design** — Plugin-first architecture: every capability is an installable skill that can be disabled or removed.
@@ -51,7 +51,7 @@ The MVP is "done" when an EU lawyer can:
 5. ✅ Review a clear audit log: "Here's what I did, and confirmation that nothing left your device"
 6. ✅ Verify (network-level) that 100% nothing was sent to the internet
 
-**Out of scope for v0.1**: browser automation, vision-based agents, OS control beyond `os-bridge`, plugin marketplace, mobile apps.
+**Out of scope for v0.1**: shell execution and its Docker sandbox (deferred — the v0.1 feature set needs no shell), browser automation, vision-based agents, OS control beyond `os-bridge`, plugin marketplace, mobile apps.
 
 ---
 
@@ -72,8 +72,8 @@ The MVP is "done" when an EU lawyer can:
 | Document parsing | `pypdf`, `python-docx`, `openpyxl`, `unstructured` |
 | Task / audit DB | SQLite via SQLModel |
 | Credentials | `python-keyring` (Windows Credential Manager / Keychain / KWallet) |
-| Sandbox | Docker SDK for Python (mandatory for shell execution) |
-| Prompt-injection defense | Dual-model sanitizer (second Mistral instance, locked-down prompt) |
+| Sandbox | Docker SDK for Python (shell execution only — **deferred to post-MVP**) |
+| Prompt-injection defense | Dual-model sanitizer (second Mistral instance, locked-down prompt) — **implemented (Phase 4)** |
 | Plugin signatures | ed25519 (`pynacl`) |
 | License | AGPL-3.0-or-later (commercial dual-license possible) |
 
@@ -105,7 +105,7 @@ The MVP is "done" when an EU lawyer can:
 │   └────┬─────┘                    └──────────┘                 │
 │        │                                                       │
 │   ┌────▼────┐                                                  │
-│   │ Sandbox │  (Docker: readonly fs, no network, capdrop)      │
+│   │ Sandbox │  (Docker: shell only - post-MVP, deferred)       │
 │   └─────────┘                                                  │
 │                                                                │
 │   ChromaDB (encrypted)   SQLite (tasks/audit)   Keyring        │
@@ -165,12 +165,14 @@ entry_point: "doc_intel.main:Plugin"
 
 ### Sanitizer layer
 
-Every piece of content from outside the agent (PDF text, email body, web page) goes through a **second Mistral instance** with a locked-down system prompt **before** the brain sees it. The sanitizer cannot execute tools, cannot see conversation history, and outputs only `{verdict: SAFE|UNSAFE, reason: str}`. UNSAFE content is quarantined and surfaced in the UI; the brain never sees it.
+Every piece of content from outside the agent (PDF text, email body, web page) goes through a **second Mistral instance** with a locked-down system prompt **before** the brain sees it. The sanitizer cannot execute tools, cannot see conversation history, and outputs only `{verdict: SAFE|UNSAFE, reason: str}`. It **fails closed** (any error or unparseable output is treated as UNSAFE). UNSAFE content is quarantined (logged by hash + source, never raw) and surfaced in the UI; the brain never sees it. Implemented in Phase 4 and wired into `declaw chat` — file contents are sanitized before the agent acts on them.
 
-Performance targets (Phase 4):
-- False positive rate < 2%
-- False negative rate < 1% on the known-injection corpus
+Performance targets, encoded in the Phase 4 benchmark harness (`scripts/sanitizer_benchmark.py`, over a locked 110-sample FR+EN corpus):
+- False positive rate < 2% (on the benign corpus)
+- Detection rate high on the known-injection corpus (false negatives low)
 - p95 latency < 500 ms per chunk
+
+> Note: the latency target assumes a fast/GPU-served classifier; on Mistral 7B/CPU it will be slower. The harness reports the real numbers so the target can be tracked as the model/hardware changes.
 
 ### Audit log
 
@@ -199,18 +201,18 @@ A network egress monitor cross-checks `network_calls` against the actual outboun
 
 ## Project status
 
-**Phase 0 — Project Foundation.** Pre-alpha. The CLI scaffold runs, the typed configuration loads, and the full backlog is on GitHub. No usable features yet.
+**Pre-alpha — Phases 0–2 and 4 complete; Phase 3 (sandbox) deferred for v0.1.** The core agent already runs: `declaw chat` drives a local LangGraph brain (Mistral 7B via Ollama) with typed, workspace-scoped filesystem tools, a confirmation gate on writes, and the dual-model sanitizer screening file contents before the brain sees them. Still missing for a usable product: document intelligence (Phase 8), the web UI (Phase 9), and the desktop app (Phase 10).
 
 ### Roadmap
 
 | Phase | Theme | Status |
 | --- | --- | --- |
-| 0 | Project foundation (scaffold, config, logging, preflight) | 🟡 in progress |
-| 1 | Core brain (LangGraph loop, tool calls, context management) | ⬜ planned |
-| 2 | Tool layer (typed filesystem tools, registry) | ⬜ planned |
-| 3 | **Sandbox layer** ⚠️ (Docker isolation, escape tests) | ⬜ planned |
-| 4 | **Sanitizer layer** ⚠️ (dual-model defense, injection corpus) | ⬜ planned |
-| 5 | Memory & audit (ChromaDB, network egress monitor) | ⬜ planned |
+| 0 | Project foundation (scaffold, config, logging, preflight) | ✅ done |
+| 1 | Core brain (LangGraph loop, tool calls, context management) | ✅ done |
+| 2 | Tool layer (typed filesystem tools, registry) | ✅ done |
+| 3 | **Sandbox layer** (Docker isolation, escape tests) | ⏸️ deferred (post-MVP) |
+| 4 | **Sanitizer layer** ⚠️ (dual-model defense, injection corpus) | ✅ done |
+| 5 | Memory & audit (ChromaDB, network egress monitor) | 🟡 next (MVP critical path) |
 | 6 | Credentials & permissions (keyring, plugin perms, ed25519) | ⬜ planned |
 | 7 | Plugin host (subprocess isolation, IPC, SDK) | ⬜ planned |
 | 8 | ⭐ Doc-Intel plugin (PDF/DOCX/XLSX, RAG, citations) | ⬜ planned |
@@ -224,8 +226,10 @@ A network egress monitor cross-checks `network_calls` against the actual outboun
 ### Phase gating (strict)
 
 - ⛔ Phase 8 (doc-intel) cannot start before Phase 7 (plugin host) is complete
-- ⛔ Phase 9 (Web UI) cannot start before Phases 3 (sandbox) **and** 4 (sanitizer) are complete
+- ⛔ Phase 9 (Web UI) cannot start before Phase 4 (sanitizer) is complete ✅ — Phase 3 (sandbox) is **deferred for v0.1** (shell execution dropped), so it no longer gates Phase 9
 - ⛔ v1.0 cannot ship before Phase 12 (security hardening) is complete
+
+> **Why Phase 3 is deferred:** the v0.1 feature set (document Q&A, file move/rename) needs no shell, and requiring Docker Desktop (WSL2, admin rights, paid licensing for larger orgs) contradicts the "install in under 5 minutes, no terminal" goal. Principle #3 stays in force: if shell execution returns post-MVP, it must go through the Docker sandbox — never bypassed.
 
 ### Tracking work
 
@@ -274,7 +278,7 @@ docs/                  Architecture, security model, plugin guide
 
 ## Quickstart (developers)
 
-**Prerequisites**: Python 3.12+, [uv](https://docs.astral.sh/uv/), [Ollama](https://ollama.com/) with `mistral:7b` pulled, and Docker Desktop (for any feature beyond CLI).
+**Prerequisites**: Python 3.12+, [uv](https://docs.astral.sh/uv/), and [Ollama](https://ollama.com/) with `mistral:7b` pulled. Docker is **not** required for v0.1 (it is only needed for the deferred shell sandbox).
 
 ```bash
 # Install dependencies (reproducible build via uv.lock)
@@ -288,9 +292,19 @@ uv run declaw status
 
 # Print version
 uv run declaw version
+
+# Chat with the local agent (needs Ollama running with mistral:7b)
+uv run declaw chat            # add --debug to trace tool calls
 ```
 
-The `start` / `stop` / `chat` subcommands are stubs until Phases 1 / 9 land.
+`declaw chat` is a working local-agent REPL (Phases 1–2 + 4): it can read, list, write, and move files inside your workspace with typed, validated parameters — writes/moves ask for confirmation, and file contents pass the sanitizer first. The `start` / `stop` subcommands (the FastAPI gateway) are stubs until Phase 9.
+
+The sanitizer benchmark can be run against your local model:
+
+```bash
+uv run python scripts/sanitizer_benchmark.py            # full corpus
+uv run python scripts/sanitizer_benchmark.py --quick    # 6-sample smoke
+```
 
 ### Working rules (for contributors and Claude Code)
 
