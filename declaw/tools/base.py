@@ -56,6 +56,12 @@ class DeclawTool(BaseModel, Generic[ArgsT]):
     description_fr: str
     classification: ToolClass
     args_schema: type[ArgsT]
+    # True if the tool returns content sourced from OUTSIDE the agent (file
+    # contents, emails, web pages). Such output must pass the sanitizer before
+    # the brain sees it (Principle #4) - the registry wires this via
+    # ``langchain_tools(..., sanitizer=...)``. Pure-metadata or DeClaw-generated
+    # output (a directory listing, a "wrote N bytes" confirmation) is False.
+    produces_external_content: bool = False
 
     async def _arun(self, args: ArgsT) -> str:
         """Run the tool with already-validated args. Subclasses MUST override."""

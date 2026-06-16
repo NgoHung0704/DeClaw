@@ -76,6 +76,8 @@ class FilesystemReadTool(DeclawTool[FilesystemReadArgs]):
     description_fr: str = _DESCRIPTION_FR
     classification: ToolClass = ToolClass.READ
     args_schema: type[FilesystemReadArgs] = FilesystemReadArgs
+    # File contents are untrusted external content: route through the sanitizer.
+    produces_external_content: bool = True
 
     async def _arun(self, args: FilesystemReadArgs) -> str:
         resolved = _resolve_in_workspace(args.path)

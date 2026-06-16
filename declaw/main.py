@@ -95,6 +95,8 @@ def chat(
         make_console_confirmation_provider,
         run_chat,
     )
+    from declaw.sanitizer.classifier import build_ollama_classifier
+    from declaw.sanitizer.sanitizer import Sanitizer
     from declaw.tools.registry import default_registry
 
     settings = get_settings()
@@ -122,12 +124,25 @@ def chat(
         return console.input(question, markup=False, emoji=False)
 
     approve = make_console_confirmation_provider(confirm_prompt, settings.language)
-    tools = default_registry().langchain_tools(settings.language, approve)
+
+    # Principle #4: external content (file reads) must pass the sanitizer before
+    # the brain sees it. A separate Mistral session (sanitizer_model) classifies
+    # the output; UNSAFE content is quarantined and never reaches the model.
+    sanitizer = (
+        Sanitizer(build_ollama_classifier(language=settings.language))
+        if settings.sanitizer_required
+        else None
+    )
+    tools = default_registry().langchain_tools(
+        settings.language, approve, sanitizer=sanitizer
+    )
     graph = build_brain(tools)
 
+    sanitizer_state = "on" if sanitizer is not None else "off"
     console.print(
         f"[green]DeClaw chat[/green] - model [bold]{settings.model}[/bold], "
-        f"workspace [bold]{settings.workspace_dir}[/bold]. "
+        f"workspace [bold]{settings.workspace_dir}[/bold], "
+        f"sanitizer [bold]{sanitizer_state}[/bold]. "
         "Type [bold]/exit[/bold] to quit."
     )
 
