@@ -80,42 +80,44 @@ The MVP is "done" when an EU lawyer can:
 ### High-level diagram
 
 ```
-┌────────────────────────────────────────────────────────────────┐
-│                    TAURI DESKTOP SHELL                         │
-│  (native window, system tray, auto-updater)                    │
-│                                                                │
-│   WEBVIEW (UI)  ─── HTML + TailwindCSS + Vanilla JS            │
-│        │                                                       │
-│        ▼  HTTP REST / WebSocket  (127.0.0.1:7842 only)         │
-│   DeClaw CORE (Python)                                         │
-│   ┌──────────┐   ┌──────────┐   ┌─────────────┐                │
-│   │ Gateway  │──▶│  Brain   │──▶│  Sanitizer  │ (locked-down)  │
-│   │(FastAPI) │   │(LangGraph)│  │ (Mistral #2)│                │
-│   └──────────┘   └────┬─────┘   └─────────────┘                │
-│                       │                                        │
-│                       ▼                                        │
-│                ┌────────────────┐                              │
-│                │  PLUGIN HOST   │ (each plugin = subprocess)   │
-│                └───┬────────┬───┘                              │
-│         ┌──────────┘        └──────────┐                       │
-│         ▼                              ▼                       │
-│   ┌──────────┐                    ┌──────────┐                 │
-│   │ Doc-Intel│                    │ OS-Bridge│                 │
-│   │ (v0.1)   │                    │ (Phase 2)│                 │
-│   └────┬─────┘                    └──────────┘                 │
-│        │                                                       │
-│   ┌────▼────┐                                                  │
-│   │ Sandbox │  (Docker: shell only - post-MVP, deferred)       │
-│   └─────────┘                                                  │
-│                                                                │
-│   ChromaDB (encrypted)   SQLite (tasks/audit)   Keyring        │
-└────────────────────────────────────────────────────────────────┘
-                          │ (local only, never internet)
-                          ▼
-                  ┌───────────────┐
-                  │    Ollama     │
-                  │  Mistral 7B   │
-                  └───────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│ TAURI DESKTOP SHELL   ·   native window · system tray · auto-updater │
+│ WEBVIEW UI   ·   HTML + TailwindCSS + Vanilla JS   ·   EN / FR i18n  │
+└──────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    │  HTTP REST / WebSocket
+                                    ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│ DeClaw CORE  (Python — runs entirely on the user's machine)          │
+│                                                                      │
+│  ┌─────────┐     ┌─────────────┐      reasoning                      │
+│  │ Gateway │ ──▶ │    Brain    │ ◀──▶  Ollama (Mistral 7B)           │
+│  │(FastAPI)│     │ (LangGraph) │       100% local                    │
+│  └─────────┘     └──────┬──────┘                                     │
+│   loopback only         │ tool call                                  │
+│   token + origin        ▼                                            │
+│                  ┌──────────────┐                                    │
+│                  │ PLUGIN HOST  │  each plugin = isolated            │
+│                  └──┬────────┬──┘  subprocess · ed25519-signed       │
+│          ┌──────────┘        └──────────┐                            │
+│          ▼                              ▼                            │
+│    ┌───────────┐                  ┌───────────┐                      │
+│    │ Doc-Intel │                  │ OS-Bridge │                      │
+│    │  (v0.1)   │                  │ (Phase 2) │                      │
+│    └─────┬─────┘                  └───────────┘                      │
+│          │ external content (PDF text, file body, …)                 │
+│          ▼                                                           │
+│    ┌─────────────┐   UNSAFE ──▶ quarantine (brain never sees it)     │
+│    │  SANITIZER  │                                                   │
+│    │ (Mistral #2)│   SAFE ────▶ returned to the Brain                │
+│    └─────────────┘                                                   │
+│                                                                      │
+│  Storage    : ChromaDB (encrypted) · SQLite (tasks/audit) · Keyring  │
+│  Always-on  : Audit logger + Network egress monitor (every action)   │
+│  Deferred   : Docker sandbox for shell execution (post-MVP)          │
+└──────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼  local only — never the internet
 ```
 
 ### Plugin-first architecture
