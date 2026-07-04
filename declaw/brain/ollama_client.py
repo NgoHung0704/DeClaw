@@ -64,6 +64,17 @@ class OllamaClient:
             payload = response.json()
             return tuple(model["name"] for model in payload.get("models", []))
 
+    async def embed(self, model: str, texts: list[str]) -> list[list[float]]:
+        """Embed ``texts`` with ``model`` via ``/api/embed``. Raises on failure.
+
+        Returns one vector per input text, in the same order.
+        """
+        async with self._client() as http:
+            response = await http.post("/api/embed", json={"model": model, "input": texts})
+            response.raise_for_status()
+            embeddings = response.json()["embeddings"]
+            return [[float(x) for x in vector] for vector in embeddings]
+
     async def health(self) -> OllamaHealth:
         """Single-call health snapshot. Never raises — errors are reported in-band."""
         try:
