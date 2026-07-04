@@ -88,7 +88,7 @@ class EgressMonitor:
             finally:
                 monitor._emit_from_sync(monitor._event(request, response, error))
 
-        httpx.AsyncClient.send = observed_async_send  # type: ignore[method-assign]
+        httpx.AsyncClient.send = observed_async_send  # type: ignore[method-assign, assignment]
         httpx.Client.send = observed_sync_send  # type: ignore[method-assign, assignment]
         self._installed = True
 
