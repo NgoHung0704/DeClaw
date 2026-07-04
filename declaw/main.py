@@ -97,6 +97,7 @@ def chat(
 ) -> None:
     """Start an interactive chat REPL backed by the local brain."""
     # Imported lazily so `version`/`status` don't pay the langchain import cost.
+    from declaw.audit.egress import EgressMonitor, allowed_hosts_from_settings
     from declaw.audit.logger import DbAuditLogger
     from declaw.audit.sinks import composite_sink, quarantine_db_sink
     from declaw.brain.repl import (
@@ -188,7 +189,13 @@ def chat(
         await ensure_schema(engine)
         await run_chat(graph, read=read, write=write, debug=debug)
 
-    asyncio.run(_session())
+    # Principle #7: every outbound network call (incl. each Ollama request) is
+    # audited; anything outside the local allowlist is flagged (DCL-064).
+    monitor = EgressMonitor(
+        audit, allowed_hosts=allowed_hosts_from_settings(settings.ollama_base_url)
+    )
+    with monitor:
+        asyncio.run(_session())
     console.print("[dim]bye[/dim]")
 
 
