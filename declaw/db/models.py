@@ -94,6 +94,40 @@ class Task(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=_utcnow, sa_column=_dt_col_updated())
 
 
+class Episode(SQLModel, table=True):
+    """Episodic memory: one timestamped record per completed agent task (DCL-054).
+
+    Episodes are the "what happened when" layer of memory — queryable by date
+    and tag, linkable to both the task row and (via task_id) its audit events.
+    Tags are stored as a JSON array; with local, per-user data volumes the
+    date filter runs in SQL and tag matching in Python (documented trade-off
+    over a normalized tag table).
+    """
+
+    __tablename__ = "episodes"
+
+    id: str = Field(default_factory=_new_id, primary_key=True, max_length=36)
+    task_id: str | None = Field(
+        default=None,
+        foreign_key="tasks.id",
+        index=True,
+        description="Task this episode records, if any.",
+    )
+    summary: str = Field(description="One-paragraph plain-language record of the episode.")
+    tags: list[str] = Field(
+        default_factory=list,
+        sa_column=Column(JSON, nullable=False),
+        description="Free-form labels for retrieval (e.g. 'contracts', 'email').",
+    )
+    outcome: str | None = Field(
+        default=None, description="Terminal outcome, e.g. 'completed' or 'failed'."
+    )
+    started_at: datetime = Field(default_factory=_utcnow, sa_column=_dt_col(index=True))
+    finished_at: datetime | None = Field(
+        default=None, sa_column=Column(UTCDateTime(), nullable=True)
+    )
+
+
 class AuditEvent(SQLModel, table=True):
     """Append-only audit record. Required by Inviolable Principle #7."""
 
