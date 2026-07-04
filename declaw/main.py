@@ -9,6 +9,8 @@ gateway started by ``start``).
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import typer
 from rich.console import Console
@@ -17,6 +19,11 @@ from rich.table import Table
 from declaw import __version__
 from declaw.brain.ollama_client import OllamaClient, OllamaHealth
 from declaw.config import get_settings
+
+if TYPE_CHECKING:  # heavy imports stay lazy at runtime
+    from declaw.audit.logger import DbAuditLogger
+    from declaw.memory.episodic import EpisodicMemory
+    from declaw.memory.semantic import SemanticMemory
 
 cli = typer.Typer(
     name="declaw",
@@ -183,6 +190,99 @@ def chat(
 
     asyncio.run(_session())
     console.print("[dim]bye[/dim]")
+
+
+memory_app = typer.Typer(
+    name="memory",
+    help="Export or wipe DeClaw's long-term memory (GDPR).",
+    no_args_is_help=True,
+)
+cli.add_typer(memory_app)
+
+
+def _build_memory_stack() -> tuple[SemanticMemory, EpisodicMemory, DbAuditLogger]:
+    """Assemble (semantic, episodic, audit) over the real stores.
+
+    Shared by ``memory export`` and ``memory wipe``. Imports are lazy so the
+    lightweight commands don't pay for chroma/langchain.
+    """
+    from declaw.audit.logger import DbAuditLogger
+    from declaw.db.engine import get_engine, get_sessionmaker
+    from declaw.memory.chroma import build_chroma_client, get_collection
+    from declaw.memory.crypto import get_or_create_fernet
+    from declaw.memory.embeddings import build_ollama_embedder
+    from declaw.memory.episodic import EpisodicMemory
+    from declaw.memory.semantic import SemanticMemory
+
+    get_engine()  # materializes data_dir
+    collection = get_collection(build_chroma_client(), "semantic")
+    semantic = SemanticMemory(
+        collection, build_ollama_embedder(), fernet=get_or_create_fernet()
+    )
+    episodic = EpisodicMemory(get_sessionmaker())
+    audit = DbAuditLogger(get_sessionmaker())
+    return semantic, episodic, audit
+
+
+@memory_app.command("export")
+def memory_export(
+    out: str = typer.Option(
+        "", "--out", help="Destination JSON file (default: data_dir/exports/...)."
+    ),
+) -> None:
+    """Export all stored memory as a JSON archive (GDPR portability)."""
+    from datetime import datetime, timezone
+
+    from declaw.db.engine import ensure_schema, get_engine
+    from declaw.memory.gdpr import export_memory
+
+    settings = get_settings()
+    if out:
+        destination = Path(out).expanduser()
+    else:
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        destination = settings.data_dir / "exports" / f"declaw-memory-{stamp}.json"
+
+    semantic, episodic, audit = _build_memory_stack()
+
+    async def _run() -> Path:
+        await ensure_schema(get_engine())
+        return await export_memory(
+            destination, semantic=semantic, episodic=episodic, audit=audit
+        )
+
+    written = asyncio.run(_run())
+    console.print(f"[green]Memory exported[/green] to [bold]{written}[/bold]")
+
+
+@memory_app.command("wipe")
+def memory_wipe(
+    yes: bool = typer.Option(False, "--yes", help="Skip the confirmation prompt."),
+) -> None:
+    """Delete ALL stored memory (right to be forgotten). Irreversible."""
+    from declaw.db.engine import ensure_schema, get_engine
+    from declaw.memory.gdpr import WipeReport, wipe_memory
+
+    if not yes:
+        confirmed = typer.confirm(
+            "This permanently deletes ALL semantic memories and task history. Continue?"
+        )
+        if not confirmed:
+            console.print("[yellow]Aborted.[/yellow] Nothing was deleted.")
+            raise typer.Exit(code=1)
+
+    semantic, episodic, audit = _build_memory_stack()
+
+    async def _run() -> WipeReport:
+        await ensure_schema(get_engine())
+        return await wipe_memory(semantic=semantic, episodic=episodic, audit=audit)
+
+    report = asyncio.run(_run())
+    console.print(
+        f"[green]Memory wiped.[/green] Removed {report.semantic_removed} semantic "
+        f"memories and {report.episodes_removed} episodes. "
+        "An anonymized record (counts only) was kept in the audit trail."
+    )
 
 
 def main() -> None:
