@@ -4,7 +4,7 @@
 
 DeClaw is a local-first AI agent designed for **EU regulated professionals** — lawyers, notaries, doctors, accountants — who cannot legally use cloud AI on client data because of GDPR and professional secrecy.
 
-- **Private by default** — Mistral 7B runs 100% local via Ollama. Nothing leaves the machine. Ever.
+- **Private by default** — Qwen2.5 3B runs 100% local via Ollama. Nothing leaves the machine. Ever.
 - **Safe by architecture** — Every tool takes typed, validated parameters scoped to your workspace; external content is screened by a dual-model sanitizer before the agent acts on it; file changes require your confirmation. (Shell execution and its mandatory Docker sandbox are deferred to post-MVP — v0.1 needs no shell.)
 - **Transparent always** — Every task produces a natural-language audit log; a network egress monitor proves nothing left the device.
 - **Easy for everyone** — One-click installer, native desktop app (Tauri), no terminal required.
@@ -61,7 +61,7 @@ The MVP is "done" when an EU lawyer can:
 
 | Layer | Choice |
 | --- | --- |
-| Brain model | Ollama + Mistral 7B Instruct (default). Optional: Mistral 8x7B, Mixtral, Llama 3.1 8B |
+| Brain model | Ollama + Qwen2.5 3B (default — tool-calling tuned, fits 4GB GPU). Optional: Qwen2.5 7B, Llama 3.1 8B |
 | Embeddings | `nomic-embed-text` (via Ollama) |
 | Language | Python 3.12+ (uv-managed, lockfile committed) |
 | Agent framework | LangGraph |
@@ -80,45 +80,88 @@ The MVP is "done" when an EU lawyer can:
 ### High-level diagram
 
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│ TAURI DESKTOP SHELL   ·   native window · system tray · auto-updater │
-│ WEBVIEW UI   ·   HTML + TailwindCSS + Vanilla JS   ·   EN / FR i18n  │
-└──────────────────────────────────────────────────────────────────────┘
+                ┌──────────────────────────────────────────────────────┐
+                │  Tauri Desktop Shell                     (Phase 10)  │
+                │  Webview UI  (Tailwind, EN/FR i18n)      (Phase  9)  │
+                └──────────────────────┬───────────────────────────────┘
+                                       │  HTTP REST / WebSocket
+                                       ▼
+╔══════════════════════════════════════════════════════════════════════════╗
+║  DeClaw CORE  —  Python, runs entirely on the user's machine             ║
+║                                                                          ║
+║      ┌─────────┐        ┌──────────────┐   reason    ┌──────────────┐    ║
+║      │ Gateway │ ─────▶ │    Brain     │ ──────────▶ │   Ollama     │    ║
+║      │(FastAPI)│        │ (LangGraph)  │ ◀────────── │   (local)    │    ║
+║      │loopback │        └──────┬───────┘             │              │    ║
+║      │(Phase 9)│               │ tool call           │ Mistral #1   │    ║
+║      └─────────┘               ▼                     │ Mistral #2   │    ║
+║                         ┌──────────────┐             │ (sanitizer)  │    ║
+║                         │ TOOL REGISTRY│             └──────────────┘    ║
+║                         └──┬────────┬──┘                                 ║
+║           built-in path    │        │   plugin path                      ║
+║                            ▼        ▼                                    ║
+║                     ┌──────────┐  ┌──────────────┐                       ║
+║                     │CONFIRMA- │  │ PLUGIN HOST  │                       ║
+║                     │TION GATE │  │ subprocess + │                       ║
+║                     │ (WRITE/  │  │ ed25519 sigs │                       ║
+║                     │ DESTRUCT)│  │  (Phase 7)   │                       ║
+║                     └─────┬────┘  └──┬────────┬──┘                       ║
+║                           ▼          ▼        ▼                          ║
+║                     ┌──────────┐  ┌──────┐ ┌──────┐                      ║
+║                     │ BUILT-IN │  │ Doc- │ │  OS- │                      ║
+║                     │ FS TOOLS │  │Intel │ │Bridge│                      ║
+║                     │  read /  │  │  P8  │ │  P11 │                      ║
+║                     │  list /  │  └──┬───┘ └──────┘                      ║
+║                     │  write / │     │                                   ║
+║                     │  move    │     │  (PDF text, future)               ║
+║                     └─────┬────┘     │                                   ║
+║                           │ file body│                                   ║
+║                           └────┬─────┘                                   ║
+║                                ▼                                         ║
+║                     ┌──────────────────────┐                             ║
+║                     │      SANITIZER       │  uses Mistral #2            ║
+║                     │   fail-closed +      │  (separate session,         ║
+║                     │   locked prompt      │   no shared state)          ║
+║                     └──┬──────────────┬────┘                             ║
+║                    SAFE│              │ UNSAFE                           ║
+║                        │              ▼                                  ║
+║                        │       ┌─────────────┐                           ║
+║                        │       │ QUARANTINE  │  hash + source            ║
+║                        │       │ (UI only)   │  raw never returned       ║
+║                        │       └─────────────┘                           ║
+║                        │                                                 ║
+║                        └────── SAFE → back to Brain ─────▶               ║
+║                                                                          ║
+║  Storage  :  ChromaDB (Fernet)  ·  SQLite (tasks/audit)  ·  Keyring      ║
+║  ┌──────────────────────────────────────────────────────────────────┐    ║
+║  │  Audit logger  +  Network egress monitor  (wraps every action)   │    ║
+║  └──────────────────────────────────────────────────────────────────┘    ║
+║  Deferred :  Docker sandbox for shell execution  (Phase 3, post-MVP)     ║
+╚══════════════════════════════════════════════════════════════════════════╝
                                     │
-                                    │  HTTP REST / WebSocket
-                                    ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│ DeClaw CORE  (Python — runs entirely on the user's machine)          │
-│                                                                      │
-│  ┌─────────┐     ┌─────────────┐      reasoning                      │
-│  │ Gateway │ ──▶ │    Brain    │ ◀──▶  Ollama (Mistral 7B)           │
-│  │(FastAPI)│     │ (LangGraph) │       100% local                    │
-│  └─────────┘     └──────┬──────┘                                     │
-│   loopback only         │ tool call                                  │
-│   token + origin        ▼                                            │
-│                  ┌──────────────┐                                    │
-│                  │ PLUGIN HOST  │  each plugin = isolated            │
-│                  └──┬────────┬──┘  subprocess · ed25519-signed       │
-│          ┌──────────┘        └──────────┐                            │
-│          ▼                              ▼                            │
-│    ┌───────────┐                  ┌───────────┐                      │
-│    │ Doc-Intel │                  │ OS-Bridge │                      │
-│    │  (v0.1)   │                  │ (Phase 2) │                      │
-│    └─────┬─────┘                  └───────────┘                      │
-│          │ external content (PDF text, file body, …)                 │
-│          ▼                                                           │
-│    ┌─────────────┐   UNSAFE ──▶ quarantine (brain never sees it)     │
-│    │  SANITIZER  │                                                   │
-│    │ (Mistral #2)│   SAFE ────▶ returned to the Brain                │
-│    └─────────────┘                                                   │
-│                                                                      │
-│  Storage    : ChromaDB (encrypted) · SQLite (tasks/audit) · Keyring  │
-│  Always-on  : Audit logger + Network egress monitor (every action)   │
-│  Deferred   : Docker sandbox for shell execution (post-MVP)          │
-└──────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼  local only — never the internet
+                                    ▼   local only — never the internet
 ```
+
+**Component status**
+
+| Component                                | Status        | Phase |
+| ---------------------------------------- | ------------- | ----- |
+| Brain (LangGraph loop)                   | ✅ shipped    | 1     |
+| Tool Registry                            | ✅ shipped    | 2     |
+| Built-in FS Tools (read/list/write/move) | ✅ shipped    | 2     |
+| Confirmation Gate (WRITE/DESTRUCT)       | ✅ shipped    | 2     |
+| Sanitizer + Quarantine                   | ✅ shipped    | 4     |
+| SQLite (tasks/audit DB)                  | ✅ shipped    | 0     |
+| ChromaDB (Fernet at-rest)                | 🟡 next       | 5     |
+| Audit logger + Egress monitor            | 🟡 next       | 5     |
+| Keyring (credentials)                    | ⬜ planned    | 6     |
+| Plugin Host (subprocess + ed25519)       | ⬜ planned    | 7     |
+| Doc-Intel plugin                         | ⬜ planned    | 8     |
+| Gateway (FastAPI, loopback)              | ⬜ planned    | 9     |
+| Webview UI (Tailwind, EN/FR)             | ⬜ planned    | 9     |
+| Tauri Desktop Shell                      | ⬜ planned    | 10    |
+| OS-Bridge plugin                         | ⬜ planned    | 11    |
+| Docker sandbox (shell execution)         | ⏸️ deferred   | 3     |
 
 ### Plugin-first architecture
 
@@ -174,7 +217,7 @@ Performance targets, encoded in the Phase 4 benchmark harness (`scripts/sanitize
 - Detection rate high on the known-injection corpus (false negatives low)
 - p95 latency < 500 ms per chunk
 
-> Note: the latency target assumes a fast/GPU-served classifier; on Mistral 7B/CPU it will be slower. The harness reports the real numbers so the target can be tracked as the model/hardware changes.
+> Note: the latency target assumes a GPU-served classifier. On 4GB GPU full-offload (Qwen2.5 3B) the budget is realistic; CPU-only or partial offload will be slower. The harness reports the real numbers so the target can be tracked as the model/hardware changes.
 
 ### Audit log
 
@@ -192,7 +235,7 @@ After every task, the brain auto-generates a natural-language audit entry:
   ],
   "network_calls": [],
   "data_left_device": false,
-  "model_used": "mistral:7b",
+  "model_used": "qwen2.5:3b",
   "plugins_invoked": ["doc-intel"]
 }
 ```
@@ -203,7 +246,7 @@ A network egress monitor cross-checks `network_calls` against the actual outboun
 
 ## Project status
 
-**Pre-alpha — Phases 0–2 and 4 complete; Phase 3 (sandbox) deferred for v0.1.** The core agent already runs: `declaw chat` drives a local LangGraph brain (Mistral 7B via Ollama) with typed, workspace-scoped filesystem tools, a confirmation gate on writes, and the dual-model sanitizer screening file contents before the brain sees them. Still missing for a usable product: document intelligence (Phase 8), the web UI (Phase 9), and the desktop app (Phase 10).
+**Pre-alpha — Phases 0–2 and 4 complete; Phase 3 (sandbox) deferred for v0.1.** The core agent already runs: `declaw chat` drives a local LangGraph brain (Qwen2.5 3B via Ollama) with typed, workspace-scoped filesystem tools, a confirmation gate on writes, and the dual-model sanitizer screening file contents before the brain sees them. Still missing for a usable product: document intelligence (Phase 8), the web UI (Phase 9), and the desktop app (Phase 10).
 
 ### Roadmap
 
@@ -280,7 +323,7 @@ docs/                  Architecture, security model, plugin guide
 
 ## Quickstart (developers)
 
-**Prerequisites**: Python 3.12+, [uv](https://docs.astral.sh/uv/), and [Ollama](https://ollama.com/) with `mistral:7b` pulled. Docker is **not** required for v0.1 (it is only needed for the deferred shell sandbox).
+**Prerequisites**: Python 3.12+, [uv](https://docs.astral.sh/uv/), and [Ollama](https://ollama.com/) with `qwen2.5:3b` pulled (`ollama pull qwen2.5:3b`, ~2GB). Docker is **not** required for v0.1 (it is only needed for the deferred shell sandbox).
 
 ```bash
 # Install dependencies (reproducible build via uv.lock)
@@ -295,7 +338,7 @@ uv run declaw status
 # Print version
 uv run declaw version
 
-# Chat with the local agent (needs Ollama running with mistral:7b)
+# Chat with the local agent (needs Ollama running with qwen2.5:3b)
 uv run declaw chat            # add --debug to trace tool calls
 ```
 

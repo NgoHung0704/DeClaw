@@ -53,9 +53,9 @@ class Settings(BaseSettings):
         validation_alias="OLLAMA_BASE_URL",
         description="Ollama HTTP API base URL.",
     )
-    model: str = Field(default="mistral:7b", description="Primary brain model.")
+    model: str = Field(default="qwen2.5:3b", description="Primary brain model.")
     sanitizer_model: str = Field(
-        default="mistral:7b",
+        default="qwen2.5:3b",
         description="Sanitizer model (must be a separate Ollama session).",
     )
     embedding_model: str = Field(
