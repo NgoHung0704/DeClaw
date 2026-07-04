@@ -318,6 +318,51 @@ def memory_wipe(
     )
 
 
+audit_app = typer.Typer(
+    name="audit",
+    help="Inspect or export the audit trail.",
+    no_args_is_help=True,
+)
+cli.add_typer(audit_app)
+
+
+@audit_app.command("export")
+def audit_export(
+    format: str = typer.Option("json", "--format", help="Export format: json, markdown, pdf."),
+    out: str = typer.Option(
+        "", "--out", help="Destination file (default: data_dir/exports/...)."
+    ),
+) -> None:
+    """Export the full audit trail (JSON, Markdown or PDF)."""
+    from datetime import datetime, timezone
+
+    from declaw.audit.export import export_events, load_all_events
+    from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
+
+    if format not in ("json", "markdown", "pdf"):
+        console.print(f"[red]Unknown format {format!r}[/red] (use json, markdown or pdf).")
+        raise typer.Exit(code=1)
+
+    settings = get_settings()
+    extension = {"json": "json", "markdown": "md", "pdf": "pdf"}[format]
+    if out:
+        destination = Path(out).expanduser()
+    else:
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        destination = settings.data_dir / "exports" / f"declaw-audit-{stamp}.{extension}"
+
+    async def _run() -> tuple[Path, int]:
+        await ensure_schema(get_engine())
+        events, unreadable = await load_all_events(get_sessionmaker())
+        written = export_events(events, destination, format)  # type: ignore[arg-type]
+        return written, unreadable
+
+    written, unreadable = asyncio.run(_run())
+    console.print(f"[green]Audit trail exported[/green] to [bold]{written}[/bold]")
+    if unreadable:
+        console.print(f"[yellow]{unreadable} unreadable audit record(s) skipped.[/yellow]")
+
+
 def main() -> None:
     """Module entry point used by ``python -m declaw.main``."""
     cli()
