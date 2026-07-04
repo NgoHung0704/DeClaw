@@ -112,8 +112,34 @@ class PermissionPromptEvent(_BaseAuditEvent):
     channel: str = Field(default="console", description="Where the prompt was shown.")
 
 
+class MemoryExportEvent(_BaseAuditEvent):
+    """User exported their memory archive (GDPR portability, DCL-056)."""
+
+    event_type: Literal["memory.export"] = "memory.export"
+    destination: str
+    semantic_count: int
+    episode_count: int
+
+
+class MemoryWipeEvent(_BaseAuditEvent):
+    """User wiped their memory (right to be forgotten, DCL-057).
+
+    Deliberately anonymized: counts only, no ids, no content — the audit
+    trail must prove the wipe happened without undoing it.
+    """
+
+    event_type: Literal["memory.wipe"] = "memory.wipe"
+    semantic_removed: int
+    episodes_removed: int
+
+
 AnyAuditEvent = Annotated[
-    ToolCallEvent | NetworkCallEvent | QuarantineEvent | PermissionPromptEvent,
+    ToolCallEvent
+    | NetworkCallEvent
+    | QuarantineEvent
+    | PermissionPromptEvent
+    | MemoryExportEvent
+    | MemoryWipeEvent,
     Field(discriminator="event_type"),
 ]
 
