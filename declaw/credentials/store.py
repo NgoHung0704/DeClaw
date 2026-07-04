@@ -20,7 +20,11 @@ Design notes:
 
 from __future__ import annotations
 
+from pathlib import Path
+from typing import Protocol
+
 import keyring
+import keyring.backends.fail
 import keyring.errors
 
 SERVICE_NAME = "declaw"
@@ -30,6 +34,18 @@ SERVICE_NAME = "declaw"
 KNOWN_SECRET_NAMES: tuple[str, ...] = (
     "memory-fernet-key",  # DCL-051: at-rest encryption of vector memory
 )
+
+
+class SecretStore(Protocol):
+    """What the rest of DeClaw depends on — vault-backed or encrypted-file."""
+
+    def get(self, name: str) -> str | None: ...
+
+    def set(self, name: str, value: str) -> None: ...
+
+    def delete(self, name: str) -> bool: ...
+
+    def purge(self, names: tuple[str, ...] = KNOWN_SECRET_NAMES) -> int: ...
 
 
 class CredentialStore:
@@ -74,3 +90,26 @@ class CredentialStore:
     def _validate(name: str) -> None:
         if not name or name != name.strip():
             raise ValueError(f"Invalid secret name {name!r}.")
+
+
+def default_credential_store(secrets_path: Path | None = None) -> SecretStore:
+    """OS vault when one exists, encrypted-file fallback otherwise (DCL-074).
+
+    python-keyring resolves to its ``fail`` backend when no vault is usable —
+    that (and only that) routes us to :class:`EncryptedFileCredentialStore`
+    under ``data_dir``. Principle #1 holds on both paths: no plaintext.
+    """
+    backend = keyring.get_keyring()
+    if isinstance(backend, keyring.backends.fail.Keyring):
+        from declaw.config import get_settings
+        from declaw.credentials.fallback import (
+            SECRETS_FILENAME,
+            EncryptedFileCredentialStore,
+        )
+
+        if secrets_path is None:
+            settings = get_settings()
+            settings.data_dir.mkdir(parents=True, exist_ok=True)
+            secrets_path = settings.data_dir / SECRETS_FILENAME
+        return EncryptedFileCredentialStore(secrets_path)
+    return CredentialStore()
