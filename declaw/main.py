@@ -155,11 +155,13 @@ def chat(
     def write(line: str) -> None:
         console.print(line)
 
-    # No system prompt is seeded: the prompt-variant probe (scripts/
-    # probe_prompt_variants.py, 2026-06-11) showed that ANY instruction text -
-    # system role or human prefix, minimal or full - collapses Mistral 7B's
-    # tool-calling (62% bare vs 0-23% with text). DCL-017's system_message()
-    # stays available for compositions that don't bind tools.
+    # No system prompt is seeded. Historical reason: a 2026-06-11 prompt-variant
+    # probe showed ANY instruction text (system role or human prefix, minimal or
+    # full) collapsed Mistral 7B tool-calling from 62% to 0-23%. After swapping
+    # the default to Qwen2.5 3B on 2026-06-28 (tool-calling-tuned), the Mistral-
+    # specific failure should be gone, but re-enabling system prompt requires an
+    # A/B probe first - see CLAUDE.md Open decision "System prompt x tool-calling".
+    # DCL-017's system_message() stays available for compositions that don't bind tools.
     asyncio.run(run_chat(graph, read=read, write=write, debug=debug))
     console.print("[dim]bye[/dim]")
 
