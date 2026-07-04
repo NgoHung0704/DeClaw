@@ -18,6 +18,7 @@ from pathlib import Path
 import threading
 
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
+from sqlmodel import SQLModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from declaw.config import get_settings
@@ -64,6 +65,19 @@ def get_sessionmaker() -> async_sessionmaker[AsyncSession]:
             if _sessionmaker is None:
                 _sessionmaker = build_sessionmaker(get_engine())
     return _sessionmaker
+
+
+async def ensure_schema(engine: AsyncEngine) -> None:
+    """Create any missing tables (idempotent).
+
+    Used by CLI entry points (e.g. ``declaw chat``) so a fresh install has a
+    working DB without running Alembic by hand. ``create_all`` skips tables
+    that already exist, so a dev database managed by ``alembic upgrade`` is
+    untouched. The packaged-app migration story (stamping + upgrades on
+    update) is a Phase 14 concern.
+    """
+    async with engine.begin() as conn:
+        await conn.run_sync(SQLModel.metadata.create_all)
 
 
 @asynccontextmanager
