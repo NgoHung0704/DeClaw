@@ -385,19 +385,19 @@
 - **Dependencies**: DCL-071
 - **Estimate**: 0.5d
 
-### [ ] DCL-074 — Encrypted secrets fallback
+### [x] DCL-074 — Encrypted secrets fallback
 - **Description**: AES-256 file + key derived from OS user; used only if keyring missing.
 - **Acceptance**: Fallback path documented; covered by tests.
 - **Dependencies**: DCL-070
 - **Estimate**: 0.5d
 
-### [ ] DCL-080 — `plugin.yaml` schema + validator
+### [x] DCL-080 — `plugin.yaml` schema + validator
 - **Description**: Pydantic model; semantic checks (denied vs requested).
 - **Acceptance**: Invalid manifests rejected with helpful error.
 - **Dependencies**: DCL-001
 - **Estimate**: 0.5d
 
-### [ ] DCL-081 — Permission enforcement middleware
+### [x] DCL-081 — Permission enforcement middleware
 - **Description**: Every tool call checked vs plugin permissions.
 - **Acceptance**: Denied call returns structured error + audit event.
 - **Dependencies**: DCL-080
@@ -409,13 +409,13 @@
 - **Dependencies**: DCL-081, DCL-127
 - **Estimate**: 0.5d
 
-### [ ] DCL-083 — Plugin signature verification (ed25519)
+### [x] DCL-083 — Plugin signature verification (ed25519)
 - **Description**: Verify on load; reject unsigned third-party plugins by default.
 - **Acceptance**: Tampered plugin rejected.
 - **Dependencies**: DCL-080
 - **Estimate**: 0.5d
 
-### [ ] DCL-084 — Permission audit log
+### [x] DCL-084 — Permission audit log
 - **Description**: Grants, denies, revocations recorded.
 - **Acceptance**: All transitions visible in audit UI.
 - **Dependencies**: DCL-081, DCL-061
