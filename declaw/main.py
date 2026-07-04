@@ -192,6 +192,32 @@ def chat(
     console.print("[dim]bye[/dim]")
 
 
+@cli.command()
+def report(
+    on: str = typer.Option(
+        "", "--date", help="Day to report on, YYYY-MM-DD (default: today, UTC)."
+    ),
+    lang: str = typer.Option(
+        "", "--lang", help="Report language: en or fr (default: DECLAW_LANGUAGE)."
+    ),
+) -> None:
+    """Show what DeClaw did on a given day, in plain language."""
+    from datetime import date, datetime, timezone
+
+    from declaw.audit.report import daily_report
+    from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
+
+    settings = get_settings()
+    day = date.fromisoformat(on) if on else datetime.now(timezone.utc).date()
+    language = lang if lang in ("en", "fr") else settings.language
+
+    async def _run() -> str:
+        await ensure_schema(get_engine())
+        return await daily_report(get_sessionmaker(), day, language)  # type: ignore[arg-type]
+
+    console.print(asyncio.run(_run()), markup=False)
+
+
 memory_app = typer.Typer(
     name="memory",
     help="Export or wipe DeClaw's long-term memory (GDPR).",
