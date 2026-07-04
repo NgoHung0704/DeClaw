@@ -18,14 +18,18 @@ from __future__ import annotations
 
 from cryptography.fernet import Fernet
 
-from declaw.credentials.store import CredentialStore
+from declaw.credentials.store import SecretStore, default_credential_store
 
 FERNET_KEY_NAME = "memory-fernet-key"
 
 
-def get_or_create_fernet(store: CredentialStore | None = None) -> Fernet:
-    """Return the memory Fernet, creating + vaulting the key on first use."""
-    store = store if store is not None else CredentialStore()
+def get_or_create_fernet(store: SecretStore | None = None) -> Fernet:
+    """Return the memory Fernet, creating + vaulting the key on first use.
+
+    The default store is the OS vault, or the DCL-074 encrypted-file fallback
+    on machines without one — never plaintext either way.
+    """
+    store = store if store is not None else default_credential_store()
     key = store.get(FERNET_KEY_NAME)
     if key is None:
         key = Fernet.generate_key().decode("ascii")
