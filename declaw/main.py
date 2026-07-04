@@ -90,12 +90,16 @@ def chat(
 ) -> None:
     """Start an interactive chat REPL backed by the local brain."""
     # Imported lazily so `version`/`status` don't pay the langchain import cost.
+    from declaw.audit.logger import DbAuditLogger
+    from declaw.audit.sinks import composite_sink, quarantine_db_sink
     from declaw.brain.repl import (
         build_brain,
         make_console_confirmation_provider,
         run_chat,
     )
+    from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
     from declaw.sanitizer.classifier import build_ollama_classifier
+    from declaw.sanitizer.quarantine import QuarantineStore, log_audit_sink
     from declaw.sanitizer.sanitizer import Sanitizer
     from declaw.tools.registry import default_registry
 
@@ -125,16 +129,25 @@ def chat(
 
     approve = make_console_confirmation_provider(confirm_prompt, settings.language)
 
+    # Principle #7: every tool call / confirmation decision / quarantine lands
+    # in the durable audit trail (SQLite, DCL-060/061).
+    engine = get_engine()
+    audit = DbAuditLogger(get_sessionmaker())
+
     # Principle #4: external content (file reads) must pass the sanitizer before
-    # the brain sees it. A separate Mistral session (sanitizer_model) classifies
-    # the output; UNSAFE content is quarantined and never reaches the model.
+    # the brain sees it. A separate session (sanitizer_model) classifies the
+    # output; UNSAFE content is quarantined and never reaches the model. The
+    # quarantine store reports to both the operational log and the audit DB.
+    quarantine = QuarantineStore(
+        audit_sink=composite_sink(log_audit_sink, quarantine_db_sink(audit))
+    )
     sanitizer = (
-        Sanitizer(build_ollama_classifier(language=settings.language))
+        Sanitizer(build_ollama_classifier(language=settings.language), quarantine=quarantine)
         if settings.sanitizer_required
         else None
     )
     tools = default_registry().langchain_tools(
-        settings.language, approve, sanitizer=sanitizer
+        settings.language, approve, sanitizer=sanitizer, audit=audit
     )
     graph = build_brain(tools)
 
@@ -142,7 +155,7 @@ def chat(
     console.print(
         f"[green]DeClaw chat[/green] - model [bold]{settings.model}[/bold], "
         f"workspace [bold]{settings.workspace_dir}[/bold], "
-        f"sanitizer [bold]{sanitizer_state}[/bold]. "
+        f"sanitizer [bold]{sanitizer_state}[/bold], audit [bold]on[/bold]. "
         "Type [bold]/exit[/bold] to quit."
     )
 
@@ -162,7 +175,13 @@ def chat(
     # specific failure should be gone, but re-enabling system prompt requires an
     # A/B probe first - see CLAUDE.md Open decision "System prompt x tool-calling".
     # DCL-017's system_message() stays available for compositions that don't bind tools.
-    asyncio.run(run_chat(graph, read=read, write=write, debug=debug))
+    async def _session() -> None:
+        # Schema + chat share one event loop so aiosqlite connections created
+        # during bootstrap stay usable for audit writes during the REPL.
+        await ensure_schema(engine)
+        await run_chat(graph, read=read, write=write, debug=debug)
+
+    asyncio.run(_session())
     console.print("[dim]bye[/dim]")
 
 

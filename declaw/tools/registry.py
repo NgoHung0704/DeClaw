@@ -29,7 +29,7 @@ one place, so "every built-in tool DeClaw ships" is auditable at a glance.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.tools import StructuredTool
 
@@ -37,6 +37,9 @@ from declaw.config import Language
 from declaw.sanitizer.pipeline import wrap_tool_with_sanitizer
 from declaw.sanitizer.sanitizer import Sanitizer
 from declaw.tools.base import DeclawTool, ToolClass
+
+if TYPE_CHECKING:
+    from declaw.audit.logger import AuditLogger
 from declaw.tools.builtin.filesystem import (
     FilesystemListTool,
     FilesystemMoveTool,
@@ -95,6 +98,7 @@ class ToolRegistry:
         approve: ConfirmationProvider,
         *,
         sanitizer: Sanitizer | None = None,
+        audit: AuditLogger | None = None,
     ) -> list[StructuredTool]:
         """Build the brain-ready tool list with READ/non-READ + sanitizer wiring.
 
@@ -103,7 +107,11 @@ class ToolRegistry:
         wrapper. When a ``sanitizer`` is supplied, any tool whose
         ``produces_external_content`` flag is set has its output routed through
         the sanitizer first (Principle #4) — UNSAFE output is quarantined and
-        replaced before the model sees it. Feed the result to both
+        replaced before the model sees it. When an ``audit`` logger is supplied
+        (DCL-061), every tool is additionally wrapped so each invocation emits a
+        ``ToolCallEvent`` and every confirmation decision a
+        ``PermissionPromptEvent`` — the audit wrapper is outermost, so it records
+        the call exactly as the model experienced it. Feed the result to both
         ``bind_tools`` and ``ToolNode``.
 
         (The built-in external-content tool, ``filesystem_read``, is READ. A
@@ -115,11 +123,18 @@ class ToolRegistry:
             tool = self._tools[name]
             if tool.classification is ToolClass.READ:
                 if sanitizer is not None and tool.produces_external_content:
-                    tools.append(wrap_tool_with_sanitizer(tool, language, sanitizer))
+                    lc_tool = wrap_tool_with_sanitizer(tool, language, sanitizer)
                 else:
-                    tools.append(tool.as_langchain_tool(language))
+                    lc_tool = tool.as_langchain_tool(language)
             else:
-                tools.append(wrap_tool_with_confirmation(tool, language, approve))
+                lc_tool = wrap_tool_with_confirmation(tool, language, approve, audit=audit)
+            if audit is not None:
+                from declaw.audit.tooling import wrap_tool_with_audit
+
+                lc_tool = wrap_tool_with_audit(
+                    lc_tool, tool=tool, language=language, audit=audit
+                )
+            tools.append(lc_tool)
         return tools
 
 
