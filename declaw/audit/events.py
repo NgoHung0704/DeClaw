@@ -133,13 +133,29 @@ class MemoryWipeEvent(_BaseAuditEvent):
     episodes_removed: int
 
 
+class PluginPermissionEvent(_BaseAuditEvent):
+    """A plugin-permission state change or enforcement decision (DCL-084).
+
+    ``action`` covers the whole lifecycle: ``granted``/``revoked`` (user
+    decisions on the grant store), ``denied_call`` (a requested-but-ungranted
+    permission was exercised), and ``violation`` (the plugin exercised a
+    permission its manifest never even requested — DCL-097 escalation).
+    """
+
+    event_type: Literal["plugin.permission"] = "plugin.permission"
+    plugin: str
+    permission: str
+    action: Literal["granted", "revoked", "denied_call", "violation"]
+
+
 AnyAuditEvent = Annotated[
     ToolCallEvent
     | NetworkCallEvent
     | QuarantineEvent
     | PermissionPromptEvent
     | MemoryExportEvent
-    | MemoryWipeEvent,
+    | MemoryWipeEvent
+    | PluginPermissionEvent,
     Field(discriminator="event_type"),
 ]
 
