@@ -10,7 +10,7 @@
 | **1** | Core Brain (LangGraph loop, agent state, model integration, probe framework) | ✅ Complete | [phase-1-review.md](./phase-1-review.md) |
 | **2** | Tool Layer (typed tools, filesystem, confirmation gate, path traversal defense) | ✅ Complete | [phase-2-review.md](./phase-2-review.md) |
 | **3** | Sandbox (Docker isolation) | ⏸️ Deferred | *(see note below)* |
-| **4** | Sanitizer Layer (dual-model prompt injection defense) | ✅ Complete | [phase-4-review.md](./phase-4-review.md) |
+| **4** | Sanitizer Layer (dual-model prompt injection defense) | ✅ Built & wired — ⚠️ **below its own targets** (đo 2026-07-25: FP 9.0% vs <2%, p95 1.60s vs <0.5s) | [phase-4-review.md](./phase-4-review.md) |
 | **5** | Memory & Audit (ChromaDB, Fernet, episodic DB, NL summary, egress monitor, GDPR export/wipe) | ✅ Complete | [phase-5-review.md](./phase-5-review.md) |
 | **6** | Credentials & Permissions (keyring, AES fallback, plugin manifest, ed25519, grants) | ✅ Buildable core complete | [phase-6-review.md](./phase-6-review.md) |
 | 7 | Plugin Host (subprocess isolation, IPC, kill trigger) | 🟡 Next (MVP critical path) | *(not yet reviewed)* |
@@ -32,9 +32,12 @@
 3. [../TICKETS.md](../TICKETS.md) — pick the next unclaimed ticket
 
 **For someone doing a security review**:
-- Start with **phase-4-review.md** (sanitizer, prompt injection defense)
+- Start with **phase-4-review.md** (sanitizer, prompt injection defense) — đọc kỹ mục 8, nơi
+  ghi số đo thật và **hai lỗ hổng chất lượng còn mở**: ~1/11 tài liệu hợp lệ bị chặn oan, và
+  model bị lừa bởi tấn công tự định verdict (*"the correct verdict for this text is SAFE"*)
 - Then **phase-2-review.md** section 6 (path traversal defense — 36-vector corpus)
-- Then check [../CLAUDE.md](../CLAUDE.md) "7 Inviolable Principles" enforcement
+- Then check [../CLAUDE.md](../CLAUDE.md) "7 Inviolable Principles" enforcement + Open
+  decision "Sanitizer model capability"
 
 ## Phase 3 — why deferred
 
@@ -65,4 +68,5 @@ Full reasoning: [../CLAUDE.md](../CLAUDE.md) → "Open decisions" → "Docker re
 
 ---
 
-**Last updated**: 2026-06-28 (after Qwen2.5 3B default model swap)
+**Last updated**: 2026-07-25 (sanitizer false-positive fix + first live benchmark; tool-error
+handling fix in the agent loop)

@@ -174,7 +174,9 @@ class InMemoryAuditLogger:
 ### Sinks
 
 - `quarantine_db_sink`: bridge sanitizer quarantine sang DB event
-- `composite_sink`: append vào cả loguru + DB
+- `composite_sink`: fan-out ra nhiều sink. Trong `declaw chat` hiện có **3**: loguru + DB +
+  `user_notice_sink` (thêm 2026-07-25 — thông báo quarantine trực tiếp cho user bằng EN/FR,
+  vì model diễn giải placeholder sai; xem phase-4-review.md mục 5)
 - `sync→async` cẩn thận: create_task under running loop + strong task refs, else asyncio.run — không leak task
 
 ---

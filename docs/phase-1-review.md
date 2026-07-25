@@ -189,6 +189,17 @@ Thay drop oldest → thay bằng 1 SystemMessage summary note.
 
 **tools node**: `ToolNode` (LangGraph built-in) execute mỗi tool call, trả ToolMessage cho mỗi call.
 
+`ToolNode` được khởi tạo kèm `handle_tool_errors=tool_error_message` — **không dùng mặc
+định** (thêm 2026-07-25). Với DeClaw, tool raise là **chuyện thường ngày**, không phải sự cố:
+"file đã tồn tại", "đường dẫn ngoài workspace" là những gì user gặp liên tục, và model cần
+*thấy* lời từ chối đó để xoay hướng (vd gọi lại với `overwrite=true`). Mặc định của langgraph
+1.2 lại re-raise mọi exception ngoài `ToolInvocationError`, tức một lần từ chối ghi file là
+một lần sập cả phiên chat. Handler phân biệt hai loại: lỗi *đã lường trước* (họ
+`ValueError`/`OSError` — mọi từ chối của tool DeClaw) trả nguyên văn cho model; lỗi bất
+thường thì log kèm traceback và chỉ báo chung, để đường dẫn tuyệt đối và nội bộ thư viện
+không lọt vào hội thoại. Annotation `exc: Exception` của handler là **load-bearing** —
+langgraph suy ra tập exception được bắt từ chính annotation đó.
+
 **Router `tools_condition`**: check `state.messages[-1].tool_calls` không rỗng → route "tools", else "END".
 
 Đây là **classic ReAct pattern** (Reason + Act), simplified.
@@ -302,7 +313,7 @@ Summariser default: LLM call với prompt "summarize concisely, preserve facts/d
 - Blank line skip
 - `--debug` in `[tool call]`/`[tool result]` lines
 
-[declaw/main.py:87](../declaw/main.py#L87) là chat command:
+[declaw/main.py:95](../declaw/main.py#L95) là chat command:
 - Health check Ollama trước
 - Ensure workspace dir exists
 - Wire registry tools + confirmation provider + sanitizer vào brain
