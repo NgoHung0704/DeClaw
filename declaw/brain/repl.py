@@ -22,6 +22,7 @@ default ``build_brain`` stack:
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Callable, Sequence
 from typing import Any
 
@@ -40,6 +41,11 @@ from declaw.brain.context import with_context_window
 from declaw.brain.loop import build_agent_graph
 from declaw.brain.state import AgentState
 from declaw.brain.stub_tools import echo
+from declaw.config import Language
+from declaw.tools.base import DeclawTool
+from declaw.tools.confirmation import ConfirmationProvider
+
+_APPROVALS = {"y", "yes", "o", "oui"}
 
 AgentGraph = CompiledStateGraph[AgentState, Any, Any, Any]
 
@@ -55,6 +61,38 @@ def build_brain(tools: Sequence[BaseTool] | None = None) -> AgentGraph:
     model = build_ollama_model(selected)
     model = with_context_window(model)
     return build_agent_graph(model=model, tools=selected)
+
+
+def make_console_confirmation_provider(
+    prompt: Callable[[str], str], language: Language
+) -> ConfirmationProvider:
+    """Build a ``ConfirmationProvider`` that asks the human via a blocking prompt.
+
+    ``prompt`` is a blocking input function (e.g. ``console.input``). It is run
+    through ``asyncio.to_thread`` so waiting for the user never stalls the
+    agent's event loop. Only an explicit yes (y/yes/o/oui) approves; anything
+    else — including EOF or Ctrl-C — denies, so the safe default when the user
+    cannot answer is "no".
+
+    The question shows the tool name and arguments (e.g. the target path)
+    because the user needs to know what they are approving. This text is shown
+    to the user and audited; it is never fed back to the model.
+    """
+
+    def question(tool: DeclawTool[Any], args: dict[str, Any]) -> str:
+        rendered = ", ".join(f"{key}={value!r}" for key, value in args.items())
+        if language == "fr":
+            return f"DeClaw veut appeler {tool.name}({rendered}). Autoriser ? [y/N] "
+        return f"DeClaw wants to call {tool.name}({rendered}). Allow? [y/N] "
+
+    async def approve(tool: DeclawTool[Any], args: dict[str, Any]) -> bool:
+        try:
+            answer = await asyncio.to_thread(prompt, question(tool, args))
+        except (EOFError, KeyboardInterrupt):
+            return False
+        return answer.strip().lower() in _APPROVALS
+
+    return approve
 
 
 def _reply_text(messages: Sequence[BaseMessage]) -> str:

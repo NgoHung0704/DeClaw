@@ -30,19 +30,24 @@ from declaw.brain.eval import (
 )
 from declaw.brain.loop import build_agent_graph
 from declaw.brain.ollama_client import OllamaClient
+from declaw.brain.prompts import system_message
 from declaw.brain.repair import with_tool_call_repair
 from declaw.config import get_settings
 
 
 async def _run_variant(
-    label: str, graph: Any, console: Console, tools_by_name: dict[str, Any]
+    label: str,
+    graph: Any,
+    console: Console,
+    tools_by_name: dict[str, Any],
+    system: Any = None,
 ) -> list[TurnResult]:
     console.print(
         f"\n[bold]Probe ({label})[/bold] - {len(BENCHMARK_CORPUS_V0)} prompts..."
     )
     results: list[TurnResult] = []
     for i, prompt in enumerate(BENCHMARK_CORPUS_V0, 1):
-        r = await run_prompt(graph, prompt, tools_by_name)
+        r = await run_prompt(graph, prompt, tools_by_name, system=system)
         marker = "ERR" if r.error else (r.called_tool or "-")
         console.print(
             f"  [{i:2d}/{len(BENCHMARK_CORPUS_V0)}] [{prompt.category:13s}] "
@@ -58,6 +63,14 @@ async def main() -> int:
         "--with-repair",
         action="store_true",
         help="Also run a variant wrapped with with_tool_call_repair.",
+    )
+    parser.add_argument(
+        "--with-system",
+        action="store_true",
+        help=(
+            "Also run a variant seeding the DCL-017 system prompt, to measure "
+            "its effect on tool-calling (the declaw chat composition)."
+        ),
     )
     args = parser.parse_args()
 
@@ -82,17 +95,22 @@ async def main() -> int:
     raw_graph = build_agent_graph(
         model=build_ollama_model(PROBE_TOOLS), tools=PROBE_TOOLS
     )
-    runs: list[tuple[str, Any]] = [("raw", raw_graph)]
+    # (label, graph, system message or None)
+    runs: list[tuple[str, Any, Any]] = [("raw", raw_graph, None)]
+    if args.with_system:
+        runs.append(("with system prompt", raw_graph, system_message()))
     if args.with_repair:
         rep_graph = build_agent_graph(
             model=with_tool_call_repair(build_ollama_model(PROBE_TOOLS), PROBE_TOOLS),
             tools=PROBE_TOOLS,
         )
-        runs.append(("with repair", rep_graph))
+        runs.append(("with repair", rep_graph, None))
 
     all_results: dict[str, list[TurnResult]] = {}
-    for label, graph in runs:
-        all_results[label] = await _run_variant(label, graph, console, tools_by_name)
+    for label, graph, system in runs:
+        all_results[label] = await _run_variant(
+            label, graph, console, tools_by_name, system=system
+        )
 
     for label, results in all_results.items():
         summarize(label, results, console)
