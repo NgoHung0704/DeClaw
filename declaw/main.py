@@ -95,6 +95,8 @@ def chat(
         make_console_confirmation_provider,
         run_chat,
     )
+    from declaw.sanitizer.classifier import build_ollama_classifier
+    from declaw.sanitizer.sanitizer import Sanitizer
     from declaw.tools.registry import default_registry
 
     settings = get_settings()
@@ -122,12 +124,25 @@ def chat(
         return console.input(question, markup=False, emoji=False)
 
     approve = make_console_confirmation_provider(confirm_prompt, settings.language)
-    tools = default_registry().langchain_tools(settings.language, approve)
+
+    # Principle #4: external content (file reads) must pass the sanitizer before
+    # the brain sees it. A separate Mistral session (sanitizer_model) classifies
+    # the output; UNSAFE content is quarantined and never reaches the model.
+    sanitizer = (
+        Sanitizer(build_ollama_classifier(language=settings.language))
+        if settings.sanitizer_required
+        else None
+    )
+    tools = default_registry().langchain_tools(
+        settings.language, approve, sanitizer=sanitizer
+    )
     graph = build_brain(tools)
 
+    sanitizer_state = "on" if sanitizer is not None else "off"
     console.print(
         f"[green]DeClaw chat[/green] - model [bold]{settings.model}[/bold], "
-        f"workspace [bold]{settings.workspace_dir}[/bold]. "
+        f"workspace [bold]{settings.workspace_dir}[/bold], "
+        f"sanitizer [bold]{sanitizer_state}[/bold]. "
         "Type [bold]/exit[/bold] to quit."
     )
 
@@ -140,11 +155,13 @@ def chat(
     def write(line: str) -> None:
         console.print(line)
 
-    # No system prompt is seeded: the prompt-variant probe (scripts/
-    # probe_prompt_variants.py, 2026-06-11) showed that ANY instruction text -
-    # system role or human prefix, minimal or full - collapses Mistral 7B's
-    # tool-calling (62% bare vs 0-23% with text). DCL-017's system_message()
-    # stays available for compositions that don't bind tools.
+    # No system prompt is seeded. Historical reason: a 2026-06-11 prompt-variant
+    # probe showed ANY instruction text (system role or human prefix, minimal or
+    # full) collapsed Mistral 7B tool-calling from 62% to 0-23%. After swapping
+    # the default to Qwen2.5 3B on 2026-06-28 (tool-calling-tuned), the Mistral-
+    # specific failure should be gone, but re-enabling system prompt requires an
+    # A/B probe first - see CLAUDE.md Open decision "System prompt x tool-calling".
+    # DCL-017's system_message() stays available for compositions that don't bind tools.
     asyncio.run(run_chat(graph, read=read, write=write, debug=debug))
     console.print("[dim]bye[/dim]")
 
