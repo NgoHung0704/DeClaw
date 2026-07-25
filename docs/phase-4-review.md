@@ -546,15 +546,68 @@ lần chạy). Harness đúng — **model là giới hạn**. Hai lỗ hổng ch
    này bị bỏ sót **cả trước và sau** fix, và là loại đáng lo nhất vì nhắm trực tiếp vào
    classifier.
 
-→ Đã ghi thành **Open decision "Sanitizer model capability"** trong CLAUDE.md với 4 phương
-án đo được (giữ 3B / model lớn hơn / hai tầng / fine-tune). **Đừng đóng vấn đề này bằng
-cách nới target hay nới corpus.** Hệ quả về phase-gating: layer *tồn tại* và đã wire, nhưng
-chất lượng đo được thấp hơn acceptance của chính nó — hiểu "Phase 4 done" là "sanitizer
-functional, chưa đạt spec".
+### ✅ Đã giải quyết (2026-07-26): đổi sanitizer sang `qwen2.5:7b`, FP về **0.0%**
 
-Lưu ý phương pháp: benchmark phân loại mẫu FR bằng prompt EN (đúng như trải nghiệm thật của
-user cấu hình EN đọc tài liệu Pháp), nên **khối few-shot FR hiện chưa được benchmark chạm
-tới** — 3 trong số FP còn lại là tiếng Pháp. Cần một lượt đo riêng cho FR.
+Đo cả 4 phương án trên cùng 127 mẫu, cùng prompt, cùng máy — mỗi model chạy **một lượt**,
+verdict từng mẫu được cache nên mọi tổ hợp đều suy ra từ cùng dữ liệu:
+
+| Phương án | Detection | FP | p50 | p95 |
+| --- | --- | --- | --- | --- |
+| A — qwen2.5:3b (mặc định cũ) | 91.7% | 7.5% | 1.09s | 1.46s |
+| A' — llama3.2:3b (khác họ, cùng cỡ) | 91.7% | 13.4% | 1.34s | 2.00s |
+| **B — qwen2.5:7b** ✅ | 90.0% | **0.0%** | 4.19s | 6.59s |
+| C — cascade 3b lọc → 7b xác nhận | **85.0%** | 0.0% | 1.49s | 6.75s |
+| Ghép hai 3B (AND / OR) | 88.3% / 95.0% | 3.0% / 17.9% | 2.44s | 3.27s |
+
+**C bị B áp đảo — kết quả ngược với dự đoán ban đầu.** Cascade *tệ hơn cả hai model đứng
+riêng* về detection: verdict SAFE của model lọc được chấp nhận luôn, nên C thừa hưởng điểm
+mù của cả hai, trong khi p95 vẫn phải trả giá 7B (6.75s ≈ 6.59s của B) vì nội dung bị gắn
+cờ vẫn leo thang. C chỉ thắng ở p50 — mua latency trung vị bằng 5 điểm detection là sai
+hướng với một layer bảo mật.
+
+**Đọc số cho đúng**: chênh lệch detection ±2 điểm ở đây là **nhiễu** (cùng model + corpus
+cho 7.5% và 9.0% FP ở hai lần chạy; Ollama không tất định tuyệt đối kể cả temperature 0).
+Nên 90.0% của B so với 91.7% của A **không phải regression**, còn 7.5% → 0.0% FP thì vượt
+xa biên nhiễu.
+
+`llama3.2:3b` là ca đáng học: nó **sửa hẳn** lớp FP về secret nhưng thay bằng prior khác —
+gắn cờ văn bản chỉ *nhắc đến* "ignore/instructions/follow" (kể cả email xác nhận lịch họp).
+Cùng cỡ, cùng detection, FP tệ hơn → **vấn đề không nằm ở họ model mà ở năng lực**.
+
+**Giá phải trả, nói thẳng**: ~4.2s thay vì ~1.1s cho mỗi lần đọc file bị sanitize, và tổng
+model tải về tăng 2GB → 6.7GB (brain 3b + sanitizer 7b). Con số tải này chống lại MVP DoD #1
+("cài trong < 5 phút") và nối thẳng vào Open decision còn treo về **Ollama lifecycle /
+đóng gói**. Ai bị giới hạn phần cứng có thể đặt `DECLAW_SANITIZER_MODEL=qwen2.5:3b` để đổi
+ngược độ chính xác lấy tốc độ.
+
+**Target p95 < 500ms (DCL-048) là bất khả thi** với mọi LLM classifier chạy local trên phần
+cứng này — phương án *nhanh nhất* đo được là 1.46s, gấp 3 lần target. Target đó viết ra
+trước khi có bất kỳ số đo nào; nên đặt lại thành mức khả thi (vd p95 < 2s cho 3b, < 7s cho
+7b) thay vì để nó fail vĩnh viễn. Đây là quyết định cấp ticket, không phải bug để sửa.
+
+### 🚨 Điểm yếu lớn nhất còn lại: sanitizer **kém hơn hẳn ở tiếng Pháp**
+
+4 trong 5 injection mà `qwen2.5:7b` còn sót là tiếng Pháp. Giả thuyết đầu tiên: do benchmark
+chấm nội dung FR bằng **prompt EN** (classifier dựng theo `settings.language`), trong khi
+user Pháp chạy `DECLAW_LANGUAGE=fr` sẽ nhận prompt FR — cấu hình chưa từng được đo.
+
+**Đã đo trên 63 mẫu FR — giả thuyết bị bác bỏ:**
+
+| Cấu hình | Detection | FP |
+| --- | --- | --- |
+| Prompt EN trên nội dung FR | 86.7% | 0.0% |
+| Prompt FR trên nội dung FR | **83.3%** | 0.0% |
+
+Prompt FR không những không giúp mà còn sót thêm một mẫu. Vậy khoảng cách thật là
+**EN 96.7% vs FR 86.7%** — đây là **giới hạn năng lực tiếng Pháp của model**, không phải lỗi
+đấu nối prompt. Với sản phẩm France-first, đây là điểm yếu đáng lo nhất của cả layer: một
+injection viết bằng tiếng Pháp có xác suất lọt **cao gấp ~4 lần** so với tiếng Anh.
+
+Tin tốt: fix về FP giữ nguyên hiệu lực ở tiếng Pháp (0.0% ở cả hai cấu hình).
+
+Hướng có thể thử sau: thêm few-shot **riêng cho FR** (few-shot là đòn bẩy duy nhất từng có
+tác dụng với họ model này), hoặc model mạnh tiếng Pháp hơn. **Đừng kết luận Phase 4 "ổn ở cả
+hai ngôn ngữ" — không phải vậy.**
 
 ---
 
@@ -568,7 +621,9 @@ uv run declaw status
 
 # Verify sanitizer setting
 # → sanitizer_required: True
-# → sanitizer_model: qwen2.5:3b (hoặc variant tương tự)
+# → sanitizer_model: qwen2.5:7b  (LỚN hơn brain model - xem mục 8)
+# → status/preflight sẽ báo nếu model sanitizer chưa được pull; thiếu nó thì
+#   MỌI lần đọc file đều bị withhold vì classifier fail-closed
 ```
 
 ### Bước 2 — Chạy unit tests

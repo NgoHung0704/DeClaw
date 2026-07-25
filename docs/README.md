@@ -10,7 +10,7 @@
 | **1** | Core Brain (LangGraph loop, agent state, model integration, probe framework) | ✅ Complete | [phase-1-review.md](./phase-1-review.md) |
 | **2** | Tool Layer (typed tools, filesystem, confirmation gate, path traversal defense) | ✅ Complete | [phase-2-review.md](./phase-2-review.md) |
 | **3** | Sandbox (Docker isolation) | ⏸️ Deferred | *(see note below)* |
-| **4** | Sanitizer Layer (dual-model prompt injection defense) | ✅ Built & wired — ⚠️ **below its own targets** (đo 2026-07-25: FP 9.0% vs <2%, p95 1.60s vs <0.5s) | [phase-4-review.md](./phase-4-review.md) |
+| **4** | Sanitizer Layer (dual-model prompt injection defense) | ✅ Built & wired — FP target **đạt** sau khi đổi sanitizer sang qwen2.5:7b (0.0%, đo 2026-07-26); ⚠️ target p95 <0.5s bất khả thi với LLM local (nhanh nhất đo được 1.46s) và cần đặt lại | [phase-4-review.md](./phase-4-review.md) |
 | **5** | Memory & Audit (ChromaDB, Fernet, episodic DB, NL summary, egress monitor, GDPR export/wipe) | ✅ Complete | [phase-5-review.md](./phase-5-review.md) |
 | **6** | Credentials & Permissions (keyring, AES fallback, plugin manifest, ed25519, grants) | ✅ Buildable core complete | [phase-6-review.md](./phase-6-review.md) |
 | 7 | Plugin Host (subprocess isolation, IPC, kill trigger) | 🟡 Next (MVP critical path) | *(not yet reviewed)* |

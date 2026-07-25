@@ -33,7 +33,9 @@ def test_defaults_match_locked_decisions() -> None:
     assert s.port == 7842
     assert s.language == "en"
     assert s.model == "qwen2.5:3b"
-    assert s.sanitizer_model == "qwen2.5:3b"
+    # Bigger than the brain on purpose: the 3b classifier false-positives on
+    # ordinary confidential documents (7.5-9% vs 0.0% measured, see config.py).
+    assert s.sanitizer_model == "qwen2.5:7b"
     assert s.embedding_model == "nomic-embed-text"
     assert s.ollama_base_url == "http://localhost:11434"
 

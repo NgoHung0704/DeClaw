@@ -54,8 +54,15 @@ class Settings(BaseSettings):
         description="Ollama HTTP API base URL.",
     )
     model: str = Field(default="qwen2.5:3b", description="Primary brain model.")
+    # Deliberately LARGER than the brain model. Measured 2026-07-25 on the full
+    # 127-sample corpus: qwen2.5:3b gives 7.5-9% false positives (it quarantines
+    # ordinary client documents that merely contain a password or an IBAN),
+    # while qwen2.5:7b gives 0.0% at the same detection rate. The cost is
+    # latency — p50 4.2s vs 1.1s per screened read — which is the right trade for
+    # a security layer that gates whether the user can read their own files.
+    # Set DECLAW_SANITIZER_MODEL=qwen2.5:3b to trade accuracy back for speed.
     sanitizer_model: str = Field(
-        default="qwen2.5:3b",
+        default="qwen2.5:7b",
         description="Sanitizer model (must be a separate Ollama session).",
     )
     embedding_model: str = Field(
