@@ -84,6 +84,47 @@ async def check_model_pulled(settings: Settings) -> CheckResult:
     return _check_model_pulled(settings, health)
 
 
+def _check_sanitizer_model_pulled(settings: Settings, health: OllamaHealth) -> CheckResult:
+    """Verify the sanitizer's model is pulled — it is a different, larger one.
+
+    Skipped (as a pass) when the sanitizer is disabled or shares the brain's
+    model, so the check only fires where it can actually bite.
+    """
+    name = "ollama.sanitizer_model"
+    if not settings.sanitizer_required or settings.sanitizer_model == settings.model:
+        return CheckResult(
+            name=name, passed=True, message="Sanitizer shares the chat model (nothing extra to pull)."
+        )
+    if not health.reachable:
+        return CheckResult(
+            name=name,
+            passed=False,
+            message=f"Cannot verify sanitizer model {settings.sanitizer_model!r}: Ollama unreachable.",
+            remedy="Start Ollama first (see ollama.reachable).",
+        )
+    if health.has_model(settings.sanitizer_model):
+        return CheckResult(
+            name=name,
+            passed=True,
+            message=f"Sanitizer model {settings.sanitizer_model!r} is pulled.",
+        )
+    return CheckResult(
+        name=name,
+        passed=False,
+        message=f"Sanitizer model {settings.sanitizer_model!r} not pulled.",
+        remedy=(
+            f"Run `ollama pull {settings.sanitizer_model}`. Without it every file "
+            "read is withheld, because the classifier fails closed."
+        ),
+    )
+
+
+async def check_sanitizer_model_pulled(settings: Settings) -> CheckResult:
+    """Verify the configured sanitizer model is among the pulled tags."""
+    health = await OllamaClient(base_url=settings.ollama_base_url).health()
+    return _check_sanitizer_model_pulled(settings, health)
+
+
 def check_docker_available() -> CheckResult:
     """Verify the Docker CLI is on PATH and the daemon responds."""
     docker_bin = shutil.which("docker")
@@ -158,6 +199,7 @@ async def run_all(settings: Settings | None = None) -> list[CheckResult]:
     health = await OllamaClient(base_url=settings.ollama_base_url).health()
     ollama_reachable = _check_ollama_reachable(settings, health)
     model_pulled = _check_model_pulled(settings, health)
+    sanitizer_model_pulled = _check_sanitizer_model_pulled(settings, health)
     docker = check_docker_available()
     port = check_port_free(settings)
-    return [ollama_reachable, model_pulled, docker, port]
+    return [ollama_reachable, model_pulled, sanitizer_model_pulled, docker, port]

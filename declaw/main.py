@@ -62,6 +62,13 @@ def status() -> None:
         f"ollama_has_{settings.model}",
         "[green]yes[/green]" if health.has_model(settings.model) else "[red]no[/red]",
     )
+    if settings.sanitizer_model != settings.model:
+        table.add_row(
+            f"ollama_has_{settings.sanitizer_model}",
+            "[green]yes[/green]"
+            if health.has_model(settings.sanitizer_model)
+            else "[red]no[/red]",
+        )
     table.add_row("data_dir", str(settings.data_dir))
     table.add_row("workspace_dir", str(settings.workspace_dir))
     table.add_row("docker_sandbox_required", str(settings.require_docker_sandbox))
@@ -127,6 +134,20 @@ def chat(
         console.print(
             f"[red]Model {settings.model!r} not pulled.[/red] "
             f"Run: [bold]ollama pull {settings.model}[/bold]"
+        )
+        raise typer.Exit(code=1)
+    # The sanitizer runs a DIFFERENT (larger) model by default. Without this
+    # check the failure is silent and baffling: chat works, then every file read
+    # comes back quarantined, because a missing model makes the classifier fail
+    # closed on every call.
+    if settings.sanitizer_required and not health.has_model(settings.sanitizer_model):
+        console.print(
+            f"[red]Sanitizer model {settings.sanitizer_model!r} not pulled.[/red] "
+            f"Run: [bold]ollama pull {settings.sanitizer_model}[/bold]\n"
+            "It screens external content before the assistant sees it, so without "
+            "it every file read would be withheld. To use the smaller (less "
+            "accurate) classifier instead, set "
+            "[bold]DECLAW_SANITIZER_MODEL=qwen2.5:3b[/bold]."
         )
         raise typer.Exit(code=1)
 

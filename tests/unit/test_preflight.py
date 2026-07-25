@@ -20,6 +20,7 @@ from declaw.preflight import (
     check_model_pulled,
     check_ollama_reachable,
     check_port_free,
+    check_sanitizer_model_pulled,
     run_all,
 )
 
@@ -211,7 +212,9 @@ async def test_run_all_returns_one_result_per_check(monkeypatch: pytest.MonkeyPa
     def handler(request: httpx.Request) -> httpx.Response:
         if request.url.path == "/api/version":
             return httpx.Response(200, json={"version": "0.3.14"})
-        return httpx.Response(200, json={"models": [{"name": "mistral:7b"}]})
+        return httpx.Response(
+            200, json={"models": [{"name": "mistral:7b"}, {"name": "big-sanitizer:7b"}]}
+        )
 
     _mock_ollama(monkeypatch, handler)
     monkeypatch.setattr("declaw.preflight.shutil.which", lambda _: "/usr/bin/docker")
@@ -222,12 +225,62 @@ async def test_run_all_returns_one_result_per_check(monkeypatch: pytest.MonkeyPa
         ),
     )
 
-    results = await run_all(_settings())
+    results = await run_all(_settings(sanitizer_model="big-sanitizer:7b"))
 
     assert [r.name for r in results] == [
         "ollama.reachable",
         "ollama.model",
+        "ollama.sanitizer_model",
         "docker.available",
         "gateway.port",
     ]
     assert all(r.passed for r in results)
+
+
+# --- sanitizer model check (its own model since 2026-07-26) ----------------
+
+
+async def test_missing_sanitizer_model_fails_with_a_remedy(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The failure this guards against is silent: chat works, every read is withheld."""
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/api/version":
+            return httpx.Response(200, json={"version": "0.3.14"})
+        return httpx.Response(200, json={"models": [{"name": "mistral:7b"}]})
+
+    _mock_ollama(monkeypatch, handler)
+    result = await check_sanitizer_model_pulled(_settings(sanitizer_model="big-sanitizer:7b"))
+
+    assert not result.passed
+    assert "big-sanitizer:7b" in result.message
+    assert result.remedy is not None and "ollama pull big-sanitizer:7b" in result.remedy
+
+
+async def test_sanitizer_check_is_a_noop_when_it_shares_the_chat_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/api/version":
+            return httpx.Response(200, json={"version": "0.3.14"})
+        return httpx.Response(200, json={"models": [{"name": "mistral:7b"}]})
+
+    _mock_ollama(monkeypatch, handler)
+    result = await check_sanitizer_model_pulled(_settings(sanitizer_model="mistral:7b"))
+    assert result.passed
+
+
+async def test_sanitizer_check_skipped_when_sanitizer_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path == "/api/version":
+            return httpx.Response(200, json={"version": "0.3.14"})
+        return httpx.Response(200, json={"models": []})
+
+    _mock_ollama(monkeypatch, handler)
+    result = await check_sanitizer_model_pulled(
+        _settings(sanitizer_model="big-sanitizer:7b", sanitizer_required=False)
+    )
+    assert result.passed
