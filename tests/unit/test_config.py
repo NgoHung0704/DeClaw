@@ -32,8 +32,8 @@ def test_defaults_match_locked_decisions() -> None:
     assert s.host == "127.0.0.1"
     assert s.port == 7842
     assert s.language == "en"
-    assert s.model == "mistral:7b"
-    assert s.sanitizer_model == "mistral:7b"
+    assert s.model == "qwen2.5:3b"
+    assert s.sanitizer_model == "qwen2.5:3b"
     assert s.embedding_model == "nomic-embed-text"
     assert s.ollama_base_url == "http://localhost:11434"
 

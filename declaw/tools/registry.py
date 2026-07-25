@@ -34,6 +34,8 @@ from typing import Any
 from langchain_core.tools import StructuredTool
 
 from declaw.config import Language
+from declaw.sanitizer.pipeline import wrap_tool_with_sanitizer
+from declaw.sanitizer.sanitizer import Sanitizer
 from declaw.tools.base import DeclawTool, ToolClass
 from declaw.tools.builtin.filesystem import (
     FilesystemListTool,
@@ -88,19 +90,34 @@ class ToolRegistry:
         }
 
     def langchain_tools(
-        self, language: Language, approve: ConfirmationProvider
+        self,
+        language: Language,
+        approve: ConfirmationProvider,
+        *,
+        sanitizer: Sanitizer | None = None,
     ) -> list[StructuredTool]:
-        """Build the brain-ready tool list with READ/non-READ wiring applied.
+        """Build the brain-ready tool list with READ/non-READ + sanitizer wiring.
 
         READ tools pass through ``as_langchain_tool`` (safe to auto-run); every
         other classification is gated behind ``approve`` via the confirmation
-        wrapper. Feed the result to both ``bind_tools`` and ``ToolNode``.
+        wrapper. When a ``sanitizer`` is supplied, any tool whose
+        ``produces_external_content`` flag is set has its output routed through
+        the sanitizer first (Principle #4) — UNSAFE output is quarantined and
+        replaced before the model sees it. Feed the result to both
+        ``bind_tools`` and ``ToolNode``.
+
+        (The built-in external-content tool, ``filesystem_read``, is READ. A
+        hypothetical non-READ external-content tool would need confirmation *and*
+        sanitizing composed; none ships today, so that path is not wired.)
         """
         tools: list[StructuredTool] = []
         for name in self.names():
             tool = self._tools[name]
             if tool.classification is ToolClass.READ:
-                tools.append(tool.as_langchain_tool(language))
+                if sanitizer is not None and tool.produces_external_content:
+                    tools.append(wrap_tool_with_sanitizer(tool, language, sanitizer))
+                else:
+                    tools.append(tool.as_langchain_tool(language))
             else:
                 tools.append(wrap_tool_with_confirmation(tool, language, approve))
         return tools
