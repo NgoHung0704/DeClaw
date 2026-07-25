@@ -107,7 +107,11 @@ def chat(
     )
     from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
     from declaw.sanitizer.classifier import build_ollama_classifier
-    from declaw.sanitizer.quarantine import QuarantineStore, log_audit_sink
+    from declaw.sanitizer.quarantine import (
+        QuarantineStore,
+        log_audit_sink,
+        user_notice_sink,
+    )
     from declaw.sanitizer.sanitizer import Sanitizer
     from declaw.tools.registry import default_registry
 
@@ -145,9 +149,18 @@ def chat(
     # Principle #4: external content (file reads) must pass the sanitizer before
     # the brain sees it. A separate session (sanitizer_model) classifies the
     # output; UNSAFE content is quarantined and never reaches the model. The
-    # quarantine store reports to both the operational log and the audit DB.
+    # quarantine store reports to the operational log, the audit DB, and the user
+    # directly — the last one matters because the model only receives a neutral
+    # placeholder and paraphrases it unreliably (see user_notice_sink).
+    def notice(line: str) -> None:
+        console.print(line, markup=False, emoji=False)
+
     quarantine = QuarantineStore(
-        audit_sink=composite_sink(log_audit_sink, quarantine_db_sink(audit))
+        audit_sink=composite_sink(
+            log_audit_sink,
+            quarantine_db_sink(audit),
+            user_notice_sink(notice, settings.language),
+        )
     )
     sanitizer = (
         Sanitizer(build_ollama_classifier(language=settings.language), quarantine=quarantine)

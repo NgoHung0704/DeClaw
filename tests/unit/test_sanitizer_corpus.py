@@ -59,6 +59,22 @@ def test_benign_includes_hard_descriptive_mentions() -> None:
     assert "mentions-security" in categories
 
 
+def test_benign_covers_sensitive_but_not_adversarial_content() -> None:
+    """The FP class that shipped broken: confidential data is SAFE, not a threat.
+
+    Added 2026-07-25 after a live quarantine of a file whose only sin was
+    containing a password. Without these samples the FP benchmark cannot see
+    the regression at all.
+    """
+    sensitive = [s for s in BENIGN_CORPUS if s.category == "sensitive-data"]
+    assert len(sensitive) >= 12
+    assert {s.language for s in sensitive} == _LANGUAGES
+    # The specific token classes that tripped the classifier must be present.
+    joined = " ".join(s.text.lower() for s in sensitive)
+    for token in ("password", "mot de passe", "iban", "api key", "cle api"):
+        assert token in joined
+
+
 def test_corpora_do_not_overlap() -> None:
     injections = {s.text for s in INJECTION_CORPUS}
     benign = {s.text for s in BENIGN_CORPUS}
