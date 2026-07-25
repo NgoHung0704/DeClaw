@@ -46,6 +46,37 @@ def test_prompt_locks_in_the_core_guarantees(language: str) -> None:
     assert CONTENT_START in prompt and CONTENT_END in prompt
 
 
+@pytest.mark.parametrize("language", ["en", "fr"])
+def test_prompt_keeps_the_worked_examples(language: str) -> None:
+    """The few-shot block is load-bearing, not decoration (see module docstring).
+
+    Without it, qwen2.5:3b quarantines ordinary documents that merely contain a
+    password or an IBAN — measured 17.9% false positives vs 7.5% with it. A
+    well-meaning tidy-up of the prompt would silently reintroduce that.
+    """
+    prompt = sanitizer_system_prompt(language)  # type: ignore[arg-type]
+    assert "CONTENT:" in prompt or "CONTENU :" in prompt
+    # Both sides of the boundary must be demonstrated, or the model only learns one.
+    assert prompt.count("-> SAFE") >= 3
+    assert prompt.count("-> UNSAFE") >= 3
+    # The sensitivity rule itself must survive too.
+    assert "SENSITIVITY IS NOT A THREAT" in prompt or "N'EST PAS UNE MENACE" in prompt
+
+
+@pytest.mark.parametrize("language", ["en", "fr"])
+def test_prompt_examples_are_not_corpus_samples(language: str) -> None:
+    """Never teach to the test: the benchmark corpus must stay an unseen set.
+
+    If a prompt example is also a corpus sample, DCL-047/048 stops measuring
+    generalization and starts measuring recall of the prompt.
+    """
+    from declaw.sanitizer.corpus import BENIGN_CORPUS, INJECTION_CORPUS
+
+    prompt = sanitizer_system_prompt(language)  # type: ignore[arg-type]
+    for sample in (*BENIGN_CORPUS, *INJECTION_CORPUS):
+        assert sample.text not in prompt, f"corpus sample leaked into the prompt: {sample.text!r}"
+
+
 def test_system_message_wrapper() -> None:
     msg = sanitizer_system_message("en")
     assert isinstance(msg, SystemMessage)

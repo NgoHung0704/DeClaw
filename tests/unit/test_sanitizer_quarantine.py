@@ -86,3 +86,36 @@ def test_default_log_sink_logs_hash_not_content() -> None:
     assert extra["content_sha256"] == hashlib.sha256(secret.encode()).hexdigest()
     # The raw content must never appear in the log.
     assert secret not in line
+
+
+# --- user-facing notice (transparency, not audit) ------------------------------
+
+
+def test_user_notice_tells_the_user_without_leaking_content() -> None:
+    """The user must learn their file was withheld, from DeClaw, not from the model."""
+    from declaw.sanitizer.quarantine import user_notice_sink
+
+    lines: list[str] = []
+    secret = "TOP-SECRET-CLIENT-DATA-12345"
+    store = QuarantineStore(audit_sink=user_notice_sink(lines.append, "en"))
+    quarantine_id = store.add(
+        content=secret, source="tool:filesystem_read", verdict=_unsafe("bad")
+    )
+
+    [line] = lines
+    assert "tool:filesystem_read" in line
+    assert quarantine_id[:8] in line
+    assert "quarantined" in line.lower()
+    assert "false positive" in line.lower()  # FPs are ~9%: say so plainly
+    assert secret not in line  # same rule as every other sink
+
+
+def test_user_notice_is_localized() -> None:
+    from declaw.sanitizer.quarantine import user_notice_sink
+
+    lines: list[str] = []
+    store = QuarantineStore(audit_sink=user_notice_sink(lines.append, "fr"))
+    store.add(content="x", source="tool:filesystem_read", verdict=_unsafe("bad"))
+
+    assert "quarantaine" in lines[0].lower()
+    assert "faux positif" in lines[0].lower()
