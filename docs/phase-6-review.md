@@ -34,7 +34,7 @@ Phase 6 (buildable core) build **security perimeter cho credentials + plugins**:
 - **ed25519 verification** (DCL-083) — chống mạo danh plugin bên thứ ba
 - **Permission enforcer + grants** (DCL-081/084) — request + grant + enforce, mỗi grant audited
 
-**Status**: ✅ buildable core COMPLETE (445 unit tests + 1 skipped, mypy 66 files + ruff clean). **4 ticket open by dependency**: DCL-071/072/073 (cần Phase 7), DCL-082 (cần Phase 9 UI).
+**Status**: ✅ buildable core COMPLETE (445 unit tests + 1 skipped tại thời điểm chốt phase; **459 sau 2 bản fix ngày 2026-07-25** — tool-error handling trong agent loop + sanitizer false positive; mypy 66 files + ruff clean). **4 ticket open by dependency**: DCL-071/072/073 (cần Phase 7), DCL-082 (cần Phase 9 UI).
 
 ---
 

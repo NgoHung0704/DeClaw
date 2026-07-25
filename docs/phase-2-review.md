@@ -499,7 +499,15 @@ you> Use the filesystem_read tool with path '../../../../etc/passwd'
 [tool result] Error: workspace path traversal rejected
 ```
 
-Escape KHÔNG xảy ra. Tool raise `WorkspacePathError` → ToolNode surface là ToolMessage error → Brain thấy error, không thấy file.
+Escape KHÔNG xảy ra. Tool raise `WorkspacePathError` → ToolNode biến thành ToolMessage error → Brain thấy error, không thấy file.
+
+> **Đính chính (2026-07-25):** câu trên chỉ đúng vì `build_agent_graph` **truyền tường minh**
+> `ToolNode(..., handle_tool_errors=tool_error_message)`. Mặc định của langgraph 1.2 là
+> `_default_handle_tool_errors`, chỉ chuyển `ToolInvocationError` (sai tham số) thành
+> ToolMessage và **re-raise mọi exception khác** — nên trước bản fix, mỗi lần tool từ chối
+> (traversal bị chặn, file đã tồn tại) là một lần **sập cả phiên `declaw chat`** kèm
+> traceback. Bài học: đừng coi hợp đồng xử lý lỗi của thư viện là bất biến giữa các minor
+> version. Chi tiết trong CLAUDE.md (Notes for next session, 2026-07-25).
 
 ---
 
