@@ -117,37 +117,37 @@
 - **Dependencies**: DCL-011
 - **Estimate**: 0.5d
 
-### [ ] DCL-021 — Tool: filesystem_read (workspace-scoped)
+### [x] DCL-021 — Tool: filesystem_read (workspace-scoped)
 - **Description**: Reads file content limited to workspace root; rejects traversal.
 - **Acceptance**: Path outside workspace raises; tests cover `..`, symlink, NTFS short names.
 - **Dependencies**: DCL-020
 - **Estimate**: 0.5d
 
-### [ ] DCL-022 — Tool: filesystem_write (+ confirmation)
+### [x] DCL-022 — Tool: filesystem_write (+ confirmation)
 - **Description**: Workspace-scoped write; user confirmation required.
 - **Acceptance**: Without confirmation token, write rejected.
 - **Dependencies**: DCL-020
 - **Estimate**: 0.5d
 
-### [ ] DCL-023 — Tool: filesystem_move (+ confirmation)
+### [x] DCL-023 — Tool: filesystem_move (+ confirmation)
 - **Description**: Move within workspace only; never cross-volume; confirmation required.
 - **Acceptance**: Cross-volume rejected; confirmation enforced.
 - **Dependencies**: DCL-020
 - **Estimate**: 0.5d
 
-### [ ] DCL-024 — Tool: filesystem_list (workspace-scoped)
+### [x] DCL-024 — Tool: filesystem_list (workspace-scoped)
 - **Description**: List entries with metadata (size, mtime, type).
 - **Acceptance**: Out-of-scope paths rejected.
 - **Dependencies**: DCL-020
 - **Estimate**: 0.25d
 
-### [ ] DCL-025 — Tool registry (typed registration)
+### [x] DCL-025 — Tool registry (typed registration)
 - **Description**: Registration via decorator; no dynamic `eval`/`exec`.
 - **Acceptance**: Unknown tool ID rejected; registry exposes JSON schema.
 - **Dependencies**: DCL-020
 - **Estimate**: 0.5d
 
-### [ ] DCL-026 — Path traversal protection unit tests
+### [x] DCL-026 — Path traversal protection unit tests
 - **Description**: 30+ adversarial paths (UTF-8 tricks, double encoding, alt streams).
 - **Acceptance**: All adversarial paths rejected.
 - **Dependencies**: DCL-021
