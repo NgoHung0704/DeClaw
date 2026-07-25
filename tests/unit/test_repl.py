@@ -126,6 +126,68 @@ async def test_run_chat_seeds_system_message() -> None:
 
 
 # ============================================================================
+# A failing turn must not end the session
+#
+# Tool errors are handled inside the graph (see test_loop.py), but everything
+# else can still blow up mid-turn: Ollama dying, a recursion limit, a bug. The
+# REPL keeps the conversation open and reports the failure instead.
+# ============================================================================
+
+
+class _FlakyModel:
+    """Raises on the first call, then behaves; records how often it was called."""
+
+    def __init__(self, exc: Exception, then: BaseMessage) -> None:
+        self._exc = exc
+        self._then = then
+        self.received: list[list[BaseMessage]] = []
+
+    async def __call__(self, messages: Sequence[BaseMessage]) -> BaseMessage:
+        self.received.append(list(messages))
+        if len(self.received) == 1:
+            raise self._exc
+        return self._then
+
+
+async def test_run_chat_survives_a_failing_turn() -> None:
+    model = _FlakyModel(RuntimeError("ollama went away"), AIMessage(content="back again"))
+    graph = build_agent_graph(model=model, tools=[echo])
+    writer = _Writer()
+
+    await run_chat(graph, read=_Reader(["first", "second", "/exit"]), write=writer)
+
+    joined = "\n".join(writer.lines)
+    assert "could not be completed" in joined  # the user is told, in words
+    assert "RuntimeError" in joined  # with enough detail to report a bug
+    assert "back again" in joined  # and the next turn still works
+    assert len(model.received) == 2  # the REPL did not exit on the failure
+
+
+async def test_run_chat_failure_message_localized_french() -> None:
+    model = _FlakyModel(RuntimeError("boom"), AIMessage(content="ok"))
+    graph = build_agent_graph(model=model, tools=[echo])
+    writer = _Writer()
+
+    await run_chat(
+        graph, read=_Reader(["essai", "/exit"]), write=writer, language="fr"
+    )
+
+    assert any("n'a pas pu être traitée" in line for line in writer.lines)
+
+
+async def test_failed_turn_is_dropped_from_history() -> None:
+    """History only ever holds completed turns, so a dead turn cannot repeat."""
+    model = _FlakyModel(RuntimeError("boom"), AIMessage(content="ok"))
+    graph = build_agent_graph(model=model, tools=[echo])
+
+    await run_chat(graph, read=_Reader(["doomed", "healthy", "/exit"]), write=_Writer())
+
+    second_turn = model.received[1]
+    texts = [str(m.content) for m in second_turn]
+    assert texts == ["healthy"]  # the failed prompt left no trace
+
+
+# ============================================================================
 # Console confirmation provider (wiring follow-up)
 # ============================================================================
 
@@ -218,6 +280,49 @@ async def test_registry_read_tool_runs_through_graph(workspace: Path) -> None:
     tool_msgs = [m for m in result["messages"] if isinstance(m, ToolMessage)]
     assert tool_msgs
     assert any("report.txt" in str(m.content) for m in tool_msgs)
+
+
+async def test_existing_file_reports_error_then_recovers_with_overwrite(
+    workspace: Path,
+) -> None:
+    """The reported bug: refusing to clobber a file must not end the session.
+
+    Full recovery path — the model asks to write an existing file, is told it
+    already exists, then retries with overwrite=true and succeeds.
+    """
+    target = workspace / "test.txt"
+    target.write_text("original contents", encoding="utf-8")
+    tools = default_registry().langchain_tools("en", always_approve)
+
+    write_call = {"name": "filesystem_write", "args": {"path": "test.txt", "content": "new"}}
+    model = _ScriptedModel(
+        [
+            AIMessage(content="", tool_calls=[{**write_call, "id": "c1"}]),
+            AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": "filesystem_write",
+                        "args": {"path": "test.txt", "content": "new", "overwrite": True},
+                        "id": "c2",
+                    }
+                ],
+            ),
+            AIMessage(content="Replaced test.txt."),
+        ]
+    )
+    graph = build_agent_graph(model=model, tools=tools)
+
+    result = await graph.ainvoke({"messages": [HumanMessage(content="write test.txt")]})
+
+    tool_msgs = [m for m in result["messages"] if isinstance(m, ToolMessage)]
+    assert len(tool_msgs) == 2
+    # First attempt: refused, with an actionable reason the model can use.
+    assert "already exists" in str(tool_msgs[0].content)
+    assert "overwrite" in str(tool_msgs[0].content)
+    # Second attempt: succeeded, so the file is actually replaced.
+    assert target.read_text(encoding="utf-8") == "new"
+    assert result["messages"][-1].content == "Replaced test.txt."
 
 
 async def test_registry_write_tool_is_gated_through_graph(workspace: Path) -> None:

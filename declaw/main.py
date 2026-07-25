@@ -187,7 +187,9 @@ def chat(
         # Schema + chat share one event loop so aiosqlite connections created
         # during bootstrap stay usable for audit writes during the REPL.
         await ensure_schema(engine)
-        await run_chat(graph, read=read, write=write, debug=debug)
+        await run_chat(
+            graph, read=read, write=write, debug=debug, language=settings.language
+        )
 
     # Principle #7: every outbound network call (incl. each Ollama request) is
     # audited; anything outside the local allowlist is flagged (DCL-064).
