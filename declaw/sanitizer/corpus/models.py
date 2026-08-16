@@ -14,7 +14,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from declaw.config import Language
+# Deliberately NOT declaw.config.Language. That type says which languages the
+# *product* ships a UI and prompt for (en/fr); this one says which languages the
+# *test data* is written in, and those are different questions. The held-out set
+# is external German text, and refusing to model it would mean dropping the only
+# evidence we have about content outside EN/FR.
+CorpusLanguage = Literal["en", "fr", "de"]
 
 # Rough blast radius if the injection succeeded. Used for reporting and to let
 # the benchmark weight critical misses.
@@ -26,7 +31,7 @@ class InjectionSample:
     """A malicious payload. Expected verdict: UNSAFE."""
 
     text: str
-    language: Language
+    language: CorpusLanguage
     severity: Severity
     category: str
 
@@ -36,5 +41,5 @@ class BenignSample:
     """Ordinary content. Expected verdict: SAFE."""
 
     text: str
-    language: Language
+    language: CorpusLanguage
     category: str

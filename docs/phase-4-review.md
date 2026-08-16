@@ -681,12 +681,36 @@ trong tài liệu này đều lạc quan hơn thực tế khoảng 20 điểm.**
 (đã được kiểm chứng độc lập). **Cái nó thay đổi**: hiểu 91.7% là điểm số *trên corpus này*,
 không phải tuyên bố về năng lực.
 
-**Việc cần làm, theo thứ tự**: (1) nhập injection từ nguồn ngoài vào corpus thành một mục
-**đánh dấu rõ là chưa từng thấy**, rồi đo lại baseline; (2) giữ vĩnh viễn một tập held-out
-**không bao giờ đụng vào prompt** — vì few-shot lấy từ corpus, và đó chính là cách đề thi bị
-lọt vào đáp án; (3) sau đó mới tinh chỉnh detection. Lưu ý `deepset/prompt-injections` theo
-threat model *user tấn công chatbot*, nên dùng nó làm **nguồn cách diễn đạt**, không dùng
-nhãn của nó trực tiếp.
+### ✅ Đã dựng tập held-out, và benchmark giờ luôn hiện khoảng cách
+
+`declaw/sanitizer/corpus/heldout.py` — 30 injection + 20 benign lấy từ nguồn ngoài
+(deepset/prompt-injections, cc-by-4.0/apache-2.0, có ghi công). Hai quy tắc dựng khiến nó
+không phải là "tự ra đề" lần nữa:
+
+- **Văn bản là của bên ngoài**, giữ nguyên không sửa — đúng chỗ mà corpus tự viết thất bại;
+- **Nhãn được gán bằng máy**, không bằng cảm tính: bộ chọn chỉ giữ mẫu khớp với chính các
+  gạch đầu dòng UNSAFE trong prompt của ta, và **bỏ hẳn** phần lớn mẫu "lệch nhiệm vụ" mơ hồ
+  thay vì đoán — vì nhãn của họ theo threat model *user tấn công chatbot*, không phải của ta.
+
+Corpus giờ có hai vai trò tách bạch, **đừng gộp**:
+
+| Tập | Vai trò | Prompt được phép tham chiếu? |
+| --- | --- | --- |
+| `INJECTION_CORPUS` / `BENIGN_CORPUS` (EN+FR, tự viết) | corpus **phát triển** | có (few-shot lấy cảm hứng từ đây) |
+| `HELDOUT_INJECTIONS` / `HELDOUT_BENIGN` (EN+DE, ngoài) | tập **chưa từng thấy** | **không bao giờ** |
+
+`scripts/sanitizer_benchmark.py` chạy cả hai và in thẳng **khoảng cách tổng quát hoá**, kèm
+cảnh báo khi chênh > 5 điểm. Hai luật được ghi trong docstring và **test bảo vệ**:
+
+1. Không bao giờ trích mẫu held-out vào prompt (`test_prompt_examples_are_not_corpus_samples`
+   đã phủ cả file này);
+2. Không tinh chỉnh theo từng mẫu hỏng trong held-out — sửa **khái niệm** rồi đo lại, nếu
+   không nó lặng lẽ biến thành tập huấn luyện thứ hai.
+
+Ghi chú mô hình hoá: mẫu corpus giờ dùng `CorpusLanguage` (`en`/`fr`/`de`), **cố ý không**
+dùng `declaw.config.Language`. "Sản phẩm hỗ trợ ngôn ngữ nào" và "dữ liệu test viết bằng
+ngôn ngữ nào" là hai câu hỏi khác nhau; gộp lại thì phải bỏ mẫu tiếng Đức — tức bỏ đúng bằng
+chứng duy nhất ta có về nội dung ngoài EN/FR.
 
 ### 🚨 Điểm yếu lớn nhất còn lại: sanitizer **kém hơn hẳn ở tiếng Pháp**
 
