@@ -70,10 +70,16 @@ def test_prompt_examples_are_not_corpus_samples(language: str) -> None:
     If a prompt example is also a corpus sample, DCL-047/048 stops measuring
     generalization and starts measuring recall of the prompt.
     """
-    from declaw.sanitizer.corpus import BENIGN_CORPUS, INJECTION_CORPUS
+    from declaw.sanitizer.corpus import (
+        BENIGN_CORPUS,
+        HELDOUT_BENIGN,
+        HELDOUT_INJECTIONS,
+        INJECTION_CORPUS,
+    )
 
     prompt = sanitizer_system_prompt(language)  # type: ignore[arg-type]
-    for sample in (*BENIGN_CORPUS, *INJECTION_CORPUS):
+    samples = (*BENIGN_CORPUS, *INJECTION_CORPUS, *HELDOUT_INJECTIONS, *HELDOUT_BENIGN)
+    for sample in samples:
         assert sample.text not in prompt, f"corpus sample leaked into the prompt: {sample.text!r}"
 
 
