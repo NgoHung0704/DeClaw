@@ -42,10 +42,25 @@ from declaw.brain.loop import build_agent_graph
 from declaw.brain.state import AgentState
 from declaw.brain.stub_tools import echo
 from declaw.config import Language
+from declaw.log import logger
 from declaw.tools.base import DeclawTool
 from declaw.tools.confirmation import ConfirmationProvider
 
 _APPROVALS = {"y", "yes", "o", "oui"}
+
+# Shown when a whole turn fails. Tool refusals never reach here (the graph turns
+# those into observations, see declaw/brain/loop.py); this covers the rest —
+# Ollama disappearing mid-conversation, a recursion limit, a bug in DeClaw. The
+# reason is kept short but names the exception type so a user can report it.
+_TURN_FAILED_EN = (
+    "That request could not be completed ({reason}). "
+    "The conversation is still open - you can try again or rephrase."
+)
+_TURN_FAILED_FR = (
+    "Cette demande n'a pas pu être traitée ({reason}). "
+    "La conversation reste ouverte - vous pouvez réessayer ou reformuler."
+)
+_MAX_REASON_CHARS = 200
 
 AgentGraph = CompiledStateGraph[AgentState, Any, Any, Any]
 
@@ -95,6 +110,14 @@ def make_console_confirmation_provider(
     return approve
 
 
+def turn_failure_message(exc: Exception, language: Language) -> str:
+    """Localized, single-line account of a failed turn for the user."""
+    first_line = str(exc).splitlines()[0] if str(exc).strip() else ""
+    reason = f"{type(exc).__name__}: {first_line}"[:_MAX_REASON_CHARS].rstrip(": ")
+    template = _TURN_FAILED_FR if language == "fr" else _TURN_FAILED_EN
+    return template.format(reason=reason)
+
+
 def _reply_text(messages: Sequence[BaseMessage]) -> str:
     """Return the most recent assistant message that carries visible text."""
     for message in reversed(messages):
@@ -123,6 +146,7 @@ async def run_chat(
     write: Callable[[str], None],
     debug: bool = False,
     system: SystemMessage | None = None,
+    language: Language = "en",
 ) -> None:
     """Drive a multi-turn REPL over ``graph``.
 
@@ -130,6 +154,11 @@ async def run_chat(
     line of output. The whole conversation is threaded back into the graph each
     turn, so the model keeps multi-turn memory. When ``system`` is given it is
     seeded as the leading message (the localized system prompt, DCL-017).
+
+    One failed turn never ends the session: the error is reported to the user
+    (in ``language``), logged with its traceback for us, and the loop moves on.
+    A user in the middle of a long conversation must not lose it to a transient
+    failure.
     """
     history: list[BaseMessage] = [] if system is None else [system]
     while True:
@@ -142,9 +171,19 @@ async def run_chat(
         if text in {"/exit", "/quit"}:
             break
 
+        # Snapshot so a failed turn can be rolled back: history then only ever
+        # holds completed turns, and a prompt that blew up cannot silently
+        # re-trigger on the next invocation.
+        completed = list(history)
         history.append(HumanMessage(content=text))
         before = len(history)
-        result = await graph.ainvoke({"messages": history})
+        try:
+            result = await graph.ainvoke({"messages": history})
+        except Exception as exc:
+            logger.exception("Chat turn failed")
+            history = completed
+            write(turn_failure_message(exc, language))
+            continue
         history = list(result["messages"])
 
         if debug:

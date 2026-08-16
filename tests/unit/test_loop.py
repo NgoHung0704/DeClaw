@@ -8,10 +8,14 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+import pytest
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
+from langchain_core.tools import StructuredTool
+from pydantic import BaseModel
 
 from declaw.brain.loop import build_agent_graph
 from declaw.brain.stub_tools import echo
+from declaw.tools.builtin.filesystem import WorkspacePathError
 
 
 class _ScriptedModel:
@@ -70,3 +74,76 @@ async def test_loop_ends_without_tool_call() -> None:
     assert isinstance(final, AIMessage)
     assert final.content == "Bonjour"
     assert len(model.calls) == 1
+
+
+# ============================================================================
+# Tool failures must not escape the graph
+#
+# A raising tool is normal operation, not a crash: "file already exists",
+# "path outside the workspace", "not a directory" are all things the user asks
+# for every day. The loop has to turn them into an observation the model can
+# react to, otherwise one refused write kills the whole session.
+# ============================================================================
+
+
+class _NoArgs(BaseModel):
+    pass
+
+
+def _raising_tool(exc: Exception, name: str = "boom") -> StructuredTool:
+    async def raise_it() -> str:
+        """A tool that always fails."""
+        raise exc
+
+    return StructuredTool.from_function(coroutine=raise_it, name=name, args_schema=_NoArgs)
+
+
+@pytest.mark.parametrize(
+    "exc",
+    [
+        WorkspacePathError("File already exists: 'test.txt' (set overwrite=true to replace)."),
+        FileNotFoundError("File not found: 'missing.txt'"),
+    ],
+)
+async def test_expected_tool_error_becomes_an_observation(exc: Exception) -> None:
+    """The tool's own message reaches the model verbatim, and the loop continues."""
+    tool = _raising_tool(exc)
+    model = _ScriptedModel(
+        [
+            AIMessage(content="", tool_calls=[{"name": "boom", "args": {}, "id": "c1"}]),
+            AIMessage(content="That file is already there - overwrite it?"),
+        ]
+    )
+    graph = build_agent_graph(model=model, tools=[tool])
+
+    result = await graph.ainvoke({"messages": [HumanMessage(content="write it")]})
+
+    tool_msgs = [m for m in result["messages"] if isinstance(m, ToolMessage)]
+    assert len(tool_msgs) == 1
+    assert tool_msgs[0].status == "error"
+    assert str(exc) in str(tool_msgs[0].content)
+
+    # The model got a second turn and answered: the session survives.
+    assert len(model.calls) == 2
+    assert result["messages"][-1].content == "That file is already there - overwrite it?"
+
+
+async def test_unexpected_tool_error_is_reported_without_internals() -> None:
+    """A bug inside a tool is logged for us, not narrated to the model."""
+    tool = _raising_tool(RuntimeError("psycopg pool exhausted at C:\\Users\\ADMIN\\secret"))
+    model = _ScriptedModel(
+        [
+            AIMessage(content="", tool_calls=[{"name": "boom", "args": {}, "id": "c1"}]),
+            AIMessage(content="Sorry, that did not work."),
+        ]
+    )
+    graph = build_agent_graph(model=model, tools=[tool])
+
+    result = await graph.ainvoke({"messages": [HumanMessage(content="go")]})
+
+    [tool_msg] = [m for m in result["messages"] if isinstance(m, ToolMessage)]
+    content = str(tool_msg.content)
+    assert tool_msg.status == "error"
+    assert "secret" not in content  # internals stay in the operational log
+    assert "RuntimeError" in content  # but the model knows the call failed
+    assert len(model.calls) == 2

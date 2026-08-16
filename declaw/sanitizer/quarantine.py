@@ -30,6 +30,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
+from declaw.config import Language
 from declaw.log import logger
 from declaw.sanitizer.verdict import SanitizerVerdict
 
@@ -94,6 +95,44 @@ def log_audit_sink(event: QuarantineEvent) -> None:
         content_sha256=event.content_sha256,
         reason=event.reason,
     ).warning("Quarantined UNSAFE external content")
+
+
+_NOTICE_EN = (
+    "[DeClaw] Withheld {source} and quarantined it (id {short_id}): the screening "
+    "model flagged a possible instruction aimed at the AI. The assistant never saw "
+    "the content, so its answer may be wrong or incomplete. If you know this "
+    "content is fine, this was a false positive - review it yourself."
+)
+_NOTICE_FR = (
+    "[DeClaw] {source} a été retenu et mis en quarantaine (id {short_id}) : le "
+    "modèle de filtrage y a détecté une possible instruction destinée à l'IA. "
+    "L'assistant n'a pas vu le contenu, sa réponse peut donc être fausse ou "
+    "incomplète. Si vous savez que ce contenu est sain, c'était un faux positif - "
+    "vérifiez-le vous-même."
+)
+
+
+def user_notice_sink(write: Callable[[str], None], language: Language) -> AuditSink:
+    """Build an ``AuditSink`` that tells the *user*, in words, about a quarantine.
+
+    Why this exists: the model is handed only a neutral placeholder, and a small
+    model paraphrases it badly — in live use qwen2.5:3b turned "quarantined as
+    possibly unsafe" into "there might be a problem with the content or
+    permissions", so the user was actively misinformed about what happened to
+    their own file. DeClaw promises transparency, so the fact that content was
+    withheld is stated by the application itself, never left to the model to
+    retell. False positives happen (measured ~9% on the benign corpus), which is
+    exactly why the notice says so and points the user at the quarantined item.
+
+    Like every other quarantine sink, this one carries the id, source and nothing
+    of the content.
+    """
+
+    def notify(event: QuarantineEvent) -> None:
+        template = _NOTICE_FR if language == "fr" else _NOTICE_EN
+        write(template.format(source=event.source, short_id=event.id[:8]))
+
+    return notify
 
 
 class QuarantineStore:

@@ -273,85 +273,85 @@
 
 ## 💾 PHASE 5 — MEMORY & AUDIT (Week 6-7)
 
-### [ ] DCL-050 — ChromaDB setup + persistent client
+### [x] DCL-050 — ChromaDB setup + persistent client
 - **Description**: Persistent local client; collection-per-purpose.
 - **Acceptance**: Restart preserves vectors.
 - **Dependencies**: DCL-004
 - **Estimate**: 0.5d
 
-### [ ] DCL-051 — At-rest encryption (Fernet)
+### [x] DCL-051 — At-rest encryption (Fernet)
 - **Description**: Encrypt collection files; key in keyring.
 - **Acceptance**: Raw files unreadable without key.
 - **Dependencies**: DCL-050, DCL-070
 - **Estimate**: 0.5d
 
-### [ ] DCL-052 — Short-term conversation buffer
+### [x] DCL-052 — Short-term conversation buffer
 - **Description**: In-memory ring; size-bounded.
 - **Acceptance**: Bound respected; eviction order correct.
 - **Dependencies**: DCL-011
 - **Estimate**: 0.25d
 
-### [ ] DCL-053 — Long-term semantic memory
+### [x] DCL-053 — Long-term semantic memory
 - **Description**: Vector search by topic.
 - **Acceptance**: top-k retrieves expected docs.
 - **Dependencies**: DCL-050
 - **Estimate**: 0.5d
 
-### [ ] DCL-054 — Episodic memory (task history)
+### [x] DCL-054 — Episodic memory (task history)
 - **Description**: Per-task records linked to audit.
 - **Acceptance**: Query by date/tag works.
 - **Dependencies**: DCL-005
 - **Estimate**: 0.5d
 
-### [ ] DCL-055 — Memory retrieval in Brain context assembly
+### [x] DCL-055 — Memory retrieval in Brain context assembly
 - **Description**: Inject top-k memories into prompt with token budget.
 - **Acceptance**: Brain uses retrieved memory in answers.
 - **Dependencies**: DCL-053
 - **Estimate**: 0.5d
 
-### [ ] DCL-056 — Memory export (GDPR portability)
+### [x] DCL-056 — Memory export (GDPR portability)
 - **Description**: JSON dump of user data.
 - **Acceptance**: `declaw memory export` writes complete archive.
 - **Dependencies**: DCL-053, DCL-054
 - **Estimate**: 0.5d
 
-### [ ] DCL-057 — Memory wipe (right to be forgotten)
+### [x] DCL-057 — Memory wipe (right to be forgotten)
 - **Description**: Delete all stored vectors + history.
 - **Acceptance**: After wipe, retrieval is empty; audit retains anonymized record.
 - **Dependencies**: DCL-053
 - **Estimate**: 0.5d
 
-### [ ] DCL-060 — Audit event schema (typed)
+### [x] DCL-060 — Audit event schema (typed)
 - **Description**: Pydantic events: ToolCall, NetworkCall, Quarantine, PermissionPrompt.
 - **Acceptance**: Events persisted; schema versioned.
 - **Dependencies**: DCL-005
 - **Estimate**: 0.5d
 
-### [ ] DCL-061 — Real-time audit logger in Brain
+### [x] DCL-061 — Real-time audit logger in Brain
 - **Description**: Every action emits an event.
 - **Acceptance**: All tool calls produce events.
 - **Dependencies**: DCL-060
 - **Estimate**: 0.5d
 
-### [ ] DCL-062 — NL audit summary generator (FR + EN)
+### [x] DCL-062 — NL audit summary generator (FR + EN)
 - **Description**: Per-task plain-language summary.
 - **Acceptance**: Summary mentions actions + “data left device: yes/no”.
 - **Dependencies**: DCL-061
 - **Estimate**: 0.5d
 
-### [ ] DCL-063 — Daily report
+### [x] DCL-063 — Daily report
 - **Description**: "What did DeClaw do today?" rollup.
 - **Acceptance**: Daily report available in UI + CLI.
 - **Dependencies**: DCL-062
 - **Estimate**: 0.5d
 
-### [ ] DCL-064 — Network egress monitor
+### [x] DCL-064 — Network egress monitor
 - **Description**: Hook outbound network calls (httpx/requests); alert + audit.
 - **Acceptance**: Any unintended external call logged + flagged.
 - **Dependencies**: DCL-060
 - **Estimate**: 1d
 
-### [ ] DCL-065 — Audit export (JSON, Markdown, PDF)
+### [x] DCL-065 — Audit export (JSON, Markdown, PDF)
 - **Description**: Multi-format export.
 - **Acceptance**: Each format renders correctly.
 - **Dependencies**: DCL-061
@@ -361,7 +361,7 @@
 
 ## 🔑 PHASE 6 — CREDENTIALS & PERMISSIONS (Week 7)
 
-### [ ] DCL-070 — python-keyring wrapper (Windows Credential Manager priority)
+### [x] DCL-070 — python-keyring wrapper (Windows Credential Manager priority)
 - **Description**: CRUD around keyring with namespace.
 - **Acceptance**: No plaintext anywhere; uninstaller removes secrets.
 - **Dependencies**: DCL-004
@@ -385,19 +385,19 @@
 - **Dependencies**: DCL-071
 - **Estimate**: 0.5d
 
-### [ ] DCL-074 — Encrypted secrets fallback
+### [x] DCL-074 — Encrypted secrets fallback
 - **Description**: AES-256 file + key derived from OS user; used only if keyring missing.
 - **Acceptance**: Fallback path documented; covered by tests.
 - **Dependencies**: DCL-070
 - **Estimate**: 0.5d
 
-### [ ] DCL-080 — `plugin.yaml` schema + validator
+### [x] DCL-080 — `plugin.yaml` schema + validator
 - **Description**: Pydantic model; semantic checks (denied vs requested).
 - **Acceptance**: Invalid manifests rejected with helpful error.
 - **Dependencies**: DCL-001
 - **Estimate**: 0.5d
 
-### [ ] DCL-081 — Permission enforcement middleware
+### [x] DCL-081 — Permission enforcement middleware
 - **Description**: Every tool call checked vs plugin permissions.
 - **Acceptance**: Denied call returns structured error + audit event.
 - **Dependencies**: DCL-080
@@ -409,13 +409,13 @@
 - **Dependencies**: DCL-081, DCL-127
 - **Estimate**: 0.5d
 
-### [ ] DCL-083 — Plugin signature verification (ed25519)
+### [x] DCL-083 — Plugin signature verification (ed25519)
 - **Description**: Verify on load; reject unsigned third-party plugins by default.
 - **Acceptance**: Tampered plugin rejected.
 - **Dependencies**: DCL-080
 - **Estimate**: 0.5d
 
-### [ ] DCL-084 — Permission audit log
+### [x] DCL-084 — Permission audit log
 - **Description**: Grants, denies, revocations recorded.
 - **Acceptance**: All transitions visible in audit UI.
 - **Dependencies**: DCL-081, DCL-061

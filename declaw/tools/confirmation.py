@@ -22,12 +22,15 @@ invisible to the prompt.
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from langchain_core.tools import StructuredTool
 
 from declaw.config import Language
 from declaw.tools.base import DeclawTool
+
+if TYPE_CHECKING:  # runtime import stays local to keep the tool layer light
+    from declaw.audit.logger import AuditLogger
 
 # Async predicate: should this non-READ tool call be allowed to run?
 # Any ``async def f(tool, args) -> bool`` is a valid provider.
@@ -48,24 +51,46 @@ _DENIAL_EN = "User denied the call to {name}."
 _DENIAL_FR = "L'utilisateur a refusé l'appel à {name}."
 
 
-def _denial_message(tool_name: str, language: Language) -> str:
+def denial_message(tool_name: str, language: Language) -> str:
+    """The exact localized string returned on a denied call.
+
+    Public because the audit wrapper (DCL-061) matches tool results against it
+    to record the outcome as ``denied`` — the string is DeClaw-generated and
+    deterministic, so the comparison is exact.
+    """
     template = _DENIAL_FR if language == "fr" else _DENIAL_EN
     return template.format(name=tool_name)
 
 
 def wrap_tool_with_confirmation(
-    tool: DeclawTool[Any], language: Language, approve: ConfirmationProvider
+    tool: DeclawTool[Any],
+    language: Language,
+    approve: ConfirmationProvider,
+    *,
+    audit: AuditLogger | None = None,
 ) -> StructuredTool:
     """Return a ``StructuredTool`` that gates ``tool`` behind ``approve``.
 
     Use this for any non-READ tool. READ tools should pass through
     ``DeclawTool.as_langchain_tool`` directly (no need to gate a pure read).
+    When ``audit`` is supplied, every human decision is recorded as a
+    ``PermissionPromptEvent`` (DCL-061) — approvals and denials both.
     """
 
     async def gated_coroutine(**kwargs: Any) -> str:
         approved = await approve(tool, kwargs)
+        if audit is not None:
+            from declaw.audit.events import PermissionPromptEvent, clip_args
+
+            await audit.emit(
+                PermissionPromptEvent(
+                    tool_name=tool.name,
+                    args=clip_args(kwargs),
+                    decision="approved" if approved else "denied",
+                )
+            )
         if not approved:
-            return _denial_message(tool.name, language)
+            return denial_message(tool.name, language)
         return await tool.run_validated(kwargs)
 
     return StructuredTool.from_function(
