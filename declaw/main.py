@@ -9,6 +9,8 @@ gateway started by ``start``).
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
+from typing import TYPE_CHECKING
 
 import typer
 from rich.console import Console
@@ -17,6 +19,11 @@ from rich.table import Table
 from declaw import __version__
 from declaw.brain.ollama_client import OllamaClient, OllamaHealth
 from declaw.config import get_settings
+
+if TYPE_CHECKING:  # heavy imports stay lazy at runtime
+    from declaw.audit.logger import DbAuditLogger
+    from declaw.memory.episodic import EpisodicMemory
+    from declaw.memory.semantic import SemanticMemory
 
 cli = typer.Typer(
     name="declaw",
@@ -55,6 +62,13 @@ def status() -> None:
         f"ollama_has_{settings.model}",
         "[green]yes[/green]" if health.has_model(settings.model) else "[red]no[/red]",
     )
+    if settings.sanitizer_model != settings.model:
+        table.add_row(
+            f"ollama_has_{settings.sanitizer_model}",
+            "[green]yes[/green]"
+            if health.has_model(settings.sanitizer_model)
+            else "[red]no[/red]",
+        )
     table.add_row("data_dir", str(settings.data_dir))
     table.add_row("workspace_dir", str(settings.workspace_dir))
     table.add_row("docker_sandbox_required", str(settings.require_docker_sandbox))
@@ -90,12 +104,21 @@ def chat(
 ) -> None:
     """Start an interactive chat REPL backed by the local brain."""
     # Imported lazily so `version`/`status` don't pay the langchain import cost.
+    from declaw.audit.egress import EgressMonitor, allowed_hosts_from_settings
+    from declaw.audit.logger import DbAuditLogger
+    from declaw.audit.sinks import composite_sink, quarantine_db_sink
     from declaw.brain.repl import (
         build_brain,
         make_console_confirmation_provider,
         run_chat,
     )
+    from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
     from declaw.sanitizer.classifier import build_ollama_classifier
+    from declaw.sanitizer.quarantine import (
+        QuarantineStore,
+        log_audit_sink,
+        user_notice_sink,
+    )
     from declaw.sanitizer.sanitizer import Sanitizer
     from declaw.tools.registry import default_registry
 
@@ -113,6 +136,20 @@ def chat(
             f"Run: [bold]ollama pull {settings.model}[/bold]"
         )
         raise typer.Exit(code=1)
+    # The sanitizer runs a DIFFERENT (larger) model by default. Without this
+    # check the failure is silent and baffling: chat works, then every file read
+    # comes back quarantined, because a missing model makes the classifier fail
+    # closed on every call.
+    if settings.sanitizer_required and not health.has_model(settings.sanitizer_model):
+        console.print(
+            f"[red]Sanitizer model {settings.sanitizer_model!r} not pulled.[/red] "
+            f"Run: [bold]ollama pull {settings.sanitizer_model}[/bold]\n"
+            "It screens external content before the assistant sees it, so without "
+            "it every file read would be withheld. To use the smaller (less "
+            "accurate) classifier instead, set "
+            "[bold]DECLAW_SANITIZER_MODEL=qwen2.5:3b[/bold]."
+        )
+        raise typer.Exit(code=1)
 
     # The filesystem tools operate inside the workspace; make sure it exists.
     settings.workspace_dir.mkdir(parents=True, exist_ok=True)
@@ -125,16 +162,34 @@ def chat(
 
     approve = make_console_confirmation_provider(confirm_prompt, settings.language)
 
+    # Principle #7: every tool call / confirmation decision / quarantine lands
+    # in the durable audit trail (SQLite, DCL-060/061).
+    engine = get_engine()
+    audit = DbAuditLogger(get_sessionmaker())
+
     # Principle #4: external content (file reads) must pass the sanitizer before
-    # the brain sees it. A separate Mistral session (sanitizer_model) classifies
-    # the output; UNSAFE content is quarantined and never reaches the model.
+    # the brain sees it. A separate session (sanitizer_model) classifies the
+    # output; UNSAFE content is quarantined and never reaches the model. The
+    # quarantine store reports to the operational log, the audit DB, and the user
+    # directly — the last one matters because the model only receives a neutral
+    # placeholder and paraphrases it unreliably (see user_notice_sink).
+    def notice(line: str) -> None:
+        console.print(line, markup=False, emoji=False)
+
+    quarantine = QuarantineStore(
+        audit_sink=composite_sink(
+            log_audit_sink,
+            quarantine_db_sink(audit),
+            user_notice_sink(notice, settings.language),
+        )
+    )
     sanitizer = (
-        Sanitizer(build_ollama_classifier(language=settings.language))
+        Sanitizer(build_ollama_classifier(language=settings.language), quarantine=quarantine)
         if settings.sanitizer_required
         else None
     )
     tools = default_registry().langchain_tools(
-        settings.language, approve, sanitizer=sanitizer
+        settings.language, approve, sanitizer=sanitizer, audit=audit
     )
     graph = build_brain(tools)
 
@@ -142,7 +197,7 @@ def chat(
     console.print(
         f"[green]DeClaw chat[/green] - model [bold]{settings.model}[/bold], "
         f"workspace [bold]{settings.workspace_dir}[/bold], "
-        f"sanitizer [bold]{sanitizer_state}[/bold]. "
+        f"sanitizer [bold]{sanitizer_state}[/bold], audit [bold]on[/bold]. "
         "Type [bold]/exit[/bold] to quit."
     )
 
@@ -162,8 +217,186 @@ def chat(
     # specific failure should be gone, but re-enabling system prompt requires an
     # A/B probe first - see CLAUDE.md Open decision "System prompt x tool-calling".
     # DCL-017's system_message() stays available for compositions that don't bind tools.
-    asyncio.run(run_chat(graph, read=read, write=write, debug=debug))
+    async def _session() -> None:
+        # Schema + chat share one event loop so aiosqlite connections created
+        # during bootstrap stay usable for audit writes during the REPL.
+        await ensure_schema(engine)
+        await run_chat(
+            graph, read=read, write=write, debug=debug, language=settings.language
+        )
+
+    # Principle #7: every outbound network call (incl. each Ollama request) is
+    # audited; anything outside the local allowlist is flagged (DCL-064).
+    monitor = EgressMonitor(
+        audit, allowed_hosts=allowed_hosts_from_settings(settings.ollama_base_url)
+    )
+    with monitor:
+        asyncio.run(_session())
     console.print("[dim]bye[/dim]")
+
+
+@cli.command()
+def report(
+    on: str = typer.Option(
+        "", "--date", help="Day to report on, YYYY-MM-DD (default: today, UTC)."
+    ),
+    lang: str = typer.Option(
+        "", "--lang", help="Report language: en or fr (default: DECLAW_LANGUAGE)."
+    ),
+) -> None:
+    """Show what DeClaw did on a given day, in plain language."""
+    from datetime import date, datetime, timezone
+
+    from declaw.audit.report import daily_report
+    from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
+
+    settings = get_settings()
+    day = date.fromisoformat(on) if on else datetime.now(timezone.utc).date()
+    language = lang if lang in ("en", "fr") else settings.language
+
+    async def _run() -> str:
+        await ensure_schema(get_engine())
+        return await daily_report(get_sessionmaker(), day, language)  # type: ignore[arg-type]
+
+    console.print(asyncio.run(_run()), markup=False)
+
+
+memory_app = typer.Typer(
+    name="memory",
+    help="Export or wipe DeClaw's long-term memory (GDPR).",
+    no_args_is_help=True,
+)
+cli.add_typer(memory_app)
+
+
+def _build_memory_stack() -> tuple[SemanticMemory, EpisodicMemory, DbAuditLogger]:
+    """Assemble (semantic, episodic, audit) over the real stores.
+
+    Shared by ``memory export`` and ``memory wipe``. Imports are lazy so the
+    lightweight commands don't pay for chroma/langchain.
+    """
+    from declaw.audit.logger import DbAuditLogger
+    from declaw.db.engine import get_engine, get_sessionmaker
+    from declaw.memory.chroma import build_chroma_client, get_collection
+    from declaw.memory.crypto import get_or_create_fernet
+    from declaw.memory.embeddings import build_ollama_embedder
+    from declaw.memory.episodic import EpisodicMemory
+    from declaw.memory.semantic import SemanticMemory
+
+    get_engine()  # materializes data_dir
+    collection = get_collection(build_chroma_client(), "semantic")
+    semantic = SemanticMemory(
+        collection, build_ollama_embedder(), fernet=get_or_create_fernet()
+    )
+    episodic = EpisodicMemory(get_sessionmaker())
+    audit = DbAuditLogger(get_sessionmaker())
+    return semantic, episodic, audit
+
+
+@memory_app.command("export")
+def memory_export(
+    out: str = typer.Option(
+        "", "--out", help="Destination JSON file (default: data_dir/exports/...)."
+    ),
+) -> None:
+    """Export all stored memory as a JSON archive (GDPR portability)."""
+    from datetime import datetime, timezone
+
+    from declaw.db.engine import ensure_schema, get_engine
+    from declaw.memory.gdpr import export_memory
+
+    settings = get_settings()
+    if out:
+        destination = Path(out).expanduser()
+    else:
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        destination = settings.data_dir / "exports" / f"declaw-memory-{stamp}.json"
+
+    semantic, episodic, audit = _build_memory_stack()
+
+    async def _run() -> Path:
+        await ensure_schema(get_engine())
+        return await export_memory(
+            destination, semantic=semantic, episodic=episodic, audit=audit
+        )
+
+    written = asyncio.run(_run())
+    console.print(f"[green]Memory exported[/green] to [bold]{written}[/bold]")
+
+
+@memory_app.command("wipe")
+def memory_wipe(
+    yes: bool = typer.Option(False, "--yes", help="Skip the confirmation prompt."),
+) -> None:
+    """Delete ALL stored memory (right to be forgotten). Irreversible."""
+    from declaw.db.engine import ensure_schema, get_engine
+    from declaw.memory.gdpr import WipeReport, wipe_memory
+
+    if not yes:
+        confirmed = typer.confirm(
+            "This permanently deletes ALL semantic memories and task history. Continue?"
+        )
+        if not confirmed:
+            console.print("[yellow]Aborted.[/yellow] Nothing was deleted.")
+            raise typer.Exit(code=1)
+
+    semantic, episodic, audit = _build_memory_stack()
+
+    async def _run() -> WipeReport:
+        await ensure_schema(get_engine())
+        return await wipe_memory(semantic=semantic, episodic=episodic, audit=audit)
+
+    report = asyncio.run(_run())
+    console.print(
+        f"[green]Memory wiped.[/green] Removed {report.semantic_removed} semantic "
+        f"memories and {report.episodes_removed} episodes. "
+        "An anonymized record (counts only) was kept in the audit trail."
+    )
+
+
+audit_app = typer.Typer(
+    name="audit",
+    help="Inspect or export the audit trail.",
+    no_args_is_help=True,
+)
+cli.add_typer(audit_app)
+
+
+@audit_app.command("export")
+def audit_export(
+    format: str = typer.Option("json", "--format", help="Export format: json, markdown, pdf."),
+    out: str = typer.Option(
+        "", "--out", help="Destination file (default: data_dir/exports/...)."
+    ),
+) -> None:
+    """Export the full audit trail (JSON, Markdown or PDF)."""
+    from datetime import datetime, timezone
+
+    from declaw.audit.export import export_events, load_all_events
+    from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
+
+    if format not in ("json", "markdown", "pdf"):
+        console.print(f"[red]Unknown format {format!r}[/red] (use json, markdown or pdf).")
+        raise typer.Exit(code=1)
+
+    settings = get_settings()
+    extension = {"json": "json", "markdown": "md", "pdf": "pdf"}[format]
+    if out:
+        destination = Path(out).expanduser()
+    else:
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        destination = settings.data_dir / "exports" / f"declaw-audit-{stamp}.{extension}"
+
+    async def _run() -> tuple[Path, int]:
+        await ensure_schema(get_engine())
+        events, unreadable = await load_all_events(get_sessionmaker())
+        written = export_events(events, destination, format)  # type: ignore[arg-type]
+        return written, unreadable
+
+    written, unreadable = asyncio.run(_run())
+    console.print(f"[green]Audit trail exported[/green] to [bold]{written}[/bold]")
+    if unreadable:
+        console.print(f"[yellow]{unreadable} unreadable audit record(s) skipped.[/yellow]")
 
 
 def main() -> None:
