@@ -122,6 +122,10 @@ class PluginManifest(BaseModel):
             raise ValueError("descriptions must be non-empty (EN and FR are both mandatory)")
         return value
 
+    def description_for_language(self, language: str) -> str:
+        """Return the manifest description in the user's language."""
+        return self.description_fr if language == "fr" else self.description_en
+
     @field_validator("entrypoint")
     @classmethod
     def _contained_entrypoint(cls, value: str) -> str:
