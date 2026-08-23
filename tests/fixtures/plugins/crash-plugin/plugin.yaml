@@ -1,0 +1,6 @@
+manifest_version: 1
+name: crash-plugin
+version: 1.0.0
+description_en: Test plugin that exits mid-request.
+description_fr: Plugin de test qui se termine en pleine requete.
+entrypoint: main.py
