@@ -1,0 +1,6 @@
+manifest_version: 1
+name: hang-plugin
+version: 1.0.0
+description_en: Test plugin that never answers.
+description_fr: Plugin de test qui ne repond jamais.
+entrypoint: main.py
