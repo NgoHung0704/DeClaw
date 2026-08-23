@@ -79,6 +79,16 @@ class Settings(BaseSettings):
         default=Path("~/DeClaw-workspace").expanduser(),
         description="Default workspace folder (user documents).",
     )
+    # plugins/ sits at the repository root, outside the packaged wheel, so the
+    # path that works in a checkout does not exist in an installed build. This
+    # is the seam Phase 14 packaging uses without touching the loader.
+    builtin_plugins_dir: Path | None = Field(
+        default=None,
+        description=(
+            "Where the shipped plugins live. Defaults to <repo>/plugins/builtin in a "
+            "development checkout, else a directory beside the executable."
+        ),
+    )
 
     # --- Security toggles (defaults enforce the 7 principles) ---------------
     require_docker_sandbox: bool = Field(
@@ -111,7 +121,7 @@ class Settings(BaseSettings):
             )
         return value
 
-    @field_validator("data_dir", "workspace_dir", mode="before")
+    @field_validator("data_dir", "workspace_dir", "builtin_plugins_dir", mode="before")
     @classmethod
     def _expand_user(cls, value: object) -> object:
         if isinstance(value, str):
