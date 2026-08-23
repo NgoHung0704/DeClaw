@@ -1,18 +1,10 @@
 """Workspace-scoped filesystem tools (DCL-021 / DCL-022 / DCL-023 / DCL-024).
 
 These tools are the first place where a path coming from the model can reach
-the user's filesystem, so the path resolver is the security boundary.
-Defence-in-depth:
-
-1. Absolute paths are rejected before resolution (no ``/etc/passwd``).
-2. The user-supplied path is joined to the workspace root, then ``.resolve()``
-   canonicalises symlinks and (on Windows) NTFS 8.3 short names.
-3. The canonical path must be inside the workspace — checked via
-   ``Path.relative_to``. Anything escaping (``..`` traversal, symlink to
-   outside, short-name alias to outside) raises ``WorkspacePathError``.
-
-``WorkspacePathError`` extends ``ValueError`` so LangGraph's ``ToolNode``
-surfaces it as a ``ToolMessage`` error the model (and the audit trail) can see.
+the user's filesystem, so the path resolver is the security boundary. That
+resolver now lives in ``declaw.tools.builtin._paths`` — it gained consumers
+outside this module — and its defence layers are documented there. Every tool
+below routes user-supplied paths through it and through nothing else.
 
 Classifications: ``filesystem_read`` is READ (the confirmation queue lets it
 auto-run); ``filesystem_write`` and ``filesystem_move`` are WRITE (every call
@@ -23,18 +15,25 @@ the brain when the tool is wired into ``ToolNode``.
 
 from __future__ import annotations
 
-import sys
 from datetime import UTC, datetime
-from pathlib import Path
 
 from pydantic import BaseModel, Field
 
-from declaw.config import get_settings
 from declaw.tools.base import DeclawTool, ToolClass
+from declaw.tools.builtin._paths import WorkspacePathError, resolve_in_workspace
 
+# Private alias so the four call sites below read exactly as they did before
+# the resolver moved to _paths.py. WorkspacePathError is re-exported for the
+# same reason: modules and tests already import it from here.
+_resolve_in_workspace = resolve_in_workspace
 
-class WorkspacePathError(ValueError):
-    """Raised when a path is outside the workspace or otherwise unsafe."""
+__all__ = [
+    "FilesystemListTool",
+    "FilesystemMoveTool",
+    "FilesystemReadTool",
+    "FilesystemWriteTool",
+    "WorkspacePathError",
+]
 
 
 class FilesystemReadArgs(BaseModel):
@@ -304,42 +303,3 @@ class FilesystemListTool(DeclawTool[FilesystemListArgs]):
             )
             lines.append(f"{kind:4}  {size:>10}  {mtime:19}  {entry.name}")
         return "\n".join(lines)
-
-
-def _resolve_in_workspace(raw_path: str) -> Path:
-    """Resolve ``raw_path`` inside the workspace root; raise on escape.
-
-    Defence layers, in order:
-
-    1. Reject embedded NUL bytes (never valid in any path; also stops C-string
-       truncation tricks) — raised as ``WorkspacePathError`` for a consistent,
-       auditable boundary rather than a bare ``ValueError`` from ``resolve()``.
-    2. Reject absolute paths up front, so they cannot replace the workspace
-       root after joining (``/etc/passwd``, ``C:\\Windows``, UNC shares).
-    3. On Windows, reject any ``:`` — it can never be a legal filename
-       character there, so it is always either a drive-relative spec (``C:foo``)
-       or an NTFS alternate data stream (``notes.txt:hidden``), both of which
-       are side channels a workspace path must not reach. (POSIX allows ``:``
-       in filenames and has neither side channel, so the check is Windows-only.)
-    4. Join + ``resolve()`` (canonicalises symlinks and NTFS 8.3 short names),
-       then require containment via ``relative_to``.
-    """
-    if "\x00" in raw_path:
-        raise WorkspacePathError(f"Path contains a NUL byte: {raw_path!r}")
-    workspace = Path(get_settings().workspace_dir).resolve()
-    candidate = Path(raw_path)
-    if candidate.is_absolute():
-        raise WorkspacePathError(f"Absolute paths are not allowed: {raw_path!r}")
-    if sys.platform == "win32" and ":" in raw_path:
-        raise WorkspacePathError(
-            f"Path contains ':' (drive-relative or alternate data stream): "
-            f"{raw_path!r}"
-        )
-    resolved = (workspace / candidate).resolve()
-    try:
-        resolved.relative_to(workspace)
-    except ValueError as exc:
-        raise WorkspacePathError(
-            f"Path resolves outside the workspace: {raw_path!r}"
-        ) from exc
-    return resolved
