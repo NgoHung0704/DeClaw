@@ -425,51 +425,63 @@
 
 ## 🔌 PHASE 7 — PLUGIN HOST (Week 8) ⚠️ ARCHITECTURAL FOUNDATION
 
-### [ ] DCL-090 — Plugin loader (discover plugins/ directory)
-- **Description**: Scan builtin + user plugin dirs.
-- **Acceptance**: Loader returns plugin index with status.
+### [x] DCL-090 — Plugin loader (discover plugins/ directory)
+- **Description**: Scan `plugins/builtin/` only in v0.1. The user plugin dir is
+  deliberately NOT scanned: that would be a third-party install path by file copy,
+  with no signature check.
+- **Acceptance**: Loader returns a plugin index with status; a broken manifest is
+  skipped with an audited reason, never fatal to the others.
 - **Dependencies**: DCL-080
 - **Estimate**: 0.5d
 
-### [ ] DCL-091 — Plugin lifecycle (install/uninstall/update/disable)
-- **Description**: CRUD over installed plugins; state persisted.
-- **Acceptance**: All transitions update registry.
+### [x] DCL-091 — Plugin lifecycle (enable/disable/quarantine)
+- **Description**: Enable, disable and quarantine over builtin plugins; state persisted.
+- **Acceptance**: Enable, disable and quarantine survive restarts. Install, uninstall
+  and update are OUT OF SCOPE for v0.1 (builtin plugins only) — see
+  `docs/superpowers/specs/2026-08-23-phase-7-9-roadmap.md` decision 2.
 - **Dependencies**: DCL-090
 - **Estimate**: 1d
 
-### [ ] DCL-092 — Subprocess isolation (each plugin its own Python process)
+### [x] DCL-092 — Subprocess isolation (each plugin its own Python process)
 - **Description**: Spawn restricted subprocess (no inherited env, no keyring).
-- **Acceptance**: Plugin cannot import declaw internals.
+- **Acceptance**: Spawned with a built-from-scratch environment and no keyring access.
+  The `declaw.*` import hook enforces the ARCHITECTURAL boundary; it is NOT a security
+  control (same venv, plugin can remove the hook) — see docs/phase-7-review.md §8.
 - **Dependencies**: DCL-091
 - **Estimate**: 1d
 
-### [ ] DCL-093 — IPC protocol (JSON over stdio, schema-validated)
+### [x] DCL-093 — IPC protocol (JSON over stdio, schema-validated)
 - **Description**: Request/response + events; size-limited.
 - **Acceptance**: Malformed frames rejected; large frames dropped.
 - **Dependencies**: DCL-092
 - **Estimate**: 1d
 
-### [ ] DCL-094 — Plugin SDK skeleton
+### [x] DCL-094 — Plugin SDK skeleton
 - **Description**: `declaw-plugin-sdk` package: BasePlugin, decorators, IPC client.
 - **Acceptance**: Sample plugin builds against SDK.
 - **Dependencies**: DCL-093
 - **Estimate**: 0.5d
 
-### [ ] DCL-095 — Plugin manifest registry
-- **Description**: `~/.declaw/plugins/installed.db` via SQLite.
-- **Acceptance**: Survives restarts.
+### [x] DCL-095 — Plugin manifest registry
+- **Description**: `~/.declaw/plugin_state.json` — plain JSON, not SQLite.
+- **Acceptance**: Survives restarts. JSON because this is user policy and being
+  readable/diffable is a transparency feature, like `plugin_grants.json`.
 - **Dependencies**: DCL-091
 - **Estimate**: 0.25d
 
-### [ ] DCL-096 — Plugin crash handling
+### [x] DCL-096 — Plugin crash handling
 - **Description**: Crash isolated; core unaffected; auto-restart with backoff.
 - **Acceptance**: Killed plugin restarts; repeated crash quarantines plugin.
 - **Dependencies**: DCL-092
 - **Estimate**: 0.5d
 
-### [ ] DCL-097 — Permission violation handling
-- **Description**: Terminate plugin + notify user.
-- **Acceptance**: Violation kills process and logs event.
+### [x] DCL-097 — Permission violation handling
+- **Description**: Refuse the load on a permission violation; terminate on a protocol
+  violation; notify the user.
+- **Acceptance**: A capability requiring a permission its manifest never requested
+  REFUSES THE LOAD (runtime permission violations are structurally impossible with no
+  plugin->host callback channel). Three protocol violations kill and quarantine the
+  plugin. Both audited.
 - **Dependencies**: DCL-081, DCL-092
 - **Estimate**: 0.25d
 
