@@ -101,7 +101,11 @@ os.dup2(2, 1)               # anything written to stdout now goes to stderr
 ```
 
 The plugin's stderr is read by the host and forwarded to loguru at DEBUG,
-tagged with the plugin name.
+tagged with the plugin name. **A dedicated background task drains it for the
+whole process lifetime** — an undrained stderr pipe fills its OS buffer and
+then blocks the plugin mid-write, which would look exactly like a hang. The
+drain task is started with the process and cancelled only after the process
+has exited.
 
 **Import boundary.** The bootstrap installs a `sys.meta_path` finder at index 0
 that raises `ImportError` for `declaw` and anything under `declaw.`. This
@@ -211,6 +215,12 @@ Tool names are prefixed with the plugin slug, dashes to underscores:
 `filesystem_read`, and `ToolRegistry`'s existing duplicate check catches
 collisions between plugins.
 
+Capability names are validated as slugs (`^[a-z][a-z0-9_-]{1,50}$`) at load
+time. This is not cosmetic: the name becomes a tool name sent to the model, and
+Ollama's function-calling schema restricts what characters may appear there. A
+capability with a name outside the pattern fails the load with the name quoted
+in the error.
+
 `ToolRegistry` gains `register_instance(tool)` — the current `register()` takes
 a class and instantiates it, which does not fit proxy tools bound to a specific
 plugin and capability.
@@ -235,6 +245,30 @@ validates the path with `_resolve_in_workspace` first, then passes the
 validated absolute path. The alternative — reading bytes in the core and
 base64-ing them — would mean a 67 MB frame for a 50 MB PDF.
 
+**Who grants, on a fresh install.** `plugin_grants.json` starts empty, so on
+first run `doc-intel` would hold `filesystem.read` as *requested but not
+granted* and every call would fail — and the permission dialog that would fix
+that is Phase 9 work. Phase 7 has to answer this itself.
+
+v0.1 answer: **builtin plugins are auto-granted the permissions their manifest
+requests, on first load, transparently.** The justification is narrow and
+should not be generalised — a builtin plugin ships inside the application
+binary, so a user who does not trust it cannot trust DeClaw either; there is no
+separate trust decision to ask about. Transparency is what makes this
+acceptable rather than a silent grab:
+
+- each auto-grant emits the normal `PluginPermissionEvent` with
+  `action="granted"`, so it appears in the audit trail and the daily report
+- `declaw plugins list` shows every plugin's permissions and their grant state
+- `declaw plugins revoke <plugin> <permission>` works, and a revoked permission
+  is **not** re-granted on the next start — auto-grant applies only to
+  permissions never seen before, tracked in `plugin_state.json`
+
+**This must not survive into the third-party install flow.** When plugins can
+come from outside the application, auto-grant is exactly the wrong default and
+the install-time dialog becomes mandatory. Recorded in the roadmap's deferred
+list.
+
 **Reframing DCL-097, honestly.** The ticket says a permission violation kills
 the process. That presumes a plugin → host callback channel, which the thin
 design does not have: a plugin cannot ask the core for anything, so it cannot
@@ -255,6 +289,16 @@ assumed.
 plugin directory is deliberately not scanned: scanning it would be a
 third-party install path by file copy, with no signature check, which is
 exactly what decision 2 excludes.
+
+Resolving where that directory *is* needs care, because `plugins/` sits at the
+repository root while `[tool.hatch.build.targets.wheel]` packages only
+`declaw` — so the path that works in a git checkout does not exist in an
+installed wheel. Resolution order: a new `builtin_plugins_dir` setting if set,
+else `<package parent>/plugins/builtin` (the development checkout), else a
+directory shipped beside the executable (the packaged app). A missing directory
+is not an error — the host logs it and loads nothing. Making `plugins/builtin`
+actually ship inside the distribution is Phase 14 packaging work; the setting
+is the seam that lets Phase 14 solve it without touching the loader.
 
 **State** lives in `<data_dir>/plugin_state.json`, alongside the existing
 `plugin_grants.json` and for the same reason: this is the user's own policy,
@@ -283,13 +327,23 @@ subprocess.
 **In-flight requests** when a process dies get `PluginCrashedError`, which
 reaches the model as a recoverable tool error.
 
+**Shutdown** is graceful then forced: send the `shutdown` frame, wait 5 s for
+the process to exit on its own, then `terminate()`, wait 2 s, then `kill()`.
+Note for Windows: killing a process does not kill its children. No v0.1 plugin
+spawns children, and the loader has no way to stop one that does — recorded as
+a known limitation rather than papered over.
+
 ## 6. The SDK (DCL-094)
 
-`declaw_plugin_sdk/` is a top-level package in this repository, added to
-`pyproject.toml` as a second package in the same distribution. Its only
+`declaw_plugin_sdk/` is a top-level package in this repository. Its only
 dependency is pydantic. **It must not import `declaw`** — the import hook
 blocks `declaw.*`, so an SDK living inside `declaw/` could not be imported by
 the very processes it exists to serve.
+
+Packaging: `[tool.hatch.build.targets.wheel]` currently lists
+`packages = ["declaw"]` and must become `["declaw", "declaw_plugin_sdk"]`,
+otherwise the bootstrap module is missing from any installed build and every
+plugin fails to start with an import error that says nothing useful.
 
 Surface:
 
@@ -336,8 +390,24 @@ class PluginHost:
 
 `declaw chat` starts the host, merges `host.model_tools()` into the registry
 before building the brain, and stops the host on exit. A new CLI group
-`declaw plugins list | enable <name> | disable <name>` exposes lifecycle
-without a UI.
+`declaw plugins list | enable <name> | disable <name> | revoke <name> <perm>`
+exposes lifecycle without a UI.
+
+**This forces a restructure of the chat command.** Today `main.py:191` builds
+the tool list and the graph *synchronously*, before `asyncio.run(_session())`.
+`PluginHost.start()` is async, and asyncio subprocess transports are bound to
+the loop that created them — so a host started outside that loop would produce
+pipes the REPL cannot use. Registry assembly, `host.start()`, and
+`build_brain()` all move inside `_session()`. This is the same constraint the
+existing comment about `ensure_schema` and aiosqlite already documents, for the
+same reason; the fix is to extend the pattern, not invent one.
+
+**The tool list is bound once, at chat start.** Disabling or quarantining a
+plugin mid-session does not remove its tools from the running graph — rebinding
+would mean rebuilding the graph under the model. Instead the proxy tool returns
+a `PluginUnavailableError` as an ordinary tool error, which the model can
+report to the user. Live rebinding belongs to the Phase 9 gateway, where
+sessions are already explicit objects.
 
 ## 8. Data, files, and audit
 
@@ -375,7 +445,10 @@ Nothing else. No unrelated refactoring.
 | Process exits unexpectedly | `PluginCrashedError` to in-flight caller, restart with backoff |
 | 3 crashes in 5 minutes | Quarantine, audit, user notice |
 | Oversized / malformed / unsolicited frame | Protocol violation; 3 of them kill and quarantine |
-| Plugin disabled | Not started; its tools absent from the registry |
+| Plugin disabled before chat starts | Not started; its tools absent from the registry |
+| Plugin disabled or quarantined mid-session | Tools stay bound; calls return `PluginUnavailableError` as a tool error |
+| Capability name is not a slug | Plugin refused, name quoted in the error |
+| `plugins/builtin` missing entirely | Logged, nothing loaded, application starts normally |
 
 ## 11. Testing strategy
 

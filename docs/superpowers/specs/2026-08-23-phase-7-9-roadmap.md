@@ -182,6 +182,12 @@ Tickets are not renumbered; their scope or acceptance text changes.
 ## Deferred to v0.2 or later
 
 - Third-party plugin install, with `files:` digests added to the signed manifest
+- **An install-time permission dialog, mandatory before third-party install
+  ships.** Phase 7 auto-grants builtin plugins the permissions their manifest
+  requests, because a plugin shipped inside the application binary presents no
+  separate trust decision. That reasoning does not extend one inch past
+  builtin, so the auto-grant path must be closed in the same change that opens
+  installation.
 - The plugin credential API (DCL-071 / 072 / 073)
 - OS-level sandboxing of plugin processes
 - Multiple concurrent requests per plugin (a process pool); the protocol already
