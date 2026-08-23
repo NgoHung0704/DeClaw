@@ -148,6 +148,31 @@ class PluginPermissionEvent(_BaseAuditEvent):
     action: Literal["granted", "revoked", "denied_call", "violation"]
 
 
+class PluginLifecycleEvent(_BaseAuditEvent):
+    """A plugin process changed state (DCL-091 / DCL-096 / DCL-097).
+
+    ``load_failed`` covers a manifest or capability set the host refused;
+    ``quarantined`` is the terminal state after repeated crashes or protocol
+    violations. Both are user-visible on purpose: a plugin that silently
+    stopped working would be worse than one that says why.
+    """
+
+    event_type: Literal["plugin.lifecycle"] = "plugin.lifecycle"
+    plugin: str
+    version: str = ""
+    action: Literal[
+        "started",
+        "stopped",
+        "crashed",
+        "restarted",
+        "quarantined",
+        "enabled",
+        "disabled",
+        "load_failed",
+    ]
+    detail: str = ""
+
+
 AnyAuditEvent = Annotated[
     ToolCallEvent
     | NetworkCallEvent
@@ -155,7 +180,8 @@ AnyAuditEvent = Annotated[
     | PermissionPromptEvent
     | MemoryExportEvent
     | MemoryWipeEvent
-    | PluginPermissionEvent,
+    | PluginPermissionEvent
+    | PluginLifecycleEvent,
     Field(discriminator="event_type"),
 ]
 

@@ -146,3 +146,20 @@ def test_clip_args_truncates_and_fingerprints_long_strings() -> None:
 def test_clip_args_does_not_touch_non_strings() -> None:
     args = {"numbers": list(range(1000))}
     assert clip_args(args) == args
+
+
+def test_plugin_lifecycle_event_round_trips_through_a_db_row() -> None:
+    from declaw.audit.events import PluginLifecycleEvent, event_from_row, to_db_row
+
+    event = PluginLifecycleEvent(
+        plugin="echo-plugin", version="1.0.0", action="quarantined", detail="3 crashes in 5 min"
+    )
+    restored = event_from_row(to_db_row(event))
+    assert restored == event
+
+
+def test_plugin_lifecycle_action_vocabulary_is_closed() -> None:
+    from declaw.audit.events import PluginLifecycleEvent
+
+    with pytest.raises(ValidationError):
+        PluginLifecycleEvent(plugin="p", action="exploded")  # type: ignore[arg-type]

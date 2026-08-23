@@ -175,3 +175,22 @@ async def test_daily_report_counts_unreadable_rows(
 
     text = await daily_report(sessionmaker, day, "en")
     assert "1 unreadable audit record(s) skipped" in text
+
+
+def test_quarantined_plugin_appears_in_the_english_summary() -> None:
+    from declaw.audit.events import PluginLifecycleEvent
+
+    text = summarize_events(
+        [PluginLifecycleEvent(plugin="echo-plugin", action="quarantined", detail="3 crashes")],
+        "en",
+    )
+    assert "echo-plugin" in text
+    assert "quarantin" in text.lower()
+
+
+def test_disabled_plugin_appears_in_the_french_summary() -> None:
+    from declaw.audit.events import PluginLifecycleEvent
+
+    text = summarize_events([PluginLifecycleEvent(plugin="echo-plugin", action="disabled")], "fr")
+    assert "echo-plugin" in text
+    assert "désactivée" in text
