@@ -17,6 +17,7 @@ from collections.abc import Sequence
 from declaw.audit.events import (
     AnyAuditEvent,
     NetworkCallEvent,
+    PluginLifecycleEvent,
     PermissionPromptEvent,
     QuarantineEvent,
     ToolCallEvent,
@@ -38,6 +39,7 @@ _L = {
         "network_flagged": "Made {count} network call(s), {flagged} of them OUTSIDE this device",
         "egress_no": "Data left this device: no",
         "egress_yes": "Data left this device: YES ({hosts})",
+        "plugin_lifecycle": "Plugin {plugin}: {action}.{detail}",
     },
     "fr": {
         "no_events": "Aucune activité enregistrée.",
@@ -53,6 +55,32 @@ _L = {
         "network_flagged": "{count} appel(s) réseau, dont {flagged} HORS de cet appareil",
         "egress_no": "Des données ont quitté cet appareil : non",
         "egress_yes": "Des données ont quitté cet appareil : OUI ({hosts})",
+        "plugin_lifecycle": "Extension {plugin} : {action}.{detail}",
+    },
+}
+
+# Bilingual action words for PluginLifecycleEvent. Same rule as the tool
+# templates above: fixed strings, never model output.
+_PLUGIN_ACTIONS = {
+    "en": {
+        "started": "started",
+        "stopped": "stopped",
+        "crashed": "crashed",
+        "restarted": "restarted",
+        "quarantined": "quarantined after repeated failures",
+        "enabled": "enabled",
+        "disabled": "disabled",
+        "load_failed": "could not be loaded",
+    },
+    "fr": {
+        "started": "démarrée",
+        "stopped": "arrêtée",
+        "crashed": "a planté",
+        "restarted": "redémarrée",
+        "quarantined": "mise en quarantaine après des échecs répétés",
+        "enabled": "activée",
+        "disabled": "désactivée",
+        "load_failed": "n'a pas pu être chargée",
     },
 }
 
@@ -97,6 +125,16 @@ def summarize_events(events: Sequence[AnyAuditEvent], language: Language = "en")
             lines.append(f"- {strings['quarantine'].format(source=event.source)}")
         elif isinstance(event, NetworkCallEvent):
             network_events.append(event)
+        elif isinstance(event, PluginLifecycleEvent):
+            detail = f" {event.detail}" if event.detail else ""
+            lines.append(
+                "- "
+                + strings["plugin_lifecycle"].format(
+                    plugin=event.plugin,
+                    action=_PLUGIN_ACTIONS[language][event.action],
+                    detail=detail,
+                )
+            )
         elif isinstance(event, PermissionPromptEvent):
             # The decision already shows on the ToolCall line; skip the prompt
             # itself to keep the summary readable.
