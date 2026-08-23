@@ -59,6 +59,19 @@ class ToolRegistry:
     def __init__(self) -> None:
         self._tools: dict[str, DeclawTool[Any]] = {}
 
+    def register_instance(self, tool: DeclawTool[Any]) -> DeclawTool[Any]:
+        """Register an already-constructed tool.
+
+        Plugin proxy tools (DCL-090) are bound to a specific plugin and
+        capability, so they cannot be built by the class-and-instantiate path
+        ``register`` uses. Both routes share this one insertion point, so the
+        duplicate check cannot be bypassed by picking the other one.
+        """
+        if tool.name in self._tools:
+            raise ValueError(f"Tool {tool.name!r} is already registered.")
+        self._tools[tool.name] = tool
+        return tool
+
     def register(self, tool_cls: type[DeclawTool[Any]]) -> type[DeclawTool[Any]]:
         """Instantiate and register ``tool_cls``. Usable as a class decorator.
 
@@ -68,10 +81,7 @@ class ToolRegistry:
         # Concrete DeclawTool subclasses default every field (DCL-020), so they
         # instantiate with no args; the base type ``type[DeclawTool[Any]]``
         # can't express that, hence the targeted ignore.
-        tool = tool_cls()  # type: ignore[call-arg]
-        if tool.name in self._tools:
-            raise ValueError(f"Tool {tool.name!r} is already registered.")
-        self._tools[tool.name] = tool
+        self.register_instance(tool_cls())  # type: ignore[call-arg]
         return tool_cls
 
     def get(self, name: str) -> DeclawTool[Any]:
