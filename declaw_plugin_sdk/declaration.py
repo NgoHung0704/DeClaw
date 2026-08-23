@@ -14,9 +14,9 @@ the system quieter and stricter, never louder and looser.
 from __future__ import annotations
 
 import inspect
-from collections.abc import Awaitable, Callable, Sequence
+from collections.abc import Callable, Coroutine, Sequence
 from dataclasses import dataclass
-from typing import Any, get_type_hints
+from typing import Any, TypeVar, get_type_hints
 
 from pydantic import BaseModel
 
@@ -28,6 +28,11 @@ from declaw_plugin_sdk.protocol import (
 )
 
 CAPABILITY_ATTR = "__declaw_capability__"
+
+# Coroutine, not Awaitable: the runtime hands these straight to
+# asyncio.run(), which will not accept a bare Awaitable.
+CapabilityFunc = Callable[..., Coroutine[Any, Any, Any]]
+FuncT = TypeVar("FuncT", bound=CapabilityFunc)
 
 
 class CapabilityDeclarationError(TypeError):
@@ -47,7 +52,7 @@ class CapabilitySpec:
     classification: Classification
     timeout_s: int
     args_model: type[BaseModel]
-    func: Callable[..., Awaitable[Any]]
+    func: CapabilityFunc
 
     def descriptor(self) -> CapabilityDescriptor:
         """Render the wire-facing announcement of this capability."""
@@ -74,10 +79,10 @@ def capability(
     produces_external_content: bool = False,
     classification: Classification = "write",
     timeout_s: int = 120,
-) -> Callable[[Callable[..., Awaitable[Any]]], Callable[..., Awaitable[Any]]]:
+) -> Callable[[FuncT], FuncT]:
     """Mark an async method as a capability the host may invoke."""
 
-    def decorate(func: Callable[..., Awaitable[Any]]) -> Callable[..., Awaitable[Any]]:
+    def decorate(func: FuncT) -> FuncT:
         if not inspect.iscoroutinefunction(func):
             raise CapabilityDeclarationError(
                 f"capability {name!r} must be declared with 'async def'"

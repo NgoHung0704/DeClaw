@@ -1,0 +1,12 @@
+manifest_version: 1
+name: echo-plugin
+version: 1.0.0
+description_en: Test plugin that echoes messages back.
+description_fr: Plugin de test qui renvoie les messages.
+entrypoint: main.py
+author: DeClaw test suite
+permissions:
+  requested:
+    - filesystem.read
+  denied:
+    - network
