@@ -1,0 +1,6 @@
+manifest_version: 1
+name: probe-plugin
+version: 1.0.0
+description_en: Test plugin that reports on its own sandbox.
+description_fr: Plugin de test qui rapporte son propre environnement.
+entrypoint: main.py
