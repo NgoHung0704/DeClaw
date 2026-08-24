@@ -125,6 +125,44 @@ async def check_sanitizer_model_pulled(settings: Settings) -> CheckResult:
     return _check_sanitizer_model_pulled(settings, health)
 
 
+def _check_embedding_model_pulled(settings: Settings, health: OllamaHealth) -> CheckResult:
+    """Verify the embedding model is pulled — document indexing needs it.
+
+    Same failure shape as the sanitizer model, and found the same way: Ollama
+    answers 404 for an unknown model, so without this check `declaw index`
+    reports a bare HTTP error that tells the user nothing they can act on.
+    """
+    name = "ollama.embedding_model"
+    if not health.reachable:
+        return CheckResult(
+            name=name,
+            passed=False,
+            message=f"Cannot verify embedding model {settings.embedding_model!r}: Ollama unreachable.",
+            remedy="Start Ollama first (see ollama.reachable).",
+        )
+    if health.has_model(settings.embedding_model):
+        return CheckResult(
+            name=name,
+            passed=True,
+            message=f"Embedding model {settings.embedding_model!r} is pulled.",
+        )
+    return CheckResult(
+        name=name,
+        passed=False,
+        message=f"Embedding model {settings.embedding_model!r} not pulled.",
+        remedy=(
+            f"Run `ollama pull {settings.embedding_model}`. Without it `declaw index` "
+            "cannot embed anything, so document search stays empty."
+        ),
+    )
+
+
+async def check_embedding_model_pulled(settings: Settings) -> CheckResult:
+    """Verify the configured embedding model is among the pulled tags."""
+    health = await OllamaClient(base_url=settings.ollama_base_url).health()
+    return _check_embedding_model_pulled(settings, health)
+
+
 def check_docker_available() -> CheckResult:
     """Verify the Docker CLI is on PATH and the daemon responds."""
     docker_bin = shutil.which("docker")
@@ -200,6 +238,14 @@ async def run_all(settings: Settings | None = None) -> list[CheckResult]:
     ollama_reachable = _check_ollama_reachable(settings, health)
     model_pulled = _check_model_pulled(settings, health)
     sanitizer_model_pulled = _check_sanitizer_model_pulled(settings, health)
+    embedding_model_pulled = _check_embedding_model_pulled(settings, health)
     docker = check_docker_available()
     port = check_port_free(settings)
-    return [ollama_reachable, model_pulled, sanitizer_model_pulled, docker, port]
+    return [
+        ollama_reachable,
+        model_pulled,
+        sanitizer_model_pulled,
+        embedding_model_pulled,
+        docker,
+        port,
+    ]

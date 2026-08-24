@@ -213,7 +213,14 @@ async def test_run_all_returns_one_result_per_check(monkeypatch: pytest.MonkeyPa
         if request.url.path == "/api/version":
             return httpx.Response(200, json={"version": "0.3.14"})
         return httpx.Response(
-            200, json={"models": [{"name": "mistral:7b"}, {"name": "big-sanitizer:7b"}]}
+            200,
+            json={
+                "models": [
+                    {"name": "mistral:7b"},
+                    {"name": "big-sanitizer:7b"},
+                    {"name": "nomic-embed-text"},
+                ]
+            },
         )
 
     _mock_ollama(monkeypatch, handler)
@@ -231,6 +238,7 @@ async def test_run_all_returns_one_result_per_check(monkeypatch: pytest.MonkeyPa
         "ollama.reachable",
         "ollama.model",
         "ollama.sanitizer_model",
+        "ollama.embedding_model",
         "docker.available",
         "gateway.port",
     ]
