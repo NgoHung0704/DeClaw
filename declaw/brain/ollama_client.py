@@ -24,8 +24,18 @@ class OllamaHealth:
     error: str | None = None
 
     def has_model(self, name: str) -> bool:
-        """True if ``name`` is among the pulled models (exact tag match)."""
-        return name in self.models
+        """True if ``name`` is among the pulled models.
+
+        A name with no tag also matches its ``:latest`` tag, because that is
+        what Ollama stores for ``ollama pull nomic-embed-text``. Found live on
+        2026-08-23: without this, a user who follows our own remedy message is
+        still told the model is missing, with no way out of the loop.
+        """
+        if name in self.models:
+            return True
+        if ":" not in name:
+            return f"{name}:latest" in self.models
+        return False
 
 
 class OllamaClient:
