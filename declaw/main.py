@@ -236,6 +236,20 @@ def chat(
         registry = default_registry()
         for plugin_tool in host.model_tools():
             registry.register_instance(plugin_tool)
+
+        from declaw.documents.session import DOC_INTEL_PLUGIN, build_document_stack
+        from declaw.documents.tools import build_document_search_tool
+
+        if any(p.manifest.name == DOC_INTEL_PLUGIN for p in host.loaded()):
+            stack = build_document_stack(settings, host, sanitizer=sanitizer)
+            registry.register_instance(
+                build_document_search_tool(
+                    store=stack.store,
+                    chunk_sanitizer=stack.chunk_sanitizer,
+                    language=settings.language,
+                )
+            )
+
         tools = registry.langchain_tools(
             settings.language, approve, sanitizer=sanitizer, audit=audit
         )
@@ -422,6 +436,94 @@ def audit_export(
     console.print(f"[green]Audit trail exported[/green] to [bold]{written}[/bold]")
     if unreadable:
         console.print(f"[yellow]{unreadable} unreadable audit record(s) skipped.[/yellow]")
+
+
+@cli.command()
+def index(
+    folder: str = typer.Argument("", help="Folder to index. Defaults to the whole workspace."),
+) -> None:
+    """Index the documents in your workspace so you can ask questions about them."""
+    from rich.progress import BarColumn, Progress, TextColumn
+
+    from declaw.db.engine import ensure_schema, get_engine
+    from declaw.documents.indexer import IndexProgress
+    from declaw.documents.session import DOC_INTEL_PLUGIN, build_document_stack
+    from declaw.plugin_host.grants_helper import load_grants, load_state
+    from declaw.plugin_host.host import PluginHost
+    from declaw.tools.builtin._paths import WorkspacePathError, resolve_in_workspace
+
+    settings = get_settings()
+    settings.workspace_dir.mkdir(parents=True, exist_ok=True)
+    target: Path | None = None
+    if folder:
+        try:
+            target = resolve_in_workspace(folder)
+        except WorkspacePathError as exc:
+            console.print(
+                f"[red]{folder} is outside your workspace.[/red] "
+                f"DeClaw only indexes files under {settings.workspace_dir}. ({exc})"
+            )
+            raise typer.Exit(code=1) from None
+
+    async def _run() -> None:
+        # Check the embedding model before doing any work. Ollama answers 404
+        # for an unknown model, so without this every document fails with a
+        # bare HTTP error that tells the user nothing actionable.
+        from declaw.preflight import check_embedding_model_pulled
+
+        embedding = await check_embedding_model_pulled(settings)
+        if not embedding.passed:
+            console.print(f"[red]{embedding.message}[/red] {embedding.remedy}")
+            raise typer.Exit(code=1)
+
+        engine = get_engine()
+        await ensure_schema(engine)
+        host = PluginHost(
+            state=load_state(settings.data_dir),
+            grants=load_grants(settings.data_dir),
+            settings=settings,
+        )
+        await host.start()
+        try:
+            if not any(p.manifest.name == DOC_INTEL_PLUGIN for p in host.loaded()):
+                console.print(
+                    f"[red]The {DOC_INTEL_PLUGIN} plugin is not running,[/red] so there is "
+                    "nothing to parse documents with. Try: "
+                    f"declaw plugins enable {DOC_INTEL_PLUGIN}"
+                )
+                raise typer.Exit(code=1)
+
+            # sanitizer=None: indexing does not classify chunks. That happens
+            # at retrieval, on the top-k that actually enter the model.
+            stack = build_document_stack(settings, host, sanitizer=None)
+            with Progress(
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                TextColumn("{task.completed}/{task.total}"),
+                console=console,
+            ) as progress:
+                task_id = progress.add_task("Indexing", total=1)
+
+                def on_progress(step: IndexProgress) -> None:
+                    progress.update(
+                        task_id,
+                        completed=step.done,
+                        total=step.total or 1,
+                        description=step.path,
+                    )
+
+                report = await stack.indexer.index(target, on_progress=on_progress)
+        finally:
+            await host.stop()
+
+        console.print(
+            f"[green]Indexed {report.indexed}[/green], skipped {report.skipped} unchanged, "
+            f"{report.failed} failed."
+        )
+        for warning in report.warnings:
+            console.print(f"[yellow]{warning}[/yellow]")
+
+    asyncio.run(_run())
 
 
 plugins_app = typer.Typer(help="List and control the plugins DeClaw ships with.")
