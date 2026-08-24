@@ -72,13 +72,14 @@ Fernet key to a subprocess and avoids two processes writing one Chroma store.
 | `parsers/text.py` | TXT + Markdown, heading-aware, YAML frontmatter |
 | `chunker.py` | Heading/paragraph-aware chunking to ~512 tokens |
 
-Token counting reuses the same conservative heuristic as
-`declaw/brain/context.py` (`ceil(chars / 3)` plus per-item overhead). It
-over-estimates by design, so a chunk never turns out larger than budgeted. The
-plugin cannot import it — `declaw.*` is blocked — so the ~20-line function is
-duplicated in the plugin with a comment naming core as the source of truth, and
-a test asserts the two agree on a shared corpus. Duplication here is cheaper
-than either widening the SDK or letting the two drift unnoticed.
+**Token counting** (corrected during spec review): core's
+`declaw/brain/context.py::estimate_tokens` takes a `Sequence[BaseMessage]`, not
+text, so there is nothing for the chunker to reuse even if the plugin could
+import it. What the chunker needs is `ceil(len(text) / 3)` — one line, matching
+core's `_CHARS_PER_TOKEN = 3`, over-estimating by design so a chunk never comes
+out larger than budgeted. The constant is written in the plugin with a comment
+naming `brain/context.py` as its source. No duplication test: a shared
+one-line formula has nothing meaningful to cross-check.
 
 **Core — `declaw/documents/`:**
 
@@ -151,6 +152,13 @@ alembic migration, alongside the existing tables.
 
 Table `indexed_documents`: `path` (PK, workspace-relative), `content_sha256`,
 `size_bytes`, `mtime`, `doc_type`, `chunk_count`, `indexed_at`.
+
+The migration's `down_revision` is **`3f1c2a9d4e5b`** (the episodes table),
+which is the current head — confirmed by reading the chain, not assumed.
+
+Dropping `unstructured` from `pyproject.toml` is safe: it has **zero imports**
+anywhere in `declaw/`, `tests/` or `scripts/` — it was declared in Phase 0 for
+a plan that Decision 2 now changes.
 
 ### Decision 2 — drop `unstructured`; pypdf only
 
@@ -293,6 +301,21 @@ Deterministic throughout: no Ollama, no network, no sleeps.
 PDF export), `python-docx` and `openpyxl` build documents *from known text*, so
 DCL-101's ">95% text recall" is computed exactly rather than eyeballed. A
 zero-text PDF fixture covers the scanned-document path.
+
+Probed during spec review, so the plan does not rest on hope:
+
+- fpdf2 → pypdf round-trips at **100% word recall** with correct page
+  boundaries, so exact-recall assertions are viable.
+- **French accents survive the round-trip intact** on fpdf2's *core* Helvetica
+  font — verified by codepoint (`0xe9` for `é`), with no `U+FFFD` anywhere. No
+  Unicode TTF has to be shipped with the fixtures.
+- `multi_cell` needs an explicit width; `w=0` raises
+  `FPDFException: Not enough horizontal space`.
+
+**A trap worth writing down: on Windows, never diagnose an encoding problem
+from console output.** The first probe appeared to show mangled accents; the
+data was correct all along and the terminal codepage was mangling `print`.
+Assert on codepoints or equality, never on what the console renders.
 
 | Layer | How it is tested |
 | --- | --- |
