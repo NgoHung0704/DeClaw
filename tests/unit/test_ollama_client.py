@@ -105,3 +105,37 @@ async def test_list_models_returns_tag_names() -> None:
     models = await client.list_models()
 
     assert models == ("mistral:7b", "phi3:mini")
+
+
+# --- tag matching (found live 2026-08-23: nomic-embed-text vs :latest) -----
+
+
+def test_has_model_matches_an_exact_tag() -> None:
+    from declaw.brain.ollama_client import OllamaHealth
+
+    health = OllamaHealth(reachable=True, version="1.0", models=("qwen2.5:3b-declaw",))
+    assert health.has_model("qwen2.5:3b-declaw") is True
+
+
+def test_an_untagged_name_matches_the_latest_tag() -> None:
+    # `ollama pull nomic-embed-text` stores it as 'nomic-embed-text:latest'.
+    # Without this, a user who follows our own remedy message is told the
+    # model is still missing -- an unresolvable loop.
+    from declaw.brain.ollama_client import OllamaHealth
+
+    health = OllamaHealth(reachable=True, version="1.0", models=("nomic-embed-text:latest",))
+    assert health.has_model("nomic-embed-text") is True
+
+
+def test_a_different_tag_still_does_not_match() -> None:
+    from declaw.brain.ollama_client import OllamaHealth
+
+    health = OllamaHealth(reachable=True, version="1.0", models=("qwen2.5:7b",))
+    assert health.has_model("qwen2.5:3b") is False
+
+
+def test_an_absent_model_is_absent() -> None:
+    from declaw.brain.ollama_client import OllamaHealth
+
+    health = OllamaHealth(reachable=True, version="1.0", models=("qwen2.5:7b",))
+    assert health.has_model("nomic-embed-text") is False
