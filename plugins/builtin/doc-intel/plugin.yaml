@@ -1,0 +1,13 @@
+manifest_version: 1
+name: doc-intel
+version: 0.1.0
+description_en: Parses PDF, DOCX, XLSX, TXT and Markdown documents into text chunks.
+description_fr: Analyse les documents PDF, DOCX, XLSX, TXT et Markdown en fragments de texte.
+entrypoint: main.py
+author: DeClaw Core Team
+permissions:
+  requested:
+    - filesystem.read
+  denied:
+    - network
+    - credentials
