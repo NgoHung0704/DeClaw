@@ -3,11 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/gen-repo-json.mjs && vite",
     "build": "node scripts/gen-repo-json.mjs && tsc -b && vite build",
     "preview": "vite preview",
-    "guards": "vitest run",
-    "test": "vitest run",
+    "guards": "node scripts/gen-repo-json.mjs && vitest run",
+    "test": "node scripts/gen-repo-json.mjs && vitest run",
     "sync:snippets": "node scripts/sync-snippets.mjs"
   },
   "dependencies": {
