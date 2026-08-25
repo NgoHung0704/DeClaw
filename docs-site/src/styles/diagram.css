@@ -1,6 +1,6 @@
 .diagram {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
   gap: var(--gap);
   align-items: start;
 }
@@ -15,12 +15,9 @@
   padding: 0.75rem;
 }
 
-.diagram__svg {
-  display: block;
-  min-width: 40rem;
-  width: 100%;
-  height: auto;
-}
+/* Rendered at natural size so text stays legible; the container scrolls
+   instead of the drawing shrinking until nothing can be read. */
+.diagram__svg { display: block; max-width: none; }
 
 .diagram__box { fill: var(--step); stroke: var(--line); stroke-width: 1.2; }
 .diagram__box--port { fill: var(--port); }
@@ -36,7 +33,6 @@
   fill: var(--ink-soft);
   font-size: 11px;
   font-family: var(--font);
-  text-anchor: middle;
   paint-order: stroke;
   stroke: var(--panel);
   stroke-width: 3px;

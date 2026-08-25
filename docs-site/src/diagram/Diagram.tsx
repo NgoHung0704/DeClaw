@@ -1,10 +1,10 @@
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLang, useT } from '../i18n/lang';
-import { layoutGraph, type LayoutResult } from './layout';
+import { layoutGraph, requiredColumnGap, type LayoutResult } from './layout';
 import { CompanionList, type ListEdge, type ListNode } from './CompanionList';
 
-const BOX = { maxWidth: 180, fontSize: 13, padding: 10, lineHeight: 17 };
-const COLUMN_GAP = 220;
+const BOX = { maxWidth: 165, fontSize: 13, padding: 9, lineHeight: 16 };
+const MIN_COLUMN_GAP = 150;
 const DIM_OPACITY = 0.22;
 
 export type DiagramNode = ListNode & { column: number };
@@ -31,7 +31,7 @@ export function Diagram(props: {
           label: e.label[lang],
         })),
         box: { ...BOX, maxWidth: widthBudget },
-        columnGap: COLUMN_GAP,
+        columnGap: Math.max(MIN_COLUMN_GAP, requiredColumnGap({ nodes: props.nodes, edges: props.edges })),
       }),
     [props.nodes, props.edges, lang, widthBudget],
   );
@@ -58,6 +58,8 @@ export function Diagram(props: {
         <svg
           ref={svgRef}
           viewBox={`-8 -8 ${layout.width + 40} ${layout.height + 24}`}
+          width={layout.width + 40}
+          height={layout.height + 24}
           className="diagram__svg"
           role="presentation"
         >
@@ -69,7 +71,7 @@ export function Diagram(props: {
                   points={route.points.map((p) => `${p.x},${p.y}`).join(' ')}
                   className="diagram__edge"
                 />
-                <text x={route.labelX} y={route.labelY - 5} className="diagram__edge-label">
+                <text x={route.labelX} y={route.labelY} textAnchor={route.labelAnchor} className="diagram__edge-label">
                   {t(edge.label)}
                 </text>
               </g>
