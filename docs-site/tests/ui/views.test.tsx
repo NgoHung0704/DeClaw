@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { App } from '../../src/App';
@@ -15,10 +15,13 @@ import { githubUrl } from '../../src/content/links';
 import systemsJson from '../../content/systems.json';
 import machineJson from '../../content/machine.json';
 import debtJson from '../../content/debt.json';
-import type { DebtItem, Machine, SystemEdge } from '../../src/content/types';
+import type { DebtItem, SystemEdge } from '../../src/content/types';
 
 const systemEdges = (systemsJson as unknown as { edges: SystemEdge[] }).edges;
-const machine = machineJson as unknown as Machine;
+type MachineContent = {
+  parts: { id: string; component: string; label: { en: string; vi: string }; subparts: { path: string }[] }[];
+};
+const machine = machineJson as unknown as MachineContent;
 const debt = (debtJson as unknown as { items: DebtItem[] }).items;
 
 beforeEach(() => {
@@ -30,7 +33,10 @@ describe('Layer 1 — system map', () => {
     const user = userEvent.setup();
     render(<App />);
     const edge = systemEdges.find((e) => e.contract.path === '/api/embed')!;
-    await user.click(screen.getByRole('button', { name: new RegExp(edge.label.en) }));
+    // Scoped to the drawing: the same edge is also a button in the companion
+    // list, so an unscoped query matches both and proves neither.
+    const svg = within(document.querySelector('.diagram__svg') as unknown as HTMLElement);
+    await user.click(svg.getByRole('button', { name: edge.label.en }));
     expect(window.location.hash).toContain(`edge/${edge.id}`);
     expect(screen.getByText('/api/embed')).toBeTruthy();
   });
@@ -39,7 +45,8 @@ describe('Layer 1 — system map', () => {
     const user = userEvent.setup();
     render(<App />);
     const edge = systemEdges.find((e) => e.contract.path === '/api/embed')!;
-    await user.click(screen.getByRole('button', { name: new RegExp(edge.label.en) }));
+    const svg = within(document.querySelector('.diagram__svg') as unknown as HTMLElement);
+    await user.click(svg.getByRole('button', { name: edge.label.en }));
     for (const err of edge.contract.errors) {
       expect(screen.getByText(err.code)).toBeTruthy();
     }
@@ -93,30 +100,43 @@ describe('Layer 3 — component detail', () => {
 
 describe('the machine', () => {
   const opacityOf = (id: string) =>
-    Number((document.querySelector(`[data-node-group="${id}"]`) as SVGGElement).style.opacity);
+    Number((document.querySelector(`[data-part-group="${id}"]`) as SVGGElement).style.opacity);
 
   it('lights every part the ticket touches, including ones it only traverses', () => {
     const ticket = tickets.find((t) => t.traverses.length > 0)!;
     window.location.hash = `#/machine?ticket=${ticket.id}`;
     render(<App />);
     const related = expectedRelated(ticket);
-    for (const node of machine.nodes) {
-      if (!node.component) continue;
-      const lit = opacityOf(node.id) === 1;
-      expect(lit, `${node.id} (${node.component}) for ${ticket.id}`).toBe(
-        related.has(node.component),
+    for (const part of machine.parts) {
+      const lit = opacityOf(part.id) === 1;
+      expect(lit, `${part.id} (${part.component}) for ${ticket.id}`).toBe(
+        related.has(part.component),
       );
     }
   });
 
-  it('draws the classification gate with more than one labelled exit', () => {
-    // A chain here would misrepresent the code: confirmation and sanitizing
-    // are mutually exclusive branches, not sequential stages.
-    const exits = machine.edges.filter((e) => e.from === 'gate-classification');
-    expect(exits.length).toBeGreaterThan(1);
-    for (const exit of exits) {
-      expect(exit.label.en.trim()).not.toBe('');
-      expect(exit.label.vi.trim()).not.toBe('');
+  it('opens only the clicked part, and can go back', async () => {
+    const user = userEvent.setup();
+    window.location.hash = '#/machine';
+    render(<App />);
+    const part = machine.parts[0];
+    // Before opening, every part is on show.
+    expect(document.querySelectorAll('[data-part-group]').length).toBe(machine.parts.length);
+
+    await user.click(screen.getByRole('button', { name: part.label.en }));
+    expect(window.location.hash).toContain(`part=${part.id}`);
+    // Opening replaces the whole board with that part's own pieces, rather
+    // than adding detail beside the others. The old board animates out, so
+    // this waits for the transition instead of racing it.
+    await waitFor(() =>
+      expect(document.querySelectorAll('[data-part-group]').length).toBe(0),
+    );
+    expect(screen.getAllByText(part.subparts[0].path).length).toBeGreaterThan(0);
+  });
+
+  it('gives every part real modules to open', () => {
+    for (const part of machine.parts) {
+      expect(part.subparts.length, part.id).toBeGreaterThan(0);
     }
   });
 });

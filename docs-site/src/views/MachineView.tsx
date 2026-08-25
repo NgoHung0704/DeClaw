@@ -1,34 +1,32 @@
-import machineJson from '../../content/machine.json';
 import { relatedComponents, ticketById, tickets, ui } from '../content/load';
-import type { Machine } from '../content/types';
 import { useT } from '../i18n/lang';
-import { Diagram } from '../diagram/Diagram';
+import { MachineDiagram, machineContent } from '../diagram/Machine';
 import { useNavigate, useRoute } from '../router/Router';
-
-const machine = machineJson as unknown as Machine;
 
 export function MachineView() {
   const t = useT();
   const route = useRoute();
   const navigate = useNavigate();
+
   const ticketId = route.query.ticket;
   const ticket = ticketId ? ticketById.get(ticketId) : undefined;
+  const openPart = route.query.part ?? null;
 
-  // The union of all three relations. Narrowing this to creates+modifies makes
-  // a ticket's request render as a pipeline that stops in the middle, because
-  // components it calls but never edited would stay dimmed.
+  // The union of all three relations. Narrowing it to creates+modifies renders
+  // a ticket's work as though it stopped mid-machine, because a part it drove
+  // but never edited would stay dark.
   const related = ticket ? relatedComponents(ticket) : null;
 
-  const dimmed = new Set(
-    related
-      ? machine.nodes
-          // Structural nodes — the gate, the intake ports — belong to no
-          // component. Dimming them hides the very branch the reader is
-          // following, so only component-backed parts can dim.
-          .filter((n) => n.component !== undefined && !related.has(n.component))
-          .map((n) => n.id)
-      : [],
-  );
+  const setQuery = (patch: Record<string, string | undefined>) => {
+    const query = { ...route.query };
+    for (const [k, v] of Object.entries(patch)) {
+      if (v === undefined) delete query[k];
+      else query[k] = v;
+    }
+    navigate({ segments: ['machine'], query }, { replace: true });
+  };
+
+  const openedPart = openPart ? machineContent.parts.find((p) => p.id === openPart) ?? null : null;
 
   return (
     <div className="view">
@@ -40,12 +38,7 @@ export function MachineView() {
           <span>{t(ui.components.filterTicket)}</span>
           <select
             value={ticketId ?? ''}
-            onChange={(e) => {
-              const query = { ...route.query };
-              if (e.target.value) query.ticket = e.target.value;
-              else delete query.ticket;
-              navigate({ segments: ['machine'], query }, { replace: true });
-            }}
+            onChange={(e) => setQuery({ ticket: e.target.value || undefined })}
           >
             <option value="">{t(ui.machine.noTicket)}</option>
             {tickets.map((x) => (
@@ -55,32 +48,46 @@ export function MachineView() {
             ))}
           </select>
         </label>
+        {ticket && (
+          <ul className="legend">
+            <li>{`${t(ui.machine.legendCreates)}: ${ticket.creates.join(', ') || '—'}`}</li>
+            <li>{`${t(ui.machine.legendModifies)}: ${ticket.modifies.join(', ') || '—'}`}</li>
+            <li>{`${t(ui.machine.legendTraverses)}: ${ticket.traverses.join(', ') || '—'}`}</li>
+          </ul>
+        )}
       </div>
 
-      {ticket && (
-        <ul className="legend">
-          <li>{`${t(ui.machine.legendCreates)}: ${ticket.creates.join(', ') || '—'}`}</li>
-          <li>{`${t(ui.machine.legendModifies)}: ${ticket.modifies.join(', ') || '—'}`}</li>
-          <li>{`${t(ui.machine.legendTraverses)}: ${ticket.traverses.join(', ') || '—'}`}</li>
-        </ul>
-      )}
-
-      <Diagram
-        nodes={machine.nodes.map((n) => ({
-          id: n.id,
-          label: n.label,
-          kind: n.kind,
-          x: n.x,
-          y: n.y,
-          w: n.w,
-          h: n.h,
-        }))}
-        edges={machine.edges}
-        dimmed={dimmed}
-        onSelect={() => {}}
-        canvas={machine.canvas}
-        label={t(ui.machine.heading)}
+      <MachineDiagram
+        dimmedComponents={related}
+        openPart={openPart}
+        onOpenPart={(id) => setQuery({ part: id ?? undefined })}
+        onOpenComponent={(componentId) =>
+          navigate({ segments: ['component', componentId], query: route.query })
+        }
       />
+
+      {openedPart && (
+        <section className="partdetail">
+          <h3>{t(openedPart.label)}</h3>
+          <p className="lede">{t(openedPart.note)}</p>
+          <button
+            type="button"
+            className="button"
+            onClick={() =>
+              navigate({ segments: ['component', openedPart.component], query: route.query })
+            }
+          >
+            {t(ui.machine.openComponent)}
+          </button>
+          <ul className="modules">
+            {openedPart.subparts.map((sub) => (
+              <li key={sub.id} className="mono">
+                {sub.path}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
