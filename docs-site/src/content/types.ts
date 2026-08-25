@@ -68,6 +68,7 @@ export type SystemNode = {
   kind: 'core' | 'external' | 'store' | 'planned';
   label: Loc;
   note: Loc;
+  group?: string;
 } & Placed;
 
 export type Canvas = { width: number; height: number };
