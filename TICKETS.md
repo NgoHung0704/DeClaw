@@ -577,33 +577,48 @@
 - **Dependencies**: DCL-111, DCL-043
 - **Estimate**: 0.5d
 
-### [ ] DCL-113 — Action: summarize (writes `summary.md`)
-- **Description**: Document- or set-level summary.
-- **Acceptance**: Summary readable, cites sources.
+### [x] DCL-113 — Action: summarize (writes `summary.md`)
+- **Description**: `document_summarize` — the model writes the prose, the tool looks
+  up the sources.
+- **Acceptance**: The tool re-runs retrieval itself and builds the sources block from
+  real metadata, so a citation cannot be invented (the rule that survives from
+  DCL-062). The file carries an EN/FR provenance line. WRITE-class, so confirmed.
 - **Dependencies**: DCL-110
 - **Estimate**: 0.5d
 
-### [ ] DCL-114 — Action: move file (confirmation required)
-- **Description**: Confirmation handshake.
-- **Acceptance**: No move without explicit confirmation.
+### [x] DCL-114 — Action: move file (confirmation required)
+- **Description**: Verified end to end; no new tool written.
+- **Acceptance**: The existing `filesystem_move` (DCL-023) moves AND renames through
+  the confirmation gate; a denied move changes nothing. The index now FOLLOWS the
+  file — before this phase a rename doubled the document and a delete left it, so
+  search cited files that no longer existed and a deleted document kept being quoted.
 - **Dependencies**: DCL-023
 - **Estimate**: 0.25d
 
-### [ ] DCL-115 — Action: rename file (confirmation required)
-- **Description**: Workspace-scoped rename with confirmation.
-- **Acceptance**: Conflicts handled safely.
+### [x] DCL-115 — Action: rename file (confirmation required)
+- **Description**: Verified; the same tool renames (a rename is a move in place).
+- **Acceptance**: Conflicts refused without an explicit `overwrite`. No second move
+  tool was written: two confusable names is exactly what the Phase 1 probes showed a
+  3B model handles badly.
 - **Dependencies**: DCL-023
 - **Estimate**: 0.25d
 
-### [ ] DCL-116 — Action: create folder structure
-- **Description**: E.g., “organize invoices by supplier”.
-- **Acceptance**: Plan presented to user, then executed on approve.
+### [x] DCL-116 — Action: create folder structure
+- **Description**: `organize_files` — a typed multi-file plan, approved once.
+- **Acceptance**: Every move is validated before ANY is executed; one bad entry
+  refuses the whole plan with the offender named. `DeclawTool.confirmation_preview`
+  renders the plan readably, because an unreadable prompt trains people to click
+  through — the one habit the gate exists to prevent.
 - **Dependencies**: DCL-114, DCL-115
 - **Estimate**: 0.5d
 
-### [ ] DCL-117 — French legal document benchmark suite
-- **Description**: 10+ sample contracts; eval Q&A quality.
-- **Acceptance**: Benchmark report committed under `tests/fixtures/`.
+### [x] DCL-117 — French legal document benchmark suite
+- **Description**: Retrieval benchmark: synthetic French development set vs real
+  EUR-Lex held-out set.
+- **Acceptance**: recall@1, recall@5 and MRR reported for both sets side by side,
+  warning when they diverge by more than 5 points. MEASURED 2026-08-26: development
+  recall@5 0.92, held-out 0.50 — a 42-point gap, mirroring the sanitizer's 38. Only
+  the held-out number is meaningful; see docs/phase-8b-review.md before quoting either.
 - **Dependencies**: DCL-110
 - **Estimate**: 1d
 
