@@ -129,6 +129,12 @@ export function layoutGraph(input: LayoutInput): LayoutResult {
   const outCursor = new Map<string, number>();
   const inCursor = new Map<string, number>();
 
+  // Each attachment point needs at least a line of text between it and the
+  // next one, or the labels riding those rows overlap. Dividing the box height
+  // gives 8px for three edges into a 34px box, which is not enough for 11px
+  // text, so the fan is allowed to open slightly wider than the box itself.
+  const MIN_ANCHOR_SPACING = 15;
+
   const anchorY = (
     box: Box,
     id: string,
@@ -138,7 +144,9 @@ export function layoutGraph(input: LayoutInput): LayoutResult {
     const total = totals.get(id) ?? 1;
     const index = cursor.get(id) ?? 0;
     cursor.set(id, index + 1);
-    return box.y + (box.h * (index + 1)) / (total + 1);
+    const span = Math.max(box.h, (total + 1) * MIN_ANCHOR_SPACING);
+    const top = box.y + box.h / 2 - span / 2;
+    return top + (span * (index + 1)) / (total + 1);
   };
 
   const laneCursor = new Map<string, number>();
