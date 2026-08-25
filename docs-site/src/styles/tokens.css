@@ -1,48 +1,117 @@
+/* Blueprint ground: deep navy, a fine technical grid, one signal colour.
+ *
+ * Light values sit on bare :root so a page with no stated preference still has
+ * a complete palette. Dark is the primary look and is applied both by
+ * prefers-color-scheme and by an explicit data-theme, so the toggle wins in
+ * both directions. */
 :root {
-  color-scheme: light dark;
+  --bg: #f6f7f9;
+  --bg-raised: #ffffff;
+  --bg-sunken: #eceef2;
+  --grid-line: #e2e6ec;
 
-  --ink: #14181d;
-  --ink-soft: #4a5560;
-  --paper: #f7f8fa;
-  --panel: #ffffff;
-  --line: #d6dbe2;
-  --accent: #1c5d8f;
-  --accent-soft: #e6f0f8;
-  --warn: #8a4a00;
-  --danger: #8a1f1f;
-  --ok: #1f6b3a;
+  --line: #ccd3dd;
+  --line-soft: #e2e6ec;
 
-  --port: #e6f0f8;
-  --step: #ffffff;
-  --gate: #fdf3e0;
-  --exit: #eaf3ec;
-  --planned: #f2f2f4;
+  --ink: #101620;
+  --ink-muted: #47536a;
+  --ink-faint: #6b7789;
+
+  --signal: #0b6e63;
+  --signal-soft: #dff2ef;
+  --signal-line: #46a99b;
+
+  --warn: #9a5b00;
+  --warn-soft: #fbf0dd;
+  --danger: #a02020;
+  --danger-soft: #fbe6e6;
+
+  --scrim: rgb(16 22 32 / 0.34);
+  --glow: none;
+
+  --font-display: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+
+  /* One type scale for the whole site. Every size on the page comes from this
+     ladder — mixing ad-hoc rem values is what makes a page look like it was
+     assembled by three people who never spoke. */
+  --step--2: clamp(0.69rem, 0.67rem + 0.08vw, 0.74rem);
+  --step--1: clamp(0.79rem, 0.77rem + 0.1vw, 0.85rem);
+  --step-0: clamp(0.94rem, 0.91rem + 0.16vw, 1rem);
+  --step-1: clamp(1.12rem, 1.05rem + 0.34vw, 1.3rem);
+  --step-2: clamp(1.35rem, 1.2rem + 0.75vw, 1.8rem);
+  --step-3: clamp(1.7rem, 1.4rem + 1.5vw, 2.6rem);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+  --space-10: 4.5rem;
 
   --radius: 10px;
-  --gap: 1rem;
-  --measure: 68ch;
+  --radius-sm: 6px;
+  --grid-size: 26px;
 
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  --dur-fast: 140ms;
+  --dur: 240ms;
+  --dur-slow: 620ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --ink: #e8ecf1;
-    --ink-soft: #a6b0bb;
-    --paper: #12161b;
-    --panel: #1a2028;
-    --line: #2f3944;
-    --accent: #7cb7e3;
-    --accent-soft: #1d2b38;
-    --warn: #e0a663;
-    --danger: #e88b8b;
-    --ok: #7fc79b;
+  :root:not([data-theme='light']) {
+    --bg: #080d16;
+    --bg-raised: #0d1520;
+    --bg-sunken: #050810;
+    --grid-line: #101c2b;
 
-    --port: #1d2b38;
-    --step: #1a2028;
-    --gate: #33291a;
-    --exit: #1b2a20;
-    --planned: #23272e;
+    --line: #1e3348;
+    --line-soft: #142334;
+
+    --ink: #dce7f2;
+    --ink-muted: #9db1c6;
+    --ink-faint: #7c8ea4;
+
+    --signal: #3ae0c2;
+    --signal-soft: #102b2a;
+    --signal-line: #1f7f72;
+
+    --warn: #f0aa4d;
+    --warn-soft: #2a2014;
+    --danger: #ff8a8a;
+    --danger-soft: #2b1416;
+
+    --scrim: rgb(2 5 10 / 0.66);
+    --glow: 0 0 18px rgb(58 224 194 / 0.22);
   }
+}
+
+:root[data-theme='dark'] {
+  --bg: #080d16;
+  --bg-raised: #0d1520;
+  --bg-sunken: #050810;
+  --grid-line: #101c2b;
+
+  --line: #1e3348;
+  --line-soft: #142334;
+
+  --ink: #dce7f2;
+  --ink-muted: #9db1c6;
+  --ink-faint: #7c8ea4;
+
+  --signal: #3ae0c2;
+  --signal-soft: #102b2a;
+  --signal-line: #1f7f72;
+
+  --warn: #f0aa4d;
+  --warn-soft: #2a2014;
+  --danger: #ff8a8a;
+  --danger-soft: #2b1416;
+
+  --scrim: rgb(2 5 10 / 0.66);
+  --glow: 0 0 18px rgb(58 224 194 / 0.22);
 }

@@ -8,151 +8,196 @@
     {
       "id": "port-prompt",
       "kind": "port",
-      "column": 0,
       "component": "brain-repl",
       "label": {
         "en": "Intake: a user turn",
         "vi": "Cổng vào: một lượt người dùng"
-      }
+      },
+      "x": 40,
+      "y": 90,
+      "w": 190,
+      "h": 62
     },
     {
       "id": "port-document",
       "kind": "port",
-      "column": 0,
       "component": "documents",
       "label": {
         "en": "Intake: a folder of documents",
         "vi": "Cổng vào: một thư mục tài liệu"
-      }
+      },
+      "x": 40,
+      "y": 470,
+      "w": 190,
+      "h": 62
     },
     {
       "id": "part-brain",
       "kind": "step",
-      "column": 1,
       "component": "brain-loop",
       "label": {
         "en": "Agent loop decides",
         "vi": "Vòng lặp agent quyết định"
-      }
+      },
+      "x": 290,
+      "y": 90,
+      "w": 190,
+      "h": 62
     },
     {
       "id": "part-index",
       "kind": "step",
-      "column": 1,
       "component": "documents",
       "label": {
         "en": "Indexer stores chunks",
         "vi": "Indexer lưu các chunk"
-      }
+      },
+      "x": 290,
+      "y": 470,
+      "w": 190,
+      "h": 62
     },
     {
       "id": "part-audit",
       "kind": "step",
-      "column": 2,
       "component": "audit",
       "label": {
         "en": "Audit wrapper, outermost",
         "vi": "Wrapper audit, ngoài cùng"
-      }
+      },
+      "x": 540,
+      "y": 90,
+      "w": 190,
+      "h": 62
     },
     {
       "id": "gate-classification",
       "kind": "gate",
-      "column": 3,
       "label": {
         "en": "READ, and does it produce outside content?",
         "vi": "Là READ, và có sinh nội dung từ bên ngoài không?"
-      }
+      },
+      "x": 530,
+      "y": 250,
+      "w": 210,
+      "h": 86
     },
     {
       "id": "part-confirmation",
       "kind": "step",
-      "column": 4,
       "component": "tool-registry",
       "label": {
         "en": "Confirmation gate asks you",
         "vi": "Cổng xác nhận hỏi bạn"
-      }
+      },
+      "x": 800,
+      "y": 196,
+      "w": 190,
+      "h": 62
     },
     {
       "id": "part-sanitizer",
       "kind": "step",
-      "column": 4,
       "component": "sanitizer",
       "label": {
         "en": "Sanitizer classifies the content",
         "vi": "Sanitizer phân loại nội dung"
-      }
+      },
+      "x": 800,
+      "y": 330,
+      "w": 190,
+      "h": 62
     },
     {
       "id": "part-tool",
       "kind": "step",
-      "column": 5,
       "component": "tool-filesystem",
       "label": {
         "en": "Tool runs with typed arguments",
         "vi": "Tool chạy với tham số có kiểu"
-      }
+      },
+      "x": 1050,
+      "y": 250,
+      "w": 190,
+      "h": 62
     },
     {
       "id": "part-plugin",
       "kind": "step",
-      "column": 5,
       "component": "plugin-host",
       "label": {
         "en": "Plugin subprocess, over a pipe",
         "vi": "Tiến trình con plugin, qua ống"
-      }
+      },
+      "x": 1050,
+      "y": 470,
+      "w": 190,
+      "h": 62
     },
     {
       "id": "exit-answer",
       "kind": "exit",
-      "column": 6,
       "component": "brain-repl",
       "label": {
         "en": "Exit: an answer, with citations",
         "vi": "Lối ra: câu trả lời, kèm trích dẫn"
-      }
+      },
+      "x": 1300,
+      "y": 90,
+      "w": 200,
+      "h": 62
     },
     {
       "id": "exit-fs",
       "kind": "exit",
-      "column": 6,
       "component": "tool-filesystem",
       "label": {
         "en": "Exit: a file written or moved",
         "vi": "Lối ra: một tệp được ghi hoặc di chuyển"
-      }
+      },
+      "x": 1300,
+      "y": 180,
+      "w": 200,
+      "h": 62
     },
     {
       "id": "exit-audit-db",
       "kind": "exit",
-      "column": 6,
       "component": "persistence",
       "label": {
         "en": "Exit: a row in the audit trail",
         "vi": "Lối ra: một dòng trong nhật ký kiểm toán"
-      }
+      },
+      "x": 1300,
+      "y": 310,
+      "w": 200,
+      "h": 62
     },
     {
       "id": "exit-quarantine",
       "kind": "exit",
-      "column": 6,
       "component": "sanitizer",
       "label": {
         "en": "Exit: quarantined, and you are told",
         "vi": "Lối ra: bị cách ly, và bạn được báo"
-      }
+      },
+      "x": 1300,
+      "y": 400,
+      "w": 200,
+      "h": 62
     },
     {
       "id": "exit-ollama",
       "kind": "exit",
-      "column": 6,
       "component": "brain-model",
       "label": {
         "en": "Exit: the only network egress",
         "vi": "Lối ra: luồng ra mạng duy nhất"
-      }
+      },
+      "x": 1300,
+      "y": 500,
+      "w": 200,
+      "h": 62
     }
   ],
   "edges": [
@@ -309,5 +354,9 @@
         "vi": "kết quả hoặc lời từ chối"
       }
     }
-  ]
+  ],
+  "canvas": {
+    "width": 1540,
+    "height": 640
+  }
 }

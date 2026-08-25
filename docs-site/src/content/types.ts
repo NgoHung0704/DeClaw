@@ -61,13 +61,16 @@ export type Contract = {
   source: Quote;
 };
 
+export type Placed = { x: number; y: number; w: number; h: number };
+
 export type SystemNode = {
   id: string;
   kind: 'core' | 'external' | 'store' | 'planned';
   label: Loc;
   note: Loc;
-  column: number;
-};
+} & Placed;
+
+export type Canvas = { width: number; height: number };
 
 export type SystemEdge = {
   id: string;
@@ -100,5 +103,11 @@ export type DebtItem = {
   source: Quote;
 };
 
-export type MachineNode = FlowNode & { component?: string; column: number };
-export type Machine = { id: string; title: Loc; nodes: MachineNode[]; edges: FlowEdge[] };
+export type MachineNode = FlowNode & { component?: string } & Placed;
+export type Machine = {
+  id: string;
+  title: Loc;
+  nodes: MachineNode[];
+  edges: FlowEdge[];
+  canvas: Canvas;
+};

@@ -22,7 +22,10 @@ export function MachineView() {
   const dimmed = new Set(
     related
       ? machine.nodes
-          .filter((n) => !n.component || !related.has(n.component))
+          // Structural nodes — the gate, the intake ports — belong to no
+          // component. Dimming them hides the very branch the reader is
+          // following, so only component-backed parts can dim.
+          .filter((n) => n.component !== undefined && !related.has(n.component))
           .map((n) => n.id)
       : [],
   );
@@ -67,11 +70,16 @@ export function MachineView() {
           id: n.id,
           label: n.label,
           kind: n.kind,
-          column: n.column,
+          x: n.x,
+          y: n.y,
+          w: n.w,
+          h: n.h,
         }))}
         edges={machine.edges}
         dimmed={dimmed}
         onSelect={() => {}}
+        canvas={machine.canvas}
+        label={t(ui.machine.heading)}
       />
     </div>
   );

@@ -46,15 +46,11 @@ export function DetailView({ id }: { id: string }) {
         <section key={flow.id}>
           <h3>{`${t(ui.detail.flow)} — ${t(flow.title)}`}</h3>
           <Diagram
-            nodes={flow.nodes.map((n, i) => ({
-              id: n.id,
-              label: n.label,
-              kind: n.kind,
-              column: i,
-            }))}
+            nodes={flow.nodes.map((n) => ({ id: n.id, label: n.label, kind: n.kind }))}
             edges={flow.edges}
             dimmed={new Set()}
             onSelect={() => {}}
+            label={t(flow.title)}
           />
         </section>
       ))}
