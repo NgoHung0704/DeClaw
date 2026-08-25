@@ -238,3 +238,21 @@
 .part__back:hover text { fill: var(--signal); }
 
 .partdetail { display: flex; flex-direction: column; gap: var(--space-3); }
+
+/* ---- grouped bands ----------------------------------------------------- */
+
+.band__shape {
+  fill: color-mix(in srgb, var(--bg-raised) 45%, transparent);
+  stroke: var(--line-soft);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.band__label {
+  fill: var(--ink-faint);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.band--g-planned .band__shape { stroke-dasharray: 5 5; }
+.band--g-isolation .band__shape { stroke: var(--signal-line); }

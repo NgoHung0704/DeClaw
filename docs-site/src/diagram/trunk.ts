@@ -28,7 +28,7 @@ const MIN_STUB_SPACING = 19;
 export function busRoute(
   hub: Box,
   targets: { id: string; box: Box }[],
-  opts: { gap?: number } = {},
+  opts: { gap?: number; hubSlot?: { index: number; total: number } } = {},
 ): Bus {
   if (targets.length === 0) return { spine: '', stubs: [] };
 
@@ -37,7 +37,13 @@ export function busRoute(
   const run = nearestTarget - hubRight;
   const trunkX = hubRight + Math.max(opts.gap ?? 0, run * TRUNK_INSET);
 
-  const hubY = hub.y + hub.h / 2;
+  // Several buses leaving one box must leave it at different heights. Sharing
+  // one departure row draws four horizontal runs on top of each other, which
+  // reads as a tangle at exactly the point the reader starts following.
+  const slot = opts.hubSlot;
+  const hubY = slot
+    ? hub.y + (hub.h * (slot.index + 1)) / (slot.total + 1)
+    : hub.y + hub.h / 2;
   const ys = targets.map((t) => t.box.y + t.box.h / 2);
   const top = Math.min(...ys, hubY);
   const bottom = Math.max(...ys, hubY);

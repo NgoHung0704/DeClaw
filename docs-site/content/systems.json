@@ -12,10 +12,10 @@
         "en": "declaw chat, declaw index, declaw report, declaw plugins.",
         "vi": "declaw chat, declaw index, declaw report, declaw plugins."
       },
-      "x": 40,
-      "y": 330,
-      "w": 210,
-      "h": 70
+      "x": 60,
+      "y": 503,
+      "w": 220,
+      "h": 64
     },
     {
       "id": "declaw-core",
@@ -28,10 +28,10 @@
         "en": "The agent loop, tools, sanitizer, memory, audit and the plugin host all live here.",
         "vi": "Vòng lặp agent, tool, sanitizer, bộ nhớ, kiểm toán và plugin host đều nằm ở đây."
       },
-      "x": 400,
-      "y": 312,
-      "w": 250,
-      "h": 106
+      "x": 430,
+      "y": 477,
+      "w": 260,
+      "h": 116
     },
     {
       "id": "ollama",
@@ -44,10 +44,11 @@
         "en": "Local inference over HTTP. The only host outside loopback that the egress allowlist permits.",
         "vi": "Suy luận cục bộ qua HTTP. Là host duy nhất ngoài loopback mà danh sách cho phép egress chấp nhận."
       },
-      "x": 960,
-      "y": 40,
-      "w": 230,
-      "h": 62
+      "x": 1035,
+      "y": 82,
+      "w": 250,
+      "h": 60,
+      "group": "g-model"
     },
     {
       "id": "sqlite",
@@ -60,10 +61,11 @@
         "en": "Four tables: tasks, audit_events, episodes, indexed_documents.",
         "vi": "Bốn bảng: tasks, audit_events, episodes, indexed_documents."
       },
-      "x": 960,
-      "y": 122,
-      "w": 230,
-      "h": 62
+      "x": 1035,
+      "y": 232,
+      "w": 250,
+      "h": 60,
+      "group": "g-stores"
     },
     {
       "id": "chroma",
@@ -76,10 +78,11 @@
         "en": "Two collections, declaw_semantic and declaw_documents. Telemetry is pinned off.",
         "vi": "Hai collection: declaw_semantic và declaw_documents. Telemetry bị tắt cứng."
       },
-      "x": 960,
-      "y": 204,
-      "w": 230,
-      "h": 62
+      "x": 1035,
+      "y": 308,
+      "w": 250,
+      "h": 60,
+      "group": "g-stores"
     },
     {
       "id": "keyring",
@@ -92,10 +95,11 @@
         "en": "Secrets under the declaw service namespace, with an encrypted file only when keyring fails.",
         "vi": "Bí mật nằm dưới namespace dịch vụ declaw, chỉ dùng tệp mã hoá khi keyring không dùng được."
       },
-      "x": 960,
-      "y": 286,
-      "w": 230,
-      "h": 62
+      "x": 1035,
+      "y": 384,
+      "w": 250,
+      "h": 60,
+      "group": "g-stores"
     },
     {
       "id": "plugin-proc",
@@ -108,10 +112,11 @@
         "en": "One isolated Python process per plugin, speaking NDJSON over stdio.",
         "vi": "Mỗi plugin một tiến trình Python cô lập, nói NDJSON qua stdio."
       },
-      "x": 960,
-      "y": 368,
-      "w": 230,
-      "h": 62
+      "x": 1035,
+      "y": 686,
+      "w": 250,
+      "h": 60,
+      "group": "g-isolation"
     },
     {
       "id": "workspace",
@@ -124,10 +129,11 @@
         "en": "The only part of the filesystem tools may touch, enforced by one resolver.",
         "vi": "Phần duy nhất của hệ thống tệp mà tool được chạm tới, do một resolver duy nhất cưỡng chế."
       },
-      "x": 960,
-      "y": 450,
-      "w": 230,
-      "h": 62
+      "x": 1035,
+      "y": 460,
+      "w": 250,
+      "h": 60,
+      "group": "g-stores"
     },
     {
       "id": "policy-json",
@@ -140,10 +146,11 @@
         "en": "plugin_state.json and plugin_grants.json, plain JSON on purpose so a human can read and diff them.",
         "vi": "plugin_state.json và plugin_grants.json, cố ý để JSON thuần để con người đọc và diff được."
       },
-      "x": 960,
-      "y": 532,
-      "w": 230,
-      "h": 62
+      "x": 1035,
+      "y": 536,
+      "w": 250,
+      "h": 60,
+      "group": "g-stores"
     },
     {
       "id": "gateway-planned",
@@ -156,10 +163,11 @@
         "en": "Declared in the architecture and in dependencies. The package is zero bytes.",
         "vi": "Được nêu trong kiến trúc và trong dependency. Package rỗng 0 byte."
       },
-      "x": 960,
-      "y": 614,
-      "w": 230,
-      "h": 62
+      "x": 1035,
+      "y": 836,
+      "w": 250,
+      "h": 60,
+      "group": "g-planned"
     },
     {
       "id": "docker-planned",
@@ -172,10 +180,11 @@
         "en": "Shell execution was dropped from v0.1, so the sandbox was deferred rather than bypassed.",
         "vi": "Việc chạy shell bị loại khỏi v0.1, nên sandbox được hoãn chứ không phải bị đi vòng."
       },
-      "x": 960,
-      "y": 696,
-      "w": 230,
-      "h": 62
+      "x": 1035,
+      "y": 912,
+      "w": 250,
+      "h": 60,
+      "group": "g-planned"
     }
   ],
   "edges": [
@@ -636,7 +645,7 @@
       "to": "workspace",
       "label": {
         "en": "workspace-scoped file access",
-        "vi": "truy cập tệp giới hạn trong workspace"
+        "vi": "truy cập tệp trong workspace"
       },
       "principles": [
         "P6"
@@ -843,7 +852,86 @@
     }
   ],
   "canvas": {
-    "width": 1240,
-    "height": 800
-  }
+    "width": 1370,
+    "height": 1050
+  },
+  "groups": [
+    {
+      "id": "g-model",
+      "label": {
+        "en": "Inference",
+        "vi": "Suy luận"
+      },
+      "note": {
+        "en": "The only thing DeClaw computes with.",
+        "vi": "Thứ duy nhất DeClaw dùng để tính toán."
+      },
+      "members": [
+        "ollama"
+      ],
+      "x": 1010,
+      "y": 40,
+      "w": 300,
+      "h": 120
+    },
+    {
+      "id": "g-stores",
+      "label": {
+        "en": "State on this machine",
+        "vi": "Trạng thái trên máy này"
+      },
+      "note": {
+        "en": "Everything DeClaw keeps, and nothing leaves it.",
+        "vi": "Mọi thứ DeClaw giữ lại, và không gì rời khỏi máy."
+      },
+      "members": [
+        "sqlite",
+        "chroma",
+        "keyring",
+        "workspace",
+        "policy-json"
+      ],
+      "x": 1010,
+      "y": 190,
+      "w": 300,
+      "h": 424
+    },
+    {
+      "id": "g-isolation",
+      "label": {
+        "en": "Isolation boundary",
+        "vi": "Ranh giới cô lập"
+      },
+      "note": {
+        "en": "Untrusted code runs on the far side of a pipe.",
+        "vi": "Mã không tin cậy chạy ở phía bên kia một cái ống."
+      },
+      "members": [
+        "plugin-proc"
+      ],
+      "x": 1010,
+      "y": 644,
+      "w": 300,
+      "h": 120
+    },
+    {
+      "id": "g-planned",
+      "label": {
+        "en": "Declared, not built",
+        "vi": "Đã khai báo, chưa xây"
+      },
+      "note": {
+        "en": "Named in the architecture, zero bytes of code.",
+        "vi": "Có tên trong kiến trúc, không một byte mã nào."
+      },
+      "members": [
+        "gateway-planned",
+        "docker-planned"
+      ],
+      "x": 1010,
+      "y": 794,
+      "w": 300,
+      "h": 196
+    }
+  ]
 }
