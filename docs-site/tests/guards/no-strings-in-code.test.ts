@@ -19,7 +19,20 @@ function tsxFiles(dir: string): string[] {
 
 // Allowlist: whitespace, punctuation and digits carry no meaning to translate.
 const MEANINGLESS = /^[\s\p{P}\p{S}\d]*$/u;
-const JSX_TEXT = />([^<>{}]+)</g;
+
+// The `>` of an arrow function is not the end of a JSX tag. Neutralising it
+// first removes the whole false-positive class this guard hit on real code;
+// the alternative was loosening the match until it caught nothing.
+const stripArrows = (source: string) => source.replace(/=>/g, '==');
+
+// Text between a tag close and a tag open: the `>` must end something
+// tag-shaped, and the `<` must begin an element or a closing tag.
+const JSX_TEXT = /(?<=[A-Za-z0-9"'}/])>([^<>{}]+)<(?=[A-Za-z/])/g;
+
+// Generic type arguments (`useState<Route>(...)`) also put a `>` in front of
+// code. Real UI copy never contains these characters, so anything that does is
+// code caught between two elements, not a string somebody forgot to translate.
+const LOOKS_LIKE_CODE = /[;()=]/;
 const LITERAL_ATTR = /\s(?:aria-label|title|placeholder|alt)\s*=\s*"([^"]*)"/g;
 
 describe('no user-visible string is written in code', () => {
@@ -34,9 +47,9 @@ describe('no user-visible string is written in code', () => {
     const source = readFileSync(file, 'utf8');
 
     it(`${rel} has no literal JSX text`, () => {
-      const offenders = [...source.matchAll(JSX_TEXT)]
+      const offenders = [...stripArrows(source).matchAll(JSX_TEXT)]
         .map((m) => m[1])
-        .filter((t) => !MEANINGLESS.test(t));
+        .filter((t) => !MEANINGLESS.test(t) && !LOOKS_LIKE_CODE.test(t));
       expect(offenders, `move these into content/: ${offenders.join(' | ')}`).toEqual([]);
     });
 

@@ -1,0 +1,72 @@
+.diagram {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+
+/* Wide diagrams scroll inside their own box. The page body never scrolls
+   sideways because of a drawing. */
+.diagram__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 0.75rem;
+}
+
+.diagram__svg {
+  display: block;
+  min-width: 40rem;
+  width: 100%;
+  height: auto;
+}
+
+.diagram__box { fill: var(--step); stroke: var(--line); stroke-width: 1.2; }
+.diagram__box--port { fill: var(--port); }
+.diagram__box--gate { fill: var(--gate); }
+.diagram__box--exit { fill: var(--exit); }
+.diagram__box--planned { fill: var(--planned); stroke-dasharray: 4 3; }
+.diagram__box--external { fill: var(--accent-soft); }
+.diagram__box--store { fill: var(--exit); }
+
+.diagram__label { fill: var(--ink); font-size: 13px; font-family: var(--font); }
+.diagram__edge { fill: none; stroke: var(--ink-soft); stroke-width: 1.4; }
+.diagram__edge-label {
+  fill: var(--ink-soft);
+  font-size: 11px;
+  font-family: var(--font);
+  text-anchor: middle;
+  paint-order: stroke;
+  stroke: var(--panel);
+  stroke-width: 3px;
+}
+
+.companion {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 0.75rem;
+}
+.companion__title { margin: 0 0 0.25rem; font-size: 0.95rem; }
+.companion__hint { margin: 0 0 0.6rem; font-size: 0.84rem; color: var(--ink-soft); }
+.companion__list { display: grid; gap: 0.3rem; }
+.companion__button {
+  width: 100%;
+  text-align: left;
+  font-size: 0.86rem;
+  padding: 0.3rem 0.5rem;
+}
+.companion__button--edge { color: var(--ink-soft); }
+.companion__button[data-dimmed='true'] { opacity: 0.45; }
+
+@media (max-width: 900px) {
+  .diagram { grid-template-columns: 1fr; }
+}
+
+/* Motion is opt-in, never opt-out: the default state has no transitions. */
+@media (prefers-reduced-motion: no-preference) {
+  .panel { transition: transform 160ms ease, opacity 160ms ease; }
+  .diagram__box { transition: opacity 120ms linear; }
+  .card { transition: border-color 120ms linear; }
+}
