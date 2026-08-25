@@ -1,0 +1,89 @@
+{
+  "component": "doc-intel-plugin",
+  "functions": [
+    {
+      "id": "parse",
+      "name": "parse capability",
+      "signature": "@capability(exposed_to_model=False)",
+      "file": "plugins/builtin/doc-intel/main.py",
+      "line": 1,
+      "note": {
+        "en": "The plugin declares exactly one capability, hidden from the model. It is infrastructure the indexer drives.",
+        "vi": "Plugin khai báo đúng một capability và ẩn với model. Đây là hạ tầng do indexer điều khiển."
+      }
+    },
+    {
+      "id": "chunker",
+      "name": "chunker",
+      "signature": "plugins/builtin/doc-intel/chunker.py",
+      "file": "plugins/builtin/doc-intel/chunker.py",
+      "line": 1,
+      "note": {
+        "en": "Heading-aware chunking. Blocks may merge across pages, so a citation can read p.12-13, but never across sheets.",
+        "vi": "Chia chunk có nhận biết tiêu đề. Các khối có thể gộp qua nhiều trang, nên trích dẫn có thể ghi p.12-13, nhưng không bao giờ gộp qua các sheet."
+      }
+    },
+    {
+      "id": "xlsx",
+      "name": "xlsx parser",
+      "signature": "plugins/builtin/doc-intel/parsers/xlsx.py",
+      "file": "plugins/builtin/doc-intel/parsers/xlsx.py",
+      "line": 1,
+      "note": {
+        "en": "Folds column headers into every row, because a bare row of values retrieves badly and answers nothing.",
+        "vi": "Gộp tiêu đề cột vào từng dòng, vì một dòng chỉ toàn giá trị thì truy hồi kém và không trả lời được gì."
+      }
+    },
+    {
+      "id": "docx",
+      "name": "docx parser",
+      "signature": "plugins/builtin/doc-intel/parsers/docx.py",
+      "file": "plugins/builtin/doc-intel/parsers/docx.py",
+      "line": 1,
+      "note": {
+        "en": "Walks the document body rather than paragraphs and tables separately, which would silently move every table to the end.",
+        "vi": "Duyệt phần thân tài liệu thay vì duyệt riêng đoạn văn và bảng, cách làm sau sẽ âm thầm đẩy mọi bảng xuống cuối."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [],
+  "quotes": [
+    {
+      "file": "plugins/builtin/doc-intel/parsers/pdf.py",
+      "start": 1,
+      "end": 20,
+      "anchor": "pdf",
+      "note": {
+        "en": "A scanned PDF is reported as unreadable rather than silently indexed as nothing: there is no OCR in v0.1.",
+        "vi": "PDF scan được báo là không đọc được thay vì âm thầm lập chỉ mục thành rỗng: v0.1 không có OCR."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-thin-plugin",
+      "title": {
+        "en": "The plugin parses and does nothing else",
+        "vi": "Plugin chỉ phân tích, không làm gì khác"
+      },
+      "body": {
+        "en": "The reason to isolate is that these libraries parse adversarial binary files from strangers. Keeping keys and the vector store in core also avoids handing a Fernet key to a subprocess and avoids two writers on one store.",
+        "vi": "Lý do cô lập là các thư viện này phân tích tệp nhị phân thù địch từ người lạ. Giữ khoá và kho vector ở lõi cũng tránh việc trao khoá Fernet cho tiến trình con và tránh hai nơi cùng ghi vào một kho."
+      },
+      "source": {
+        "file": "plugins/builtin/doc-intel/main.py",
+        "start": 1,
+        "end": 20,
+        "anchor": "doc",
+        "note": {
+          "en": "The single capability is declared at the top of the plugin.",
+          "vi": "Capability duy nhất được khai báo ở đầu plugin."
+        }
+      },
+      "principles": [
+        "P5"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "component": "memory",
+  "functions": [
+    {
+      "id": "SemanticMemory",
+      "name": "SemanticMemory",
+      "signature": "add / search / export_all / wipe",
+      "file": "declaw/memory/semantic.py",
+      "line": 1,
+      "note": {
+        "en": "Vector memory over an encrypted Chroma collection. Text is encrypted before it reaches the store and decrypted on the way out.",
+        "vi": "Bộ nhớ vector trên một collection Chroma đã mã hoá. Văn bản được mã hoá trước khi vào kho và giải mã khi lấy ra."
+      }
+    },
+    {
+      "id": "build_chroma_client",
+      "name": "build_chroma_client",
+      "signature": "build_chroma_client(...)",
+      "file": "declaw/memory/chroma.py",
+      "line": 1,
+      "note": {
+        "en": "Pins Chroma telemetry off and persists locally. Chroma phones home by default, which Principle #7 does not allow.",
+        "vi": "Tắt telemetry của Chroma và lưu cục bộ. Mặc định Chroma gửi dữ liệu về nhà, điều Nguyên tắc #7 không cho phép."
+      }
+    },
+    {
+      "id": "gdpr",
+      "name": "export_all / wipe",
+      "signature": "declaw/memory/gdpr.py",
+      "file": "declaw/memory/gdpr.py",
+      "line": 1,
+      "note": {
+        "en": "One self-describing JSON archive with semantic text decrypted, because portability means readable; wipe leaves counts only in the audit trail.",
+        "vi": "Một kho lưu JSON tự mô tả với văn bản ngữ nghĩa đã giải mã, vì mang đi được nghĩa là đọc được; wipe chỉ để lại số đếm trong nhật ký kiểm toán."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [],
+  "quotes": [
+    {
+      "file": "declaw/memory/crypto.py",
+      "start": 1,
+      "end": 20,
+      "anchor": "crypt",
+      "note": {
+        "en": "Document text is encrypted before reaching Chroma; the key is vaulted and never written to disk.",
+        "vi": "Văn bản tài liệu được mã hoá trước khi vào Chroma; khoá nằm trong vault và không bao giờ ghi ra đĩa."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-metadata-plaintext",
+      "title": {
+        "en": "Metadata stays plaintext by design",
+        "vi": "Metadata cố ý để nguyên plaintext"
+      },
+      "body": {
+        "en": "Chroma where-filters operate on metadata, so encrypting it would break retrieval. The rule that keeps this safe is that metadata holds labels only, never payloads.",
+        "vi": "Bộ lọc where của Chroma làm việc trên metadata, nên mã hoá nó sẽ làm hỏng truy hồi. Quy tắc giữ điều này an toàn là metadata chỉ chứa nhãn, không bao giờ chứa nội dung."
+      },
+      "source": {
+        "file": "declaw/memory/semantic.py",
+        "start": 1,
+        "end": 20,
+        "anchor": "semantic",
+        "note": {
+          "en": "Documented where the collection is defined.",
+          "vi": "Ghi ở nơi định nghĩa collection."
+        }
+      },
+      "principles": [
+        "P1"
+      ]
+    }
+  ]
+}

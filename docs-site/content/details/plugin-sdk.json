@@ -1,0 +1,222 @@
+{
+  "component": "plugin-sdk",
+  "functions": [
+    {
+      "id": "capability",
+      "name": "capability",
+      "signature": "@capability(...)",
+      "file": "declaw_plugin_sdk/declaration.py",
+      "line": 72,
+      "note": {
+        "en": "Declares one thing a plugin can do. Every flag defaults to the cautious value, so a forgotten annotation makes the system stricter, never looser.",
+        "vi": "Khai báo một việc plugin làm được. Mọi cờ mặc định ở giá trị thận trọng, nên quên chú thích sẽ khiến hệ thống chặt hơn chứ không lỏng hơn."
+      }
+    },
+    {
+      "id": "handle_line",
+      "name": "handle_line",
+      "signature": "handle_line(...) -> ResponseFrame",
+      "file": "declaw_plugin_sdk/runtime.py",
+      "line": 68,
+      "note": {
+        "en": "Dispatches one request frame. The method is checked before model validation, so version skew against a newer host reports distinctly.",
+        "vi": "Điều phối một khung request. Method được kiểm trước khi validate model, nên lệch phiên bản với host mới hơn sẽ báo lỗi rõ ràng."
+      }
+    },
+    {
+      "id": "run",
+      "name": "run",
+      "signature": "run(plugin)",
+      "file": "declaw_plugin_sdk/runtime.py",
+      "line": 125,
+      "note": {
+        "en": "A synchronous dispatch loop: on Windows the Proactor loop cannot connect_read_pipe to stdin in a child process.",
+        "vi": "Vòng điều phối đồng bộ: trên Windows, vòng lặp Proactor không thể connect_read_pipe tới stdin trong tiến trình con."
+      }
+    },
+    {
+      "id": "bootstrap",
+      "name": "bootstrap",
+      "signature": "python -m declaw_plugin_sdk.bootstrap <dir> <entrypoint>",
+      "file": "declaw_plugin_sdk/bootstrap.py",
+      "line": 1,
+      "note": {
+        "en": "Dups the real stdout away and points fd 1 at stderr before any plugin code runs, so a stray print cannot corrupt the protocol stream.",
+        "vi": "Nhân bản stdout thật ra chỗ khác và trỏ fd 1 sang stderr trước khi bất kỳ mã plugin nào chạy, nên một lệnh print lạc không thể làm hỏng luồng giao thức."
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "sdk-handshake",
+      "title": {
+        "en": "Plugin startup handshake",
+        "vi": "Bắt tay khi khởi động plugin"
+      },
+      "nodes": [
+        {
+          "id": "spawn",
+          "kind": "port",
+          "label": {
+            "en": "Host spawns the bootstrap module",
+            "vi": "Host sinh module bootstrap"
+          }
+        },
+        {
+          "id": "fd",
+          "kind": "step",
+          "label": {
+            "en": "fd 1 redirected to stderr",
+            "vi": "fd 1 chuyển hướng sang stderr"
+          }
+        },
+        {
+          "id": "block",
+          "kind": "step",
+          "label": {
+            "en": "declaw.* imports blocked",
+            "vi": "Chặn import declaw.*"
+          }
+        },
+        {
+          "id": "describe",
+          "kind": "step",
+          "label": {
+            "en": "describe returns capabilities",
+            "vi": "describe trả về danh sách capability"
+          }
+        },
+        {
+          "id": "gate",
+          "kind": "gate",
+          "label": {
+            "en": "Does the host accept the description?",
+            "vi": "Host có chấp nhận mô tả không?"
+          }
+        },
+        {
+          "id": "ready",
+          "kind": "exit",
+          "label": {
+            "en": "Capabilities become proxy tools",
+            "vi": "Capability trở thành proxy tool"
+          }
+        },
+        {
+          "id": "refused",
+          "kind": "exit",
+          "label": {
+            "en": "Load refused, reason audited",
+            "vi": "Từ chối nạp, lý do được kiểm toán"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e-env",
+          "from": "spawn",
+          "to": "fd",
+          "label": {
+            "en": "environment built from scratch",
+            "vi": "môi trường dựng từ đầu"
+          }
+        },
+        {
+          "id": "e-guard",
+          "from": "fd",
+          "to": "block",
+          "label": {
+            "en": "before any plugin code runs",
+            "vi": "trước khi mã plugin chạy"
+          }
+        },
+        {
+          "id": "e-desc",
+          "from": "block",
+          "to": "describe",
+          "label": {
+            "en": "first request on the pipe",
+            "vi": "request đầu tiên trên ống"
+          }
+        },
+        {
+          "id": "e-check",
+          "from": "describe",
+          "to": "gate",
+          "label": {
+            "en": "names, permissions, args schema",
+            "vi": "tên, quyền, schema tham số"
+          }
+        },
+        {
+          "id": "e-ok",
+          "from": "gate",
+          "to": "ready",
+          "label": {
+            "en": "valid and within the manifest",
+            "vi": "hợp lệ và nằm trong manifest"
+          }
+        },
+        {
+          "id": "e-no",
+          "from": "gate",
+          "to": "refused",
+          "label": {
+            "en": "asks for more than the manifest requested",
+            "vi": "đòi nhiều hơn manifest đã xin"
+          }
+        }
+      ]
+    }
+  ],
+  "snippets": [
+    {
+      "file": "declaw_plugin_sdk/protocol.py",
+      "start": 12,
+      "end": 15,
+      "code": "# Hard ceiling on one NDJSON line, in both directions. A parsed 500-page PDF\n# is a few MB of text; 32 MiB leaves headroom without letting a runaway plugin\n# exhaust host memory.\nMAX_FRAME_BYTES = 32 * 1024 * 1024",
+      "caption": {
+        "en": "The frame cap, with the reasoning attached: a parsed 500-page PDF is a few MB of text.",
+        "vi": "Giới hạn khung, kèm lý do: một PDF 500 trang sau khi phân tích chỉ vài MB văn bản."
+      }
+    }
+  ],
+  "quotes": [
+    {
+      "file": "declaw_plugin_sdk/protocol.py",
+      "start": 64,
+      "end": 68,
+      "anchor": "Every flag defaults to the cautious value",
+      "note": {
+        "en": "A capability the author forgot to annotate stays invisible to the model and gated behind confirmation.",
+        "vi": "Một capability mà tác giả quên chú thích sẽ vẫn ẩn với model và bị chặn sau bước xác nhận."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-shared-protocol",
+      "title": {
+        "en": "Both sides import the same protocol module",
+        "vi": "Hai phía cùng import một module giao thức"
+      },
+      "body": {
+        "en": "The host importing the SDK is fine; only the reverse is blocked. Sharing the frame models is what makes the wire format unable to drift between host and plugin.",
+        "vi": "Host import SDK thì không sao; chỉ chiều ngược lại bị chặn. Việc dùng chung các model khung là thứ khiến định dạng truyền không thể lệch giữa host và plugin."
+      },
+      "source": {
+        "file": "declaw_plugin_sdk/protocol.py",
+        "start": 1,
+        "end": 10,
+        "anchor": "Frames exchanged over",
+        "note": {
+          "en": "The module exists for exactly this reason.",
+          "vi": "Module tồn tại đúng vì lý do này."
+        }
+      },
+      "principles": [
+        "P6"
+      ]
+    }
+  ]
+}

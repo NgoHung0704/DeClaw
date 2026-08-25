@@ -1,0 +1,205 @@
+{
+  "component": "audit",
+  "functions": [
+    {
+      "id": "wrap_tool_with_audit",
+      "name": "wrap_tool_with_audit",
+      "signature": "wrap_tool_with_audit(lc_tool, *, tool, language, audit) -> StructuredTool",
+      "file": "declaw/audit/tooling.py",
+      "line": 32,
+      "note": {
+        "en": "The outermost wrapper. It records what was asked, whether it ran, was denied or failed, and how long it took.",
+        "vi": "Wrapper ngoài cùng. Nó ghi lại đã yêu cầu gì, có chạy không, bị từ chối hay lỗi, và mất bao lâu."
+      }
+    },
+    {
+      "id": "DbAuditLogger",
+      "name": "DbAuditLogger",
+      "signature": "class DbAuditLogger",
+      "file": "declaw/audit/logger.py",
+      "line": 46,
+      "note": {
+        "en": "One committed session per event. Storage errors are logged, never raised: observability must not reduce availability.",
+        "vi": "Mỗi sự kiện một phiên commit. Lỗi lưu trữ được ghi log chứ không ném ra: khả năng quan sát không được làm giảm tính sẵn sàng."
+      }
+    },
+    {
+      "id": "EgressMonitor",
+      "name": "EgressMonitor",
+      "signature": "class EgressMonitor",
+      "file": "declaw/audit/egress.py",
+      "line": 36,
+      "note": {
+        "en": "Patches httpx send so every outbound request emits an event, whether it succeeds or fails. Hosts outside the allowlist are flagged.",
+        "vi": "Vá httpx send để mọi request đi ra đều phát sinh sự kiện, thành công hay thất bại. Host ngoài danh sách cho phép bị gắn cờ."
+      }
+    },
+    {
+      "id": "allowed_hosts_from_settings",
+      "name": "allowed_hosts_from_settings",
+      "signature": "allowed_hosts_from_settings(ollama_base_url: str) -> frozenset[str]",
+      "file": "declaw/audit/egress.py",
+      "line": 154,
+      "note": {
+        "en": "The allowlist is loopback plus the configured Ollama host, and nothing else.",
+        "vi": "Danh sách cho phép gồm loopback cộng host Ollama đã cấu hình, không có gì khác."
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "audit-one-call",
+      "title": {
+        "en": "What gets recorded on one tool call",
+        "vi": "Những gì được ghi lại trong một lời gọi tool"
+      },
+      "nodes": [
+        {
+          "id": "call",
+          "kind": "port",
+          "label": {
+            "en": "Model calls a tool",
+            "vi": "Model gọi một tool"
+          }
+        },
+        {
+          "id": "clip",
+          "kind": "step",
+          "label": {
+            "en": "Arguments clipped and fingerprinted",
+            "vi": "Tham số bị cắt và lấy vân tay"
+          }
+        },
+        {
+          "id": "outcome",
+          "kind": "gate",
+          "label": {
+            "en": "How did it end?",
+            "vi": "Kết thúc thế nào?"
+          }
+        },
+        {
+          "id": "ok",
+          "kind": "exit",
+          "label": {
+            "en": "ToolCallEvent: ok",
+            "vi": "ToolCallEvent: ok"
+          }
+        },
+        {
+          "id": "denied",
+          "kind": "exit",
+          "label": {
+            "en": "ToolCallEvent: denied",
+            "vi": "ToolCallEvent: denied"
+          }
+        },
+        {
+          "id": "error",
+          "kind": "exit",
+          "label": {
+            "en": "ToolCallEvent: error",
+            "vi": "ToolCallEvent: error"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e-clip",
+          "from": "call",
+          "to": "clip",
+          "label": {
+            "en": "long strings truncated, SHA-256 kept",
+            "vi": "chuỗi dài bị cắt, giữ lại SHA-256"
+          }
+        },
+        {
+          "id": "e-run",
+          "from": "clip",
+          "to": "outcome",
+          "label": {
+            "en": "tool runs",
+            "vi": "tool chạy"
+          }
+        },
+        {
+          "id": "e-ok",
+          "from": "outcome",
+          "to": "ok",
+          "label": {
+            "en": "returned a result",
+            "vi": "trả về kết quả"
+          }
+        },
+        {
+          "id": "e-denied",
+          "from": "outcome",
+          "to": "denied",
+          "label": {
+            "en": "exact match on the denial string",
+            "vi": "khớp chính xác chuỗi từ chối"
+          }
+        },
+        {
+          "id": "e-error",
+          "from": "outcome",
+          "to": "error",
+          "label": {
+            "en": "raised",
+            "vi": "ném lỗi"
+          }
+        }
+      ]
+    }
+  ],
+  "snippets": [
+    {
+      "file": "declaw/audit/tooling.py",
+      "start": 1,
+      "end": 7,
+      "code": "\"\"\"Audit wrapper for brain-facing tools (DCL-061).\n\n``wrap_tool_with_audit`` is the outermost layer of the tool onion the registry\nbuilds (audit around confirmation around sanitizer around the tool), so the\nemitted :class:`ToolCallEvent` describes the call exactly as the model\nexperienced it: what was asked, whether it ran, was denied, or blew up, and\nhow long it took.",
+      "caption": {
+        "en": "The tool onion, described where it is built: audit around confirmation around sanitizer around the tool.",
+        "vi": "Củ hành tool, mô tả ngay nơi dựng nó: audit bọc xác nhận bọc sanitizer bọc tool."
+      }
+    }
+  ],
+  "quotes": [
+    {
+      "file": "declaw/audit/tooling.py",
+      "start": 1,
+      "end": 7,
+      "anchor": "the outermost layer of the tool onion",
+      "note": {
+        "en": "Because audit is outermost, the recorded event matches what the model experienced rather than what the tool did internally.",
+        "vi": "Vì audit ở ngoài cùng, sự kiện được ghi khớp với thứ model trải nghiệm chứ không phải thứ tool làm bên trong."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-templates-not-llm",
+      "title": {
+        "en": "Audit prose is templated, never generated",
+        "vi": "Câu chữ kiểm toán dùng template, không do model sinh"
+      },
+      "body": {
+        "en": "For regulated professionals the audit log must be hallucination-free, so summaries are deterministic per-tool templates in both languages. A model writing the log could describe an action that never happened.",
+        "vi": "Với người hành nghề có quản lý, nhật ký kiểm toán phải không có ảo giác, nên phần tóm tắt là template tất định cho từng tool, ở cả hai ngôn ngữ. Một model viết nhật ký có thể mô tả hành động chưa từng xảy ra."
+      },
+      "source": {
+        "file": "declaw/audit/summary.py",
+        "start": 1,
+        "end": 20,
+        "anchor": "summary",
+        "note": {
+          "en": "The decision is recorded in the summary module.",
+          "vi": "Quyết định được ghi trong module summary."
+        }
+      },
+      "principles": [
+        "P7"
+      ]
+    }
+  ]
+}

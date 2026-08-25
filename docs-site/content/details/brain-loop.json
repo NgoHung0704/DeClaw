@@ -1,0 +1,186 @@
+{
+  "component": "brain-loop",
+  "functions": [
+    {
+      "id": "build_agent_graph",
+      "name": "build_agent_graph",
+      "signature": "build_agent_graph(*, model, tools) -> CompiledStateGraph",
+      "file": "declaw/brain/loop.py",
+      "line": 76,
+      "note": {
+        "en": "Compiles the think -> tool-call -> observe machine. The model is injected, so the loop is testable with no Ollama daemon running.",
+        "vi": "Biên dịch cỗ máy nghĩ -> gọi tool -> quan sát. Model được tiêm vào, nên vòng lặp kiểm thử được mà không cần daemon Ollama."
+      }
+    },
+    {
+      "id": "tool_error_message",
+      "name": "tool_error_message",
+      "signature": "tool_error_message(exc: Exception) -> str",
+      "file": "declaw/brain/loop.py",
+      "line": 59,
+      "note": {
+        "en": "Turns a tool failure into an observation. Expected refusals go to the model verbatim so it can recover; unexpected ones are logged and reported generically.",
+        "vi": "Biến lỗi tool thành một quan sát. Lỗi từ chối dự kiến được đưa nguyên văn cho model để nó tự sửa; lỗi bất ngờ thì ghi log và báo chung chung."
+      }
+    },
+    {
+      "id": "AgentState",
+      "name": "AgentState",
+      "signature": "class AgentState(BaseModel)",
+      "file": "declaw/brain/state.py",
+      "line": 33,
+      "note": {
+        "en": "Five typed slots. Only messages carries a reducer, so it appends instead of overwriting; the rest are plain fields.",
+        "vi": "Năm ô có kiểu. Chỉ messages mang reducer nên nó nối thêm thay vì ghi đè; các ô còn lại là trường thường."
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "agent-turn",
+      "title": {
+        "en": "One user turn through the loop",
+        "vi": "Một lượt người dùng đi qua vòng lặp"
+      },
+      "nodes": [
+        {
+          "id": "human",
+          "kind": "port",
+          "label": {
+            "en": "Human message",
+            "vi": "Tin nhắn người dùng"
+          }
+        },
+        {
+          "id": "agent",
+          "kind": "step",
+          "label": {
+            "en": "agent node calls the model",
+            "vi": "Node agent gọi model"
+          }
+        },
+        {
+          "id": "cond",
+          "kind": "gate",
+          "label": {
+            "en": "Did the model request tools?",
+            "vi": "Model có yêu cầu tool không?"
+          }
+        },
+        {
+          "id": "tools",
+          "kind": "step",
+          "label": {
+            "en": "ToolNode runs the requested tools",
+            "vi": "ToolNode chạy các tool được yêu cầu"
+          }
+        },
+        {
+          "id": "end",
+          "kind": "exit",
+          "label": {
+            "en": "Answer returned to the user",
+            "vi": "Câu trả lời trả về người dùng"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e-in",
+          "from": "human",
+          "to": "agent",
+          "label": {
+            "en": "appended to state.messages",
+            "vi": "nối vào state.messages"
+          }
+        },
+        {
+          "id": "e-think",
+          "from": "agent",
+          "to": "cond",
+          "label": {
+            "en": "AIMessage produced",
+            "vi": "sinh ra AIMessage"
+          }
+        },
+        {
+          "id": "e-yes",
+          "from": "cond",
+          "to": "tools",
+          "label": {
+            "en": "yes: tool_calls present",
+            "vi": "có: tồn tại tool_calls"
+          }
+        },
+        {
+          "id": "e-no",
+          "from": "cond",
+          "to": "end",
+          "label": {
+            "en": "no: plain answer",
+            "vi": "không: trả lời thẳng"
+          }
+        },
+        {
+          "id": "e-observe",
+          "from": "tools",
+          "to": "agent",
+          "label": {
+            "en": "ToolMessage observed, think again",
+            "vi": "quan sát ToolMessage, nghĩ tiếp"
+          }
+        }
+      ]
+    }
+  ],
+  "snippets": [
+    {
+      "file": "declaw/brain/loop.py",
+      "start": 91,
+      "end": 98,
+      "code": "    builder = StateGraph(AgentState)\n    builder.add_node(\"agent\", think)\n    builder.add_node(\"tools\", ToolNode(list(tools), handle_tool_errors=tool_error_message))\n\n    builder.add_edge(START, \"agent\")\n    builder.add_conditional_edges(\"agent\", tools_condition)\n    builder.add_edge(\"tools\", \"agent\")\n",
+      "caption": {
+        "en": "The whole machine: two nodes, one conditional edge back to the agent.",
+        "vi": "Toàn bộ cỗ máy: hai node, một cạnh điều kiện quay lại agent."
+      }
+    }
+  ],
+  "quotes": [
+    {
+      "file": "declaw/brain/loop.py",
+      "start": 59,
+      "end": 65,
+      "anchor": "annotation is load-bearing",
+      "note": {
+        "en": "The exception annotation on the handler decides which failures langgraph catches. Widen or narrow it and different errors escape the graph.",
+        "vi": "Chú thích kiểu ngoại lệ trên handler quyết định langgraph bắt lỗi nào. Nới hay thu hẹp nó là các lỗi khác sẽ thoát khỏi graph."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-tool-error",
+      "title": {
+        "en": "A refused tool must not kill the session",
+        "vi": "Tool bị từ chối không được làm sập phiên"
+      },
+      "body": {
+        "en": "DeClaw tools refuse constantly, and langgraph 1.2 re-raises everything except bad arguments. Without an explicit handler a refused write ended the whole chat.",
+        "vi": "Tool của DeClaw từ chối liên tục, còn langgraph 1.2 ném lại mọi lỗi trừ lỗi sai tham số. Không có handler tường minh thì một lần ghi bị từ chối làm kết thúc cả phiên chat."
+      },
+      "source": {
+        "file": "declaw/brain/loop.py",
+        "start": 18,
+        "end": 23,
+        "anchor": "A raising tool is normal operation here",
+        "note": {
+          "en": "Written at the top of the module that fixes it.",
+          "vi": "Ghi ngay đầu module đã sửa lỗi này."
+        }
+      },
+      "principles": [
+        "P6"
+      ]
+    }
+  ]
+}

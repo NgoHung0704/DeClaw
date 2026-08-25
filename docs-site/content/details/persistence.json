@@ -1,0 +1,98 @@
+{
+  "component": "persistence",
+  "functions": [
+    {
+      "id": "Task",
+      "name": "Task",
+      "signature": "class Task(SQLModel, table=True)",
+      "file": "declaw/db/models.py",
+      "line": 81,
+      "note": {
+        "en": "One row per user request handed to the agent.",
+        "vi": "Mỗi yêu cầu người dùng giao cho agent là một dòng."
+      }
+    },
+    {
+      "id": "AuditEvent",
+      "name": "AuditEvent",
+      "signature": "class AuditEvent(SQLModel, table=True)",
+      "file": "declaw/db/models.py",
+      "line": 131,
+      "note": {
+        "en": "Append-only audit record, with a composite index covering the dominant query: events for a task in time order.",
+        "vi": "Bản ghi kiểm toán chỉ thêm, có chỉ mục ghép phục vụ truy vấn phổ biến nhất: sự kiện của một task theo thứ tự thời gian."
+      }
+    },
+    {
+      "id": "IndexedDocument",
+      "name": "IndexedDocument",
+      "signature": "class IndexedDocument(SQLModel, table=True)",
+      "file": "declaw/db/models.py",
+      "line": 161,
+      "note": {
+        "en": "The document catalog keyed by workspace-relative path; the content hash is what makes re-indexing cheap.",
+        "vi": "Catalog tài liệu khoá theo đường dẫn tương đối trong workspace; hash nội dung là thứ khiến việc lập chỉ mục lại rẻ."
+      }
+    },
+    {
+      "id": "UTCDateTime",
+      "name": "UTCDateTime",
+      "signature": "class UTCDateTime(TypeDecorator[datetime])",
+      "file": "declaw/db/models.py",
+      "line": 35,
+      "note": {
+        "en": "Re-attaches UTC tzinfo on read, because aiosqlite returns naive datetimes even when the column declares a timezone.",
+        "vi": "Gắn lại tzinfo UTC khi đọc, vì aiosqlite trả về datetime không có múi giờ ngay cả khi cột đã khai báo timezone."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [
+    {
+      "file": "declaw/db/models.py",
+      "start": 161,
+      "end": 169,
+      "code": "class IndexedDocument(SQLModel, table=True):\n    \"\"\"One indexed document, keyed by workspace-relative path (DCL-108).\n\n    The content hash is what makes re-indexing cheap: an unchanged file is\n    skipped without ever being opened by a parser. SQLite rather than a JSON\n    file — the opposite of the call made for ``plugin_state.json``, because\n    this is a machine-maintained index over potentially thousands of files\n    looked up by hash on every pass, not four fields of user policy.\n    \"\"\"",
+      "caption": {
+        "en": "The catalog docstring states the opposite storage call from plugin_state.json, and why.",
+        "vi": "Docstring của catalog nêu rõ lựa chọn lưu trữ ngược với plugin_state.json, và lý do."
+      }
+    }
+  ],
+  "quotes": [
+    {
+      "file": "declaw/db/models.py",
+      "start": 9,
+      "end": 11,
+      "anchor": "integer PKs would collide",
+      "note": {
+        "en": "UUID primary keys are chosen for a future where data syncs between devices.",
+        "vi": "Khoá chính UUID được chọn cho tương lai dữ liệu đồng bộ giữa các máy."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-sqlite-for-catalog",
+      "title": {
+        "en": "The catalog is SQLite, the plugin policy is JSON",
+        "vi": "Catalog dùng SQLite, còn chính sách plugin dùng JSON"
+      },
+      "body": {
+        "en": "Deliberately opposite calls. Plugin state is four fields of user policy, so being readable and diffable is a feature. The catalog is a machine-maintained index over thousands of files looked up by hash on every pass.",
+        "vi": "Hai lựa chọn cố ý ngược nhau. Trạng thái plugin là bốn trường chính sách của người dùng, nên đọc được và diff được là một tính năng. Catalog là chỉ mục do máy duy trì trên hàng nghìn tệp, tra theo hash ở mỗi lượt."
+      },
+      "source": {
+        "file": "declaw/db/models.py",
+        "start": 161,
+        "end": 169,
+        "anchor": "the opposite of the call made for",
+        "note": {
+          "en": "The trade-off is documented in the model itself.",
+          "vi": "Đánh đổi được ghi ngay trong model."
+        }
+      },
+      "principles": []
+    }
+  ]
+}

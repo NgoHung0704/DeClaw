@@ -1,0 +1,56 @@
+{
+  "component": "tool-base",
+  "functions": [
+    {
+      "id": "DeclawTool",
+      "name": "DeclawTool",
+      "signature": "class DeclawTool(BaseModel, Generic[ArgsT])",
+      "file": "declaw/tools/base.py",
+      "line": 1,
+      "note": {
+        "en": "The typed tool definition every tool subclasses, parameterised by its concrete args schema.",
+        "vi": "Định nghĩa tool có kiểu mà mọi tool kế thừa, tham số hoá bằng schema tham số cụ thể của nó."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [],
+  "quotes": [
+    {
+      "file": "declaw/tools/base.py",
+      "start": 1,
+      "end": 20,
+      "anchor": "tool",
+      "note": {
+        "en": "Tools are frozen pydantic models, so a tool definition cannot be mutated at runtime.",
+        "vi": "Tool là model pydantic đóng băng, nên định nghĩa tool không thể bị thay đổi lúc chạy."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-bilingual-descriptions",
+      "title": {
+        "en": "Bilingual descriptions are not decoration",
+        "vi": "Mô tả song ngữ không phải để trang trí"
+      },
+      "body": {
+        "en": "With English-only descriptions the measured French implicit tool-calling rate was zero out of five. The locale-correct description is what bind_tools sends the model.",
+        "vi": "Với mô tả chỉ có tiếng Anh, tỉ lệ gọi tool ngầm định trong tiếng Pháp đo được là 0/5. Mô tả đúng ngôn ngữ chính là thứ bind_tools gửi cho model."
+      },
+      "source": {
+        "file": "declaw/tools/base.py",
+        "start": 1,
+        "end": 20,
+        "anchor": "tool",
+        "note": {
+          "en": "The base class carries description_en and description_fr as separate required fields.",
+          "vi": "Lớp cơ sở mang description_en và description_fr là hai trường bắt buộc tách biệt."
+        }
+      },
+      "principles": [
+        "P6"
+      ]
+    }
+  ]
+}
