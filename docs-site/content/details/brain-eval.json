@@ -1,0 +1,65 @@
+{
+  "component": "brain-eval",
+  "functions": [
+    {
+      "id": "run_prompt",
+      "name": "run_prompt",
+      "signature": "run_prompt(...) -> TurnResult",
+      "file": "declaw/brain/eval.py",
+      "line": 177,
+      "note": {
+        "en": "Runs one corpus prompt through a graph and records which tool was called, with what arguments, and how long it took.",
+        "vi": "Chạy một prompt trong bộ mẫu qua graph và ghi lại tool nào được gọi, với tham số gì, mất bao lâu."
+      }
+    },
+    {
+      "id": "summarize",
+      "name": "summarize",
+      "signature": "summarize(label, results, console) -> None",
+      "file": "declaw/brain/eval.py",
+      "line": 233,
+      "note": {
+        "en": "Aggregates a run into the comparison table that model and prompt decisions were actually made from.",
+        "vi": "Tổng hợp một lần chạy thành bảng so sánh mà các quyết định về model và prompt thực sự dựa vào."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [],
+  "quotes": [
+    {
+      "file": "declaw/brain/eval.py",
+      "start": 60,
+      "end": 66,
+      "anchor": "class Prompt",
+      "note": {
+        "en": "The corpus is frozen so runs stay comparable across model and prompt changes.",
+        "vi": "Bộ mẫu bị đóng băng để các lần chạy còn so sánh được khi đổi model hay đổi prompt."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-frozen-corpus",
+      "title": {
+        "en": "The corpus is locked on purpose",
+        "vi": "Bộ mẫu bị khoá có chủ đích"
+      },
+      "body": {
+        "en": "A benchmark that changes with each run measures nothing. Freezing the 50 prompts is what made the model swap a measurement instead of an impression.",
+        "vi": "Một benchmark thay đổi theo mỗi lần chạy thì không đo được gì. Việc đóng băng 50 prompt là thứ biến việc đổi model thành phép đo chứ không phải cảm nhận."
+      },
+      "source": {
+        "file": "declaw/brain/eval.py",
+        "start": 1,
+        "end": 12,
+        "anchor": "frozen 50-prompt corpus",
+        "note": {
+          "en": "Stated in the module docstring.",
+          "vi": "Ghi trong docstring của module."
+        }
+      },
+      "principles": []
+    }
+  ]
+}

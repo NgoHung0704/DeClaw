@@ -1,0 +1,937 @@
+{
+  "id": "system-map",
+  "nodes": [
+    {
+      "id": "user-cli",
+      "kind": "core",
+      "label": {
+        "en": "You, at the terminal",
+        "vi": "Bạn, ở terminal"
+      },
+      "note": {
+        "en": "declaw chat, declaw index, declaw report, declaw plugins.",
+        "vi": "declaw chat, declaw index, declaw report, declaw plugins."
+      },
+      "x": 60,
+      "y": 503,
+      "w": 220,
+      "h": 64
+    },
+    {
+      "id": "declaw-core",
+      "kind": "core",
+      "label": {
+        "en": "DeClaw core process",
+        "vi": "Tiến trình lõi DeClaw"
+      },
+      "note": {
+        "en": "The agent loop, tools, sanitizer, memory, audit and the plugin host all live here.",
+        "vi": "Vòng lặp agent, tool, sanitizer, bộ nhớ, kiểm toán và plugin host đều nằm ở đây."
+      },
+      "x": 430,
+      "y": 477,
+      "w": 260,
+      "h": 116
+    },
+    {
+      "id": "ollama",
+      "kind": "external",
+      "label": {
+        "en": "Ollama daemon",
+        "vi": "Daemon Ollama"
+      },
+      "note": {
+        "en": "Local inference over HTTP. The only host outside loopback that the egress allowlist permits.",
+        "vi": "Suy luận cục bộ qua HTTP. Là host duy nhất ngoài loopback mà danh sách cho phép egress chấp nhận."
+      },
+      "x": 1035,
+      "y": 82,
+      "w": 250,
+      "h": 60,
+      "group": "g-model"
+    },
+    {
+      "id": "sqlite",
+      "kind": "store",
+      "label": {
+        "en": "SQLite database",
+        "vi": "Cơ sở dữ liệu SQLite"
+      },
+      "note": {
+        "en": "Four tables: tasks, audit_events, episodes, indexed_documents.",
+        "vi": "Bốn bảng: tasks, audit_events, episodes, indexed_documents."
+      },
+      "x": 1035,
+      "y": 232,
+      "w": 250,
+      "h": 60,
+      "group": "g-stores"
+    },
+    {
+      "id": "chroma",
+      "kind": "store",
+      "label": {
+        "en": "ChromaDB vector store",
+        "vi": "Kho vector ChromaDB"
+      },
+      "note": {
+        "en": "Two collections, declaw_semantic and declaw_documents. Telemetry is pinned off.",
+        "vi": "Hai collection: declaw_semantic và declaw_documents. Telemetry bị tắt cứng."
+      },
+      "x": 1035,
+      "y": 308,
+      "w": 250,
+      "h": 60,
+      "group": "g-stores"
+    },
+    {
+      "id": "keyring",
+      "kind": "store",
+      "label": {
+        "en": "OS credential vault",
+        "vi": "Vault credential của hệ điều hành"
+      },
+      "note": {
+        "en": "Secrets under the declaw service namespace, with an encrypted file only when keyring fails.",
+        "vi": "Bí mật nằm dưới namespace dịch vụ declaw, chỉ dùng tệp mã hoá khi keyring không dùng được."
+      },
+      "x": 1035,
+      "y": 384,
+      "w": 250,
+      "h": 60,
+      "group": "g-stores"
+    },
+    {
+      "id": "plugin-proc",
+      "kind": "external",
+      "label": {
+        "en": "Plugin subprocess",
+        "vi": "Tiến trình con plugin"
+      },
+      "note": {
+        "en": "One isolated Python process per plugin, speaking NDJSON over stdio.",
+        "vi": "Mỗi plugin một tiến trình Python cô lập, nói NDJSON qua stdio."
+      },
+      "x": 1035,
+      "y": 686,
+      "w": 250,
+      "h": 60,
+      "group": "g-isolation"
+    },
+    {
+      "id": "workspace",
+      "kind": "store",
+      "label": {
+        "en": "Workspace folder",
+        "vi": "Thư mục workspace"
+      },
+      "note": {
+        "en": "The only part of the filesystem tools may touch, enforced by one resolver.",
+        "vi": "Phần duy nhất của hệ thống tệp mà tool được chạm tới, do một resolver duy nhất cưỡng chế."
+      },
+      "x": 1035,
+      "y": 460,
+      "w": 250,
+      "h": 60,
+      "group": "g-stores"
+    },
+    {
+      "id": "policy-json",
+      "kind": "store",
+      "label": {
+        "en": "Plugin policy files",
+        "vi": "Tệp chính sách plugin"
+      },
+      "note": {
+        "en": "plugin_state.json and plugin_grants.json, plain JSON on purpose so a human can read and diff them.",
+        "vi": "plugin_state.json và plugin_grants.json, cố ý để JSON thuần để con người đọc và diff được."
+      },
+      "x": 1035,
+      "y": 536,
+      "w": 250,
+      "h": 60,
+      "group": "g-stores"
+    },
+    {
+      "id": "gateway-planned",
+      "kind": "planned",
+      "label": {
+        "en": "FastAPI gateway (not built)",
+        "vi": "Gateway FastAPI (chưa xây)"
+      },
+      "note": {
+        "en": "Declared in the architecture and in dependencies. The package is zero bytes.",
+        "vi": "Được nêu trong kiến trúc và trong dependency. Package rỗng 0 byte."
+      },
+      "x": 1035,
+      "y": 836,
+      "w": 250,
+      "h": 60,
+      "group": "g-planned"
+    },
+    {
+      "id": "docker-planned",
+      "kind": "planned",
+      "label": {
+        "en": "Docker sandbox (deferred)",
+        "vi": "Sandbox Docker (đã hoãn)"
+      },
+      "note": {
+        "en": "Shell execution was dropped from v0.1, so the sandbox was deferred rather than bypassed.",
+        "vi": "Việc chạy shell bị loại khỏi v0.1, nên sandbox được hoãn chứ không phải bị đi vòng."
+      },
+      "x": 1035,
+      "y": 912,
+      "w": 250,
+      "h": 60,
+      "group": "g-planned"
+    }
+  ],
+  "edges": [
+    {
+      "id": "cli-core",
+      "from": "user-cli",
+      "to": "declaw-core",
+      "label": {
+        "en": "typed CLI commands",
+        "vi": "lệnh CLI có kiểu"
+      },
+      "principles": [
+        "P6"
+      ],
+      "contract": {
+        "transport": {
+          "en": "In-process, Typer argument parsing.",
+          "vi": "Trong cùng tiến trình, Typer phân tích tham số."
+        },
+        "method": null,
+        "path": null,
+        "auth": {
+          "en": "None. The process runs as the local user.",
+          "vi": "Không có. Tiến trình chạy dưới quyền người dùng cục bộ."
+        },
+        "request": {
+          "en": "declaw chat | index | report | memory export|wipe | audit export | plugins list|enable|disable|revoke",
+          "vi": "declaw chat | index | report | memory export|wipe | audit export | plugins list|enable|disable|revoke"
+        },
+        "response": {
+          "en": "Rich console output; exit code 0 on success, non-zero with an actionable message otherwise.",
+          "vi": "Kết xuất console qua Rich; mã thoát 0 khi thành công, khác 0 kèm thông điệp có hướng xử lý khi lỗi."
+        },
+        "errors": [
+          {
+            "code": "exit 1",
+            "meaning": {
+              "en": "Preflight refused: a required model is not pulled, or the port is taken.",
+              "vi": "Preflight từ chối: chưa pull model cần thiết, hoặc cổng đã bị chiếm."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/main.py",
+          "start": 103,
+          "end": 110,
+          "anchor": "def chat",
+          "note": {
+            "en": "Command surface defined here.",
+            "vi": "Bề mặt lệnh định nghĩa ở đây."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-ollama-health",
+      "from": "declaw-core",
+      "to": "ollama",
+      "label": {
+        "en": "health check",
+        "vi": "kiểm tra sức khoẻ"
+      },
+      "principles": [
+        "P7"
+      ],
+      "contract": {
+        "transport": {
+          "en": "HTTP over loopback, httpx.",
+          "vi": "HTTP qua loopback, dùng httpx."
+        },
+        "method": "GET",
+        "path": "/api/version and /api/tags",
+        "auth": {
+          "en": "None — the daemon is local.",
+          "vi": "Không có — daemon chạy cục bộ."
+        },
+        "request": {
+          "en": "No body.",
+          "vi": "Không có thân request."
+        },
+        "response": {
+          "en": "{ version: str } and { models: [{ name: str }] }. An untagged name also matches its :latest tag.",
+          "vi": "{ version: str } và { models: [{ name: str }] }. Tên không có tag cũng khớp với tag :latest của nó."
+        },
+        "errors": [
+          {
+            "code": "httpx.HTTPError",
+            "meaning": {
+              "en": "Daemon unreachable. health() reports it in-band and never raises.",
+              "vi": "Không kết nối được daemon. health() báo trong kết quả và không bao giờ raise."
+            }
+          },
+          {
+            "code": "KeyError",
+            "meaning": {
+              "en": "Unexpected payload shape, treated as unreachable rather than crashing.",
+              "vi": "Payload sai hình dạng, coi như không kết nối được thay vì làm sập."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/brain/ollama_client.py",
+          "start": 88,
+          "end": 102,
+          "anchor": "Single-call health snapshot",
+          "note": {
+            "en": "Never raises: errors are reported in-band.",
+            "vi": "Không bao giờ raise: lỗi được báo trong kết quả."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-ollama-embed",
+      "from": "declaw-core",
+      "to": "ollama",
+      "label": {
+        "en": "embed chunks",
+        "vi": "nhúng vector cho chunk"
+      },
+      "principles": [
+        "P7"
+      ],
+      "contract": {
+        "transport": {
+          "en": "HTTP over loopback, httpx.",
+          "vi": "HTTP qua loopback, dùng httpx."
+        },
+        "method": "POST",
+        "path": "/api/embed",
+        "auth": {
+          "en": "None — the daemon is local.",
+          "vi": "Không có — daemon chạy cục bộ."
+        },
+        "request": {
+          "en": "{ model: str, input: list[str] }",
+          "vi": "{ model: str, input: list[str] }"
+        },
+        "response": {
+          "en": "{ embeddings: list[list[float]] } — one vector per input, in the same order.",
+          "vi": "{ embeddings: list[list[float]] } — mỗi input một vector, đúng thứ tự."
+        },
+        "errors": [
+          {
+            "code": "404",
+            "meaning": {
+              "en": "Model not pulled. Ollama answers 404 for an unknown model, which preflight now catches up front.",
+              "vi": "Chưa pull model. Ollama trả 404 cho model lạ, giờ preflight bắt trước."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/brain/ollama_client.py",
+          "start": 77,
+          "end": 86,
+          "anchor": "/api/embed",
+          "note": {
+            "en": "The only place this call is made.",
+            "vi": "Nơi duy nhất gọi API này."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-ollama-chat",
+      "from": "declaw-core",
+      "to": "ollama",
+      "label": {
+        "en": "chat with bound tools",
+        "vi": "chat kèm tool đã gắn"
+      },
+      "principles": [
+        "P6",
+        "P7"
+      ],
+      "contract": {
+        "transport": {
+          "en": "HTTP over loopback, through langchain-ollama and the ollama client.",
+          "vi": "HTTP qua loopback, đi qua langchain-ollama và client ollama."
+        },
+        "method": "POST",
+        "path": "/api/chat",
+        "auth": {
+          "en": "None — the daemon is local.",
+          "vi": "Không có — daemon chạy cục bộ."
+        },
+        "request": {
+          "en": "Messages plus the JSON Schema of every bound tool, produced by bind_tools.",
+          "vi": "Danh sách tin nhắn cộng JSON Schema của mọi tool đã gắn, do bind_tools sinh ra."
+        },
+        "response": {
+          "en": "An assistant message that may carry tool_calls with typed arguments.",
+          "vi": "Một tin nhắn assistant, có thể kèm tool_calls với tham số có kiểu."
+        },
+        "errors": [
+          {
+            "code": "graph error",
+            "meaning": {
+              "en": "A mid-turn failure is caught, reported to the user in their language, and the failed turn is rolled back.",
+              "vi": "Lỗi giữa lượt được bắt lại, báo cho người dùng bằng ngôn ngữ của họ, và lượt hỏng bị hoàn tác."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/brain/chat_model.py",
+          "start": 37,
+          "end": 42,
+          "anchor": "ChatOllama(",
+          "note": {
+            "en": "The path is confirmed in the installed ollama client; this is the code that causes the call.",
+            "vi": "Đường dẫn được xác nhận trong client ollama đã cài; đây là đoạn mã gây ra lời gọi đó."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-plugin",
+      "from": "declaw-core",
+      "to": "plugin-proc",
+      "label": {
+        "en": "NDJSON over stdio",
+        "vi": "NDJSON qua stdio"
+      },
+      "principles": [
+        "P6"
+      ],
+      "contract": {
+        "transport": {
+          "en": "One JSON object per line on the child process pipes; stderr is drained continuously.",
+          "vi": "Mỗi dòng một đối tượng JSON trên ống của tiến trình con; stderr được rút liên tục."
+        },
+        "method": "describe | invoke | shutdown",
+        "path": null,
+        "auth": {
+          "en": "None. Isolation is the boundary: the environment is built from scratch and declaw.* imports are blocked.",
+          "vi": "Không có. Ranh giới chính là sự cô lập: môi trường dựng từ đầu và mọi import declaw.* bị chặn."
+        },
+        "request": {
+          "en": "{ v: 1, id: str, method: str, params: object } — at most 32 MiB per frame, refused before it is written.",
+          "vi": "{ v: 1, id: str, method: str, params: object } — tối đa 32 MiB mỗi khung, bị từ chối trước khi ghi ra."
+        },
+        "response": {
+          "en": "{ v: 1, id: str, ok: bool, result?: any, error?: { code, message } }",
+          "vi": "{ v: 1, id: str, ok: bool, result?: any, error?: { code, message } }"
+        },
+        "errors": [
+          {
+            "code": "unknown_method",
+            "meaning": {
+              "en": "Checked before model validation, so version skew against a newer host reports distinctly.",
+              "vi": "Kiểm trước khi validate model, nên lệch phiên bản với host mới hơn sẽ báo riêng biệt."
+            }
+          },
+          {
+            "code": "unknown_capability",
+            "meaning": {
+              "en": "The plugin does not declare that capability.",
+              "vi": "Plugin không khai báo capability đó."
+            }
+          },
+          {
+            "code": "invalid_args",
+            "meaning": {
+              "en": "Arguments failed validation against the announced schema.",
+              "vi": "Tham số không qua được kiểm tra theo schema đã công bố."
+            }
+          },
+          {
+            "code": "capability_failed",
+            "meaning": {
+              "en": "The capability itself raised.",
+              "vi": "Bản thân capability ném lỗi."
+            }
+          },
+          {
+            "code": "result_too_large",
+            "meaning": {
+              "en": "The result would exceed the frame cap.",
+              "vi": "Kết quả sẽ vượt giới hạn khung."
+            }
+          },
+          {
+            "code": "internal",
+            "meaning": {
+              "en": "Anything else inside the plugin runtime.",
+              "vi": "Mọi lỗi khác bên trong runtime của plugin."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw_plugin_sdk/protocol.py",
+          "start": 19,
+          "end": 26,
+          "anchor": "ErrorCode = Literal[",
+          "note": {
+            "en": "The closed error vocabulary, shared by both sides.",
+            "vi": "Bộ mã lỗi đóng, dùng chung cho cả hai phía."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-sqlite",
+      "from": "declaw-core",
+      "to": "sqlite",
+      "label": {
+        "en": "tasks, audit, episodes, catalog",
+        "vi": "task, kiểm toán, episode, catalog"
+      },
+      "principles": [
+        "P7"
+      ],
+      "contract": {
+        "transport": {
+          "en": "Async SQLAlchemy over aiosqlite; schema versioned by Alembic.",
+          "vi": "SQLAlchemy bất đồng bộ trên aiosqlite; schema đánh phiên bản bằng Alembic."
+        },
+        "method": null,
+        "path": null,
+        "auth": {
+          "en": "Filesystem permissions only. The file lives under the configured data directory.",
+          "vi": "Chỉ dựa vào quyền hệ thống tệp. Tệp nằm trong thư mục dữ liệu đã cấu hình."
+        },
+        "request": {
+          "en": "One committed session per audit event, so a storage failure cannot lose more than its own event.",
+          "vi": "Mỗi sự kiện kiểm toán một phiên commit, nên một lần lỗi lưu trữ không thể mất nhiều hơn chính sự kiện đó."
+        },
+        "response": {
+          "en": "Typed SQLModel rows; audit payloads round-trip through the event schema.",
+          "vi": "Các dòng SQLModel có kiểu; payload kiểm toán đi và về qua đúng schema sự kiện."
+        },
+        "errors": [
+          {
+            "code": "logged, not raised",
+            "meaning": {
+              "en": "Audit storage errors are logged and swallowed: observability must not reduce availability.",
+              "vi": "Lỗi lưu kiểm toán được ghi log rồi bỏ qua: khả năng quan sát không được làm giảm tính sẵn sàng."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/db/models.py",
+          "start": 131,
+          "end": 139,
+          "anchor": "Append-only audit record",
+          "note": {
+            "en": "Required by Principle #7.",
+            "vi": "Bắt buộc theo Nguyên tắc #7."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-chroma",
+      "from": "declaw-core",
+      "to": "chroma",
+      "label": {
+        "en": "encrypted vectors",
+        "vi": "vector đã mã hoá"
+      },
+      "principles": [
+        "P1"
+      ],
+      "contract": {
+        "transport": {
+          "en": "Embedded persistent client, on disk under the data directory. Telemetry is pinned off.",
+          "vi": "Client nhúng lưu lâu dài, ghi đĩa trong thư mục dữ liệu. Telemetry bị tắt cứng."
+        },
+        "method": null,
+        "path": null,
+        "auth": {
+          "en": "Filesystem permissions. The Fernet key is vaulted, never written beside the data.",
+          "vi": "Quyền hệ thống tệp. Khoá Fernet nằm trong vault, không bao giờ ghi cạnh dữ liệu."
+        },
+        "request": {
+          "en": "Text encrypted before it reaches the store; embeddings always supplied explicitly, never computed by Chroma.",
+          "vi": "Văn bản được mã hoá trước khi vào kho; vector nhúng luôn được cấp tường minh, Chroma không tự tính."
+        },
+        "response": {
+          "en": "Nearest-neighbour hits with plaintext metadata labels and decrypted text.",
+          "vi": "Các kết quả lân cận gần nhất, với nhãn metadata dạng plaintext và văn bản đã giải mã."
+        },
+        "errors": [
+          {
+            "code": "None metadata",
+            "meaning": {
+              "en": "Chroma rejects null metadata values, so optional fields are omitted rather than nulled.",
+              "vi": "Chroma từ chối giá trị metadata null, nên trường tuỳ chọn bị bỏ hẳn thay vì để null."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/memory/chroma.py",
+          "start": 34,
+          "end": 38,
+          "anchor": "COLLECTION_PREFIX",
+          "note": {
+            "en": "Collections are namespaced declaw_<purpose>.",
+            "vi": "Collection được đặt tên theo namespace declaw_<purpose>."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-keyring",
+      "from": "declaw-core",
+      "to": "keyring",
+      "label": {
+        "en": "secrets, never plaintext",
+        "vi": "bí mật, không bao giờ plaintext"
+      },
+      "principles": [
+        "P1"
+      ],
+      "contract": {
+        "transport": {
+          "en": "python-keyring against the OS vault; an AES-256-GCM file only when keyring resolves to its fail backend.",
+          "vi": "python-keyring làm việc với vault hệ điều hành; chỉ dùng tệp AES-256-GCM khi keyring rơi vào backend fail."
+        },
+        "method": null,
+        "path": null,
+        "auth": {
+          "en": "The OS user session is the authentication.",
+          "vi": "Phiên đăng nhập của người dùng hệ điều hành chính là bước xác thực."
+        },
+        "request": {
+          "en": "Get, set and an idempotent delete under the declaw service namespace.",
+          "vi": "Get, set và delete idempotent dưới namespace dịch vụ declaw."
+        },
+        "response": {
+          "en": "The secret value, or None when absent.",
+          "vi": "Giá trị bí mật, hoặc None khi không có."
+        },
+        "errors": [
+          {
+            "code": "CorruptSecretsError",
+            "meaning": {
+              "en": "Wrong user identity or a tampered file, in the encrypted fallback.",
+              "vi": "Sai danh tính người dùng hoặc tệp bị sửa, trong phương án dự phòng mã hoá."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/credentials/store.py",
+          "start": 30,
+          "end": 33,
+          "anchor": "SERVICE_NAME",
+          "note": {
+            "en": "Backends cannot enumerate, so the known-names list is the uninstaller story.",
+            "vi": "Backend không liệt kê được, nên danh sách tên đã biết chính là câu chuyện gỡ cài đặt."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-workspace",
+      "from": "declaw-core",
+      "to": "workspace",
+      "label": {
+        "en": "workspace-scoped file access",
+        "vi": "truy cập tệp trong workspace"
+      },
+      "principles": [
+        "P6"
+      ],
+      "contract": {
+        "transport": {
+          "en": "Direct filesystem calls from typed tools, through one containment resolver.",
+          "vi": "Gọi hệ thống tệp trực tiếp từ các tool có kiểu, qua một resolver chứa duy nhất."
+        },
+        "method": null,
+        "path": null,
+        "auth": {
+          "en": "Non-READ operations wait for explicit human approval.",
+          "vi": "Các thao tác không phải READ phải chờ người dùng duyệt tường minh."
+        },
+        "request": {
+          "en": "Workspace-relative paths only.",
+          "vi": "Chỉ nhận đường dẫn tương đối trong workspace."
+        },
+        "response": {
+          "en": "File content, a listing, or a refusal the model can act on.",
+          "vi": "Nội dung tệp, danh sách, hoặc một lời từ chối mà model có thể xử lý tiếp."
+        },
+        "errors": [
+          {
+            "code": "WorkspacePathError",
+            "meaning": {
+              "en": "Traversal, absolute path, NUL byte, or on Windows a drive spec or NTFS alternate data stream.",
+              "vi": "Traversal, đường dẫn tuyệt đối, byte NUL, hoặc trên Windows là drive spec hay NTFS alternate data stream."
+            }
+          },
+          {
+            "code": "FileNotFoundError",
+            "meaning": {
+              "en": "Handed to the model verbatim so it can correct itself.",
+              "vi": "Đưa nguyên văn cho model để nó tự sửa."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/brain/loop.py",
+          "start": 45,
+          "end": 54,
+          "anchor": "Failures that are part of a",
+          "note": {
+            "en": "Expected refusals are observations, not crashes.",
+            "vi": "Những lời từ chối dự kiến là quan sát, không phải sự cố."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-policy",
+      "from": "declaw-core",
+      "to": "policy-json",
+      "label": {
+        "en": "plugin state and grants",
+        "vi": "trạng thái và quyền plugin"
+      },
+      "principles": [
+        "P7"
+      ],
+      "contract": {
+        "transport": {
+          "en": "Plain JSON files written via temp-file-then-replace.",
+          "vi": "Tệp JSON thuần, ghi theo kiểu tệp tạm rồi thay thế."
+        },
+        "method": null,
+        "path": null,
+        "auth": {
+          "en": "Filesystem permissions. This is user policy, not a secret.",
+          "vi": "Quyền hệ thống tệp. Đây là chính sách của người dùng, không phải bí mật."
+        },
+        "request": {
+          "en": "Enable, disable, quarantine, grant and revoke.",
+          "vi": "Bật, tắt, cách ly, cấp quyền và thu hồi."
+        },
+        "response": {
+          "en": "Readable, diffable state a person can inspect.",
+          "vi": "Trạng thái đọc được, diff được để con người kiểm tra."
+        },
+        "errors": [
+          {
+            "code": "not persisted",
+            "meaning": {
+              "en": "Crash counters are deliberately not persisted, so a restart gives a misbehaving plugin a fresh chance; quarantine is persisted.",
+              "vi": "Bộ đếm crash cố ý không lưu lại, nên khởi động lại cho plugin đang lỗi một cơ hội mới; còn trạng thái cách ly thì có lưu."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/plugin_host/state.py",
+          "start": 22,
+          "end": 24,
+          "anchor": "STATE_FILENAME",
+          "note": {
+            "en": "Deliberately not SQLite, and deliberately next to plugin_grants.json.",
+            "vi": "Cố ý không dùng SQLite, và cố ý đặt cạnh plugin_grants.json."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-gateway",
+      "from": "declaw-core",
+      "to": "gateway-planned",
+      "label": {
+        "en": "nothing is implemented",
+        "vi": "chưa hiện thực gì cả"
+      },
+      "principles": [
+        "P2"
+      ],
+      "contract": {
+        "transport": {
+          "en": "None. FastAPI and uvicorn are declared dependencies with no code behind them.",
+          "vi": "Không có. FastAPI và uvicorn là dependency đã khai báo nhưng chưa có mã nào phía sau."
+        },
+        "method": null,
+        "path": null,
+        "auth": {
+          "en": "Not applicable yet. When it exists it may bind only to loopback.",
+          "vi": "Chưa áp dụng. Khi nào có, nó chỉ được bind vào loopback."
+        },
+        "request": {
+          "en": "No route exists.",
+          "vi": "Chưa có route nào."
+        },
+        "response": {
+          "en": "No response exists.",
+          "vi": "Chưa có phản hồi nào."
+        },
+        "errors": [
+          {
+            "code": "not built",
+            "meaning": {
+              "en": "The package is zero bytes. Reading the dependency list would suggest otherwise.",
+              "vi": "Package rỗng 0 byte. Đọc danh sách dependency thì lại tưởng ngược lại."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/config.py",
+          "start": 115,
+          "end": 122,
+          "anchor": "Inviolable Principle #2",
+          "note": {
+            "en": "The loopback rule is already enforced in config, ahead of any gateway.",
+            "vi": "Quy tắc loopback đã được cưỡng chế trong config, trước cả khi có gateway."
+          }
+        }
+      }
+    },
+    {
+      "id": "core-docker",
+      "from": "declaw-core",
+      "to": "docker-planned",
+      "label": {
+        "en": "deferred, not bypassed",
+        "vi": "đã hoãn, không đi vòng"
+      },
+      "principles": [
+        "P3"
+      ],
+      "contract": {
+        "transport": {
+          "en": "None. Shell execution was dropped from v0.1.",
+          "vi": "Không có. Việc chạy shell bị loại khỏi v0.1."
+        },
+        "method": null,
+        "path": null,
+        "auth": {
+          "en": "Not applicable.",
+          "vi": "Không áp dụng."
+        },
+        "request": {
+          "en": "No shell tool ships, so there is nothing to sandbox yet.",
+          "vi": "Chưa có tool shell nào được ship, nên chưa có gì để đưa vào sandbox."
+        },
+        "response": {
+          "en": "None.",
+          "vi": "Không có."
+        },
+        "errors": [
+          {
+            "code": "deferred",
+            "meaning": {
+              "en": "If shell execution returns it must go through the sandbox, never around it.",
+              "vi": "Nếu chức năng chạy shell quay lại, nó phải đi qua sandbox chứ không được đi vòng."
+            }
+          }
+        ],
+        "source": {
+          "file": "declaw/preflight.py",
+          "start": 166,
+          "end": 170,
+          "anchor": "def check_docker_available",
+          "note": {
+            "en": "The Docker check still exists and is advisory.",
+            "vi": "Kiểm tra Docker vẫn còn và chỉ mang tính khuyến cáo."
+          }
+        }
+      }
+    }
+  ],
+  "canvas": {
+    "width": 1370,
+    "height": 1050
+  },
+  "groups": [
+    {
+      "id": "g-model",
+      "label": {
+        "en": "Inference",
+        "vi": "Suy luận"
+      },
+      "note": {
+        "en": "The only thing DeClaw computes with.",
+        "vi": "Thứ duy nhất DeClaw dùng để tính toán."
+      },
+      "members": [
+        "ollama"
+      ],
+      "x": 1010,
+      "y": 40,
+      "w": 300,
+      "h": 120
+    },
+    {
+      "id": "g-stores",
+      "label": {
+        "en": "State on this machine",
+        "vi": "Trạng thái trên máy này"
+      },
+      "note": {
+        "en": "Everything DeClaw keeps, and nothing leaves it.",
+        "vi": "Mọi thứ DeClaw giữ lại, và không gì rời khỏi máy."
+      },
+      "members": [
+        "sqlite",
+        "chroma",
+        "keyring",
+        "workspace",
+        "policy-json"
+      ],
+      "x": 1010,
+      "y": 190,
+      "w": 300,
+      "h": 424
+    },
+    {
+      "id": "g-isolation",
+      "label": {
+        "en": "Isolation boundary",
+        "vi": "Ranh giới cô lập"
+      },
+      "note": {
+        "en": "Untrusted code runs on the far side of a pipe.",
+        "vi": "Mã không tin cậy chạy ở phía bên kia một cái ống."
+      },
+      "members": [
+        "plugin-proc"
+      ],
+      "x": 1010,
+      "y": 644,
+      "w": 300,
+      "h": 120
+    },
+    {
+      "id": "g-planned",
+      "label": {
+        "en": "Declared, not built",
+        "vi": "Đã khai báo, chưa xây"
+      },
+      "note": {
+        "en": "Named in the architecture, zero bytes of code.",
+        "vi": "Có tên trong kiến trúc, không một byte mã nào."
+      },
+      "members": [
+        "gateway-planned",
+        "docker-planned"
+      ],
+      "x": 1010,
+      "y": 794,
+      "w": 300,
+      "h": 196
+    }
+  ]
+}

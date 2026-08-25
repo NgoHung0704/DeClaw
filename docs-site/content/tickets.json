@@ -1,0 +1,1237 @@
+{
+  "tickets": [
+    {
+      "id": "DCL-001",
+      "phase": "0",
+      "phaseTitle": {
+        "en": "Project foundation",
+        "vi": "Nền móng dự án"
+      },
+      "status": "done",
+      "title": {
+        "en": "Project scaffold",
+        "vi": "Khung dự án ban đầu"
+      },
+      "creates": [
+        "audit",
+        "brain-loop",
+        "credentials",
+        "entry-cli",
+        "memory",
+        "persistence",
+        "planned-surfaces",
+        "plugin-host",
+        "sanitizer",
+        "tool-base",
+        "tool-filesystem"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-003",
+      "phase": "0",
+      "phaseTitle": {
+        "en": "Project foundation",
+        "vi": "Nền móng dự án"
+      },
+      "status": "done",
+      "title": {
+        "en": "Ollama integration + health check",
+        "vi": "Tích hợp Ollama + kiểm tra sức khoẻ"
+      },
+      "creates": [
+        "brain-model"
+      ],
+      "modifies": [
+        "entry-cli"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-005",
+      "phase": "0",
+      "phaseTitle": {
+        "en": "Project foundation",
+        "vi": "Nền móng dự án"
+      },
+      "status": "done",
+      "title": {
+        "en": "SQLite + SQLModel setup with migrations",
+        "vi": "Thiết lập SQLite + SQLModel kèm migration"
+      },
+      "creates": [
+        "dev-tooling",
+        "persistence"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-006",
+      "phase": "0",
+      "phaseTitle": {
+        "en": "Project foundation",
+        "vi": "Nền móng dự án"
+      },
+      "status": "done",
+      "title": {
+        "en": "Structured JSON logging (loguru)",
+        "vi": "Log JSON có cấu trúc (loguru)"
+      },
+      "creates": [
+        "entry-cli"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-007",
+      "phase": "0",
+      "phaseTitle": {
+        "en": "Project foundation",
+        "vi": "Nền móng dự án"
+      },
+      "status": "done",
+      "title": {
+        "en": "Pre-flight check script",
+        "vi": "Script kiểm tra tiền khởi động"
+      },
+      "creates": [
+        "dev-tooling"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-010",
+      "phase": "1",
+      "phaseTitle": {
+        "en": "Core brain",
+        "vi": "Bộ não lõi"
+      },
+      "status": "done",
+      "title": {
+        "en": "LangGraph basic agentic loop",
+        "vi": "Vòng lặp agent cơ bản trên LangGraph"
+      },
+      "creates": [
+        "brain-loop",
+        "brain-repl"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-011",
+      "phase": "1",
+      "phaseTitle": {
+        "en": "Core brain",
+        "vi": "Bộ não lõi"
+      },
+      "status": "done",
+      "title": {
+        "en": "AgentState schema with typed slots",
+        "vi": "Schema AgentState với các ô có kiểu"
+      },
+      "creates": [
+        "brain-loop"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-012",
+      "phase": "1",
+      "phaseTitle": {
+        "en": "Core brain",
+        "vi": "Bộ não lõi"
+      },
+      "status": "done",
+      "title": {
+        "en": "Ollama function calling integration",
+        "vi": "Tích hợp gọi hàm qua Ollama"
+      },
+      "creates": [
+        "brain-model"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-013",
+      "phase": "1",
+      "phaseTitle": {
+        "en": "Core brain",
+        "vi": "Bộ não lõi"
+      },
+      "status": "done",
+      "title": {
+        "en": "Tool output parser + retry/repair",
+        "vi": "Bộ phân tích đầu ra tool + thử lại/sửa lỗi"
+      },
+      "creates": [
+        "brain-model"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-014",
+      "phase": "1",
+      "phaseTitle": {
+        "en": "Core brain",
+        "vi": "Bộ não lõi"
+      },
+      "status": "done",
+      "title": {
+        "en": "Context window management (Mistral 32k)",
+        "vi": "Quản lý cửa sổ ngữ cảnh (Mistral 32k)"
+      },
+      "creates": [
+        "brain-model"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-015",
+      "phase": "1",
+      "phaseTitle": {
+        "en": "Core brain",
+        "vi": "Bộ não lõi"
+      },
+      "status": "done",
+      "title": {
+        "en": "Context compaction strategy on overflow",
+        "vi": "Chiến lược nén ngữ cảnh khi tràn"
+      },
+      "creates": [
+        "brain-model"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-016",
+      "phase": "1",
+      "phaseTitle": {
+        "en": "Core brain",
+        "vi": "Bộ não lõi"
+      },
+      "status": "done",
+      "title": {
+        "en": "CLI test interface",
+        "vi": "Giao diện kiểm thử trên CLI"
+      },
+      "creates": [
+        "brain-repl"
+      ],
+      "modifies": [
+        "entry-cli"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-017",
+      "phase": "1",
+      "phaseTitle": {
+        "en": "Core brain",
+        "vi": "Bộ não lõi"
+      },
+      "status": "done",
+      "title": {
+        "en": "System prompt template (FR + EN)",
+        "vi": "Mẫu system prompt (FR + EN)"
+      },
+      "creates": [
+        "brain-repl"
+      ],
+      "modifies": [
+        "entry-cli"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-020",
+      "phase": "2",
+      "phaseTitle": {
+        "en": "Tool layer",
+        "vi": "Tầng công cụ"
+      },
+      "status": "done",
+      "title": {
+        "en": "BaseTool abstract class with typed params",
+        "vi": "Lớp trừu tượng BaseTool với tham số có kiểu"
+      },
+      "creates": [
+        "tool-base"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-021",
+      "phase": "2",
+      "phaseTitle": {
+        "en": "Tool layer",
+        "vi": "Tầng công cụ"
+      },
+      "status": "done",
+      "title": {
+        "en": "Tool: filesystem_read (workspace-scoped)",
+        "vi": "Tool: filesystem_read (giới hạn trong workspace)"
+      },
+      "creates": [
+        "tool-filesystem"
+      ],
+      "modifies": [],
+      "traverses": [
+        "brain-loop",
+        "tool-registry"
+      ]
+    },
+    {
+      "id": "DCL-022",
+      "phase": "2",
+      "phaseTitle": {
+        "en": "Tool layer",
+        "vi": "Tầng công cụ"
+      },
+      "status": "done",
+      "title": {
+        "en": "Tool: filesystem_write (+ confirmation)",
+        "vi": "Tool: filesystem_write (+ xác nhận)"
+      },
+      "creates": [
+        "tool-registry"
+      ],
+      "modifies": [
+        "tool-filesystem"
+      ],
+      "traverses": [
+        "brain-loop"
+      ]
+    },
+    {
+      "id": "DCL-023",
+      "phase": "2",
+      "phaseTitle": {
+        "en": "Tool layer",
+        "vi": "Tầng công cụ"
+      },
+      "status": "done",
+      "title": {
+        "en": "Tool: filesystem_move (+ confirmation)",
+        "vi": "Tool: filesystem_move (+ xác nhận)"
+      },
+      "creates": [],
+      "modifies": [
+        "tool-filesystem"
+      ],
+      "traverses": [
+        "brain-loop",
+        "tool-registry"
+      ]
+    },
+    {
+      "id": "DCL-024",
+      "phase": "2",
+      "phaseTitle": {
+        "en": "Tool layer",
+        "vi": "Tầng công cụ"
+      },
+      "status": "done",
+      "title": {
+        "en": "Tool: filesystem_list (workspace-scoped)",
+        "vi": "Tool: filesystem_list (giới hạn trong workspace)"
+      },
+      "creates": [],
+      "modifies": [
+        "tool-filesystem"
+      ],
+      "traverses": [
+        "brain-loop",
+        "tool-registry"
+      ]
+    },
+    {
+      "id": "DCL-025",
+      "phase": "2",
+      "phaseTitle": {
+        "en": "Tool layer",
+        "vi": "Tầng công cụ"
+      },
+      "status": "done",
+      "title": {
+        "en": "Tool registry (typed registration)",
+        "vi": "Registry công cụ (đăng ký có kiểu)"
+      },
+      "creates": [
+        "tool-registry"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-026",
+      "phase": "2",
+      "phaseTitle": {
+        "en": "Tool layer",
+        "vi": "Tầng công cụ"
+      },
+      "status": "done",
+      "title": {
+        "en": "Path traversal protection unit tests",
+        "vi": "Test chống path traversal"
+      },
+      "creates": [],
+      "modifies": [
+        "tool-filesystem"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-040",
+      "phase": "4",
+      "phaseTitle": {
+        "en": "Sanitizer layer",
+        "vi": "Tầng sanitizer"
+      },
+      "status": "done",
+      "title": {
+        "en": "Second Mistral instance for sanitizer",
+        "vi": "Phiên Mistral thứ hai cho sanitizer"
+      },
+      "creates": [
+        "sanitizer"
+      ],
+      "modifies": [],
+      "traverses": [
+        "brain-model"
+      ]
+    },
+    {
+      "id": "DCL-041",
+      "phase": "4",
+      "phaseTitle": {
+        "en": "Sanitizer layer",
+        "vi": "Tầng sanitizer"
+      },
+      "status": "done",
+      "title": {
+        "en": "Sanitizer system prompt (locked)",
+        "vi": "System prompt của sanitizer (đã khoá)"
+      },
+      "creates": [],
+      "modifies": [
+        "entry-cli",
+        "sanitizer",
+        "sanitizer-corpus"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-043",
+      "phase": "4",
+      "phaseTitle": {
+        "en": "Sanitizer layer",
+        "vi": "Tầng sanitizer"
+      },
+      "status": "done",
+      "title": {
+        "en": "Integration into tool input pipeline",
+        "vi": "Tích hợp vào pipeline đầu vào của tool"
+      },
+      "creates": [
+        "sanitizer"
+      ],
+      "modifies": [
+        "entry-cli",
+        "tool-base",
+        "tool-filesystem",
+        "tool-registry"
+      ],
+      "traverses": [
+        "brain-loop"
+      ]
+    },
+    {
+      "id": "DCL-046",
+      "phase": "4",
+      "phaseTitle": {
+        "en": "Sanitizer layer",
+        "vi": "Tầng sanitizer"
+      },
+      "status": "done",
+      "title": {
+        "en": "Injection corpus (FR + EN, 50+)",
+        "vi": "Bộ mẫu tấn công tiêm lệnh (FR + EN, 50+)"
+      },
+      "creates": [
+        "sanitizer-corpus"
+      ],
+      "modifies": [],
+      "traverses": [
+        "sanitizer"
+      ]
+    },
+    {
+      "id": "DCL-047",
+      "phase": "4",
+      "phaseTitle": {
+        "en": "Sanitizer layer",
+        "vi": "Tầng sanitizer"
+      },
+      "status": "done",
+      "title": {
+        "en": "False positive benchmark (< 2%)",
+        "vi": "Benchmark tỉ lệ báo động giả (< 2%)"
+      },
+      "creates": [
+        "dev-tooling",
+        "sanitizer",
+        "sanitizer-corpus"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-050",
+      "phase": "5",
+      "phaseTitle": {
+        "en": "Memory and audit",
+        "vi": "Bộ nhớ & kiểm toán"
+      },
+      "status": "done",
+      "title": {
+        "en": "ChromaDB setup + persistent client",
+        "vi": "Thiết lập ChromaDB + client lưu trữ lâu dài"
+      },
+      "creates": [
+        "memory"
+      ],
+      "modifies": [
+        "brain-model"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-051",
+      "phase": "5",
+      "phaseTitle": {
+        "en": "Memory and audit",
+        "vi": "Bộ nhớ & kiểm toán"
+      },
+      "status": "done",
+      "title": {
+        "en": "At-rest encryption (Fernet)",
+        "vi": "Mã hoá khi lưu trữ (Fernet)"
+      },
+      "creates": [
+        "memory"
+      ],
+      "modifies": [],
+      "traverses": [
+        "credentials"
+      ]
+    },
+    {
+      "id": "DCL-052",
+      "phase": "5",
+      "phaseTitle": {
+        "en": "Memory and audit",
+        "vi": "Bộ nhớ & kiểm toán"
+      },
+      "status": "done",
+      "title": {
+        "en": "Short-term conversation buffer",
+        "vi": "Buffer hội thoại ngắn hạn"
+      },
+      "creates": [
+        "memory"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-053",
+      "phase": "5",
+      "phaseTitle": {
+        "en": "Memory and audit",
+        "vi": "Bộ nhớ & kiểm toán"
+      },
+      "status": "done",
+      "title": {
+        "en": "Long-term semantic memory",
+        "vi": "Bộ nhớ ngữ nghĩa dài hạn"
+      },
+      "creates": [
+        "memory"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-054",
+      "phase": "5",
+      "phaseTitle": {
+        "en": "Memory and audit",
+        "vi": "Bộ nhớ & kiểm toán"
+      },
+      "status": "done",
+      "title": {
+        "en": "Episodic memory (task history)",
+        "vi": "Bộ nhớ episodic (lịch sử tác vụ)"
+      },
+      "creates": [
+        "dev-tooling",
+        "memory"
+      ],
+      "modifies": [
+        "persistence"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-055",
+      "phase": "5",
+      "phaseTitle": {
+        "en": "Memory and audit",
+        "vi": "Bộ nhớ & kiểm toán"
+      },
+      "status": "done",
+      "title": {
+        "en": "Memory retrieval in Brain context assembly",
+        "vi": "Truy hồi bộ nhớ khi dựng ngữ cảnh cho Brain"
+      },
+      "creates": [
+        "brain-model"
+      ],
+      "modifies": [],
+      "traverses": [
+        "brain-loop",
+        "memory"
+      ]
+    },
+    {
+      "id": "DCL-056",
+      "phase": "5",
+      "phaseTitle": {
+        "en": "Memory and audit",
+        "vi": "Bộ nhớ & kiểm toán"
+      },
+      "status": "done",
+      "title": {
+        "en": "Memory export (GDPR portability)",
+        "vi": "Xuất bộ nhớ (tính khả chuyển theo GDPR)"
+      },
+      "creates": [
+        "memory"
+      ],
+      "modifies": [
+        "audit",
+        "entry-cli"
+      ],
+      "traverses": [
+        "persistence"
+      ]
+    },
+    {
+      "id": "DCL-060",
+      "phase": "6",
+      "phaseTitle": {
+        "en": "Credentials and permissions",
+        "vi": "Credential & quyền"
+      },
+      "status": "done",
+      "title": {
+        "en": "Audit event schema (typed)",
+        "vi": "Schema sự kiện kiểm toán (có kiểu)"
+      },
+      "creates": [
+        "audit"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-061",
+      "phase": "6",
+      "phaseTitle": {
+        "en": "Credentials and permissions",
+        "vi": "Credential & quyền"
+      },
+      "status": "done",
+      "title": {
+        "en": "Real-time audit logger in Brain",
+        "vi": "Bộ ghi kiểm toán thời gian thực trong Brain"
+      },
+      "creates": [
+        "audit"
+      ],
+      "modifies": [
+        "entry-cli",
+        "persistence",
+        "tool-registry"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-062",
+      "phase": "6",
+      "phaseTitle": {
+        "en": "Credentials and permissions",
+        "vi": "Credential & quyền"
+      },
+      "status": "done",
+      "title": {
+        "en": "NL audit summary generator (FR + EN)",
+        "vi": "Bộ sinh tóm tắt kiểm toán bằng ngôn ngữ tự nhiên (FR + EN)"
+      },
+      "creates": [
+        "audit"
+      ],
+      "modifies": [
+        "entry-cli"
+      ],
+      "traverses": [
+        "persistence"
+      ]
+    },
+    {
+      "id": "DCL-064",
+      "phase": "6",
+      "phaseTitle": {
+        "en": "Credentials and permissions",
+        "vi": "Credential & quyền"
+      },
+      "status": "done",
+      "title": {
+        "en": "Network egress monitor",
+        "vi": "Giám sát lưu lượng ra mạng"
+      },
+      "creates": [
+        "audit"
+      ],
+      "modifies": [
+        "entry-cli"
+      ],
+      "traverses": [
+        "brain-model"
+      ]
+    },
+    {
+      "id": "DCL-065",
+      "phase": "6",
+      "phaseTitle": {
+        "en": "Credentials and permissions",
+        "vi": "Credential & quyền"
+      },
+      "status": "done",
+      "title": {
+        "en": "Audit export (JSON, Markdown, PDF)",
+        "vi": "Xuất nhật ký kiểm toán (JSON, Markdown, PDF)"
+      },
+      "creates": [
+        "audit"
+      ],
+      "modifies": [
+        "entry-cli"
+      ],
+      "traverses": [
+        "persistence"
+      ]
+    },
+    {
+      "id": "DCL-070",
+      "phase": "7",
+      "phaseTitle": {
+        "en": "Plugin host",
+        "vi": "Plugin host"
+      },
+      "status": "done",
+      "title": {
+        "en": "python-keyring wrapper (Windows Credential Manager priority)",
+        "vi": "Lớp bọc python-keyring (ưu tiên Windows Credential Manager)"
+      },
+      "creates": [
+        "credentials"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-074",
+      "phase": "7",
+      "phaseTitle": {
+        "en": "Plugin host",
+        "vi": "Plugin host"
+      },
+      "status": "done",
+      "title": {
+        "en": "Encrypted secrets fallback",
+        "vi": "Phương án dự phòng lưu secret đã mã hoá"
+      },
+      "creates": [
+        "credentials"
+      ],
+      "modifies": [
+        "memory"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-080",
+      "phase": "8",
+      "phaseTitle": {
+        "en": "doc-intel plugin",
+        "vi": "Plugin doc-intel"
+      },
+      "status": "done",
+      "title": {
+        "en": "`plugin.yaml` schema + validator",
+        "vi": "Schema `plugin.yaml` + bộ kiểm tra"
+      },
+      "creates": [
+        "plugin-host"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-081",
+      "phase": "8",
+      "phaseTitle": {
+        "en": "doc-intel plugin",
+        "vi": "Plugin doc-intel"
+      },
+      "status": "done",
+      "title": {
+        "en": "Permission enforcement middleware",
+        "vi": "Middleware cưỡng chế quyền"
+      },
+      "creates": [
+        "plugin-host"
+      ],
+      "modifies": [
+        "audit"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-083",
+      "phase": "8",
+      "phaseTitle": {
+        "en": "doc-intel plugin",
+        "vi": "Plugin doc-intel"
+      },
+      "status": "done",
+      "title": {
+        "en": "Plugin signature verification (ed25519)",
+        "vi": "Xác minh chữ ký plugin (ed25519)"
+      },
+      "creates": [
+        "plugin-host"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-090",
+      "phase": "9",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Plugin loader (discover plugins/ directory)",
+        "vi": "Bộ nạp plugin (quét thư mục plugins/)"
+      },
+      "creates": [
+        "plugin-host"
+      ],
+      "modifies": [
+        "entry-cli",
+        "tool-registry"
+      ],
+      "traverses": [
+        "plugin-sdk"
+      ]
+    },
+    {
+      "id": "DCL-091",
+      "phase": "9",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Plugin lifecycle (enable/disable/quarantine)",
+        "vi": "Vòng đời plugin (bật/tắt/cách ly)"
+      },
+      "creates": [
+        "plugin-host"
+      ],
+      "modifies": [
+        "entry-cli"
+      ],
+      "traverses": [
+        "audit"
+      ]
+    },
+    {
+      "id": "DCL-092",
+      "phase": "9",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Subprocess isolation (each plugin its own Python process)",
+        "vi": "Cô lập tiến trình con (mỗi plugin một tiến trình Python riêng)"
+      },
+      "creates": [
+        "plugin-host",
+        "tool-filesystem"
+      ],
+      "modifies": [],
+      "traverses": [
+        "plugin-sdk"
+      ]
+    },
+    {
+      "id": "DCL-093",
+      "phase": "9",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "IPC protocol (JSON over stdio, schema-validated)",
+        "vi": "Giao thức IPC (JSON qua stdio, có kiểm schema)"
+      },
+      "creates": [
+        "plugin-host",
+        "plugin-sdk"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-094",
+      "phase": "9",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Plugin SDK skeleton",
+        "vi": "Bộ khung SDK cho plugin"
+      },
+      "creates": [
+        "plugin-sdk"
+      ],
+      "modifies": [],
+      "traverses": [
+        "plugin-host"
+      ]
+    },
+    {
+      "id": "DCL-095",
+      "phase": "9",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Plugin manifest registry",
+        "vi": "Registry manifest plugin"
+      },
+      "creates": [
+        "plugin-host"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-096",
+      "phase": "9",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Plugin crash handling",
+        "vi": "Xử lý khi plugin sập"
+      },
+      "creates": [
+        "plugin-host"
+      ],
+      "modifies": [
+        "audit"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-100",
+      "phase": "10",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "doc-intel plugin scaffold + plugin.yaml",
+        "vi": "Khung plugin doc-intel + plugin.yaml"
+      },
+      "creates": [
+        "doc-intel-plugin"
+      ],
+      "modifies": [],
+      "traverses": [
+        "plugin-host",
+        "plugin-sdk"
+      ]
+    },
+    {
+      "id": "DCL-101",
+      "phase": "10",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "PDF parser (pypdf + unstructured fallback)",
+        "vi": "Bộ phân tích PDF (pypdf + phương án dự phòng unstructured)"
+      },
+      "creates": [
+        "doc-intel-plugin"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-102",
+      "phase": "10",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "DOCX parser",
+        "vi": "Bộ phân tích DOCX"
+      },
+      "creates": [
+        "doc-intel-plugin"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-103",
+      "phase": "10",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "XLSX parser",
+        "vi": "Bộ phân tích XLSX"
+      },
+      "creates": [
+        "doc-intel-plugin"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-104",
+      "phase": "10",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "TXT/Markdown parser",
+        "vi": "Bộ phân tích TXT/Markdown"
+      },
+      "creates": [
+        "doc-intel-plugin"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-105",
+      "phase": "10",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Document chunker (semantic ~512 tokens)",
+        "vi": "Bộ chia chunk tài liệu (ngữ nghĩa, ~512 token)"
+      },
+      "creates": [
+        "doc-intel-plugin"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-106",
+      "phase": "10",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Embedding generation (nomic-embed-text via Ollama)",
+        "vi": "Sinh vector nhúng (nomic-embed-text qua Ollama)"
+      },
+      "creates": [
+        "documents"
+      ],
+      "modifies": [],
+      "traverses": [
+        "brain-model",
+        "memory"
+      ]
+    },
+    {
+      "id": "DCL-107",
+      "phase": "10",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Indexer pipeline",
+        "vi": "Pipeline lập chỉ mục"
+      },
+      "creates": [
+        "documents"
+      ],
+      "modifies": [
+        "brain-model",
+        "entry-cli"
+      ],
+      "traverses": [
+        "doc-intel-plugin",
+        "plugin-host"
+      ]
+    },
+    {
+      "id": "DCL-108",
+      "phase": "10",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Incremental indexing",
+        "vi": "Lập chỉ mục tăng dần"
+      },
+      "creates": [
+        "dev-tooling",
+        "documents"
+      ],
+      "modifies": [
+        "persistence"
+      ],
+      "traverses": []
+    },
+    {
+      "id": "DCL-109",
+      "phase": "10",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "File watcher (auto-index)",
+        "vi": "Bộ theo dõi tệp (tự động lập chỉ mục)"
+      },
+      "creates": [
+        "documents"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-110",
+      "phase": "11",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Semantic search (top-k)",
+        "vi": "Tìm kiếm ngữ nghĩa (top-k)"
+      },
+      "creates": [
+        "documents"
+      ],
+      "modifies": [],
+      "traverses": [
+        "sanitizer",
+        "tool-registry",
+        "brain-loop"
+      ]
+    },
+    {
+      "id": "DCL-111",
+      "phase": "11",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "Citation system",
+        "vi": "Hệ thống trích dẫn"
+      },
+      "creates": [
+        "documents"
+      ],
+      "modifies": [],
+      "traverses": []
+    },
+    {
+      "id": "DCL-112",
+      "phase": "11",
+      "phaseTitle": {
+        "en": "Other",
+        "vi": "Khác"
+      },
+      "status": "done",
+      "title": {
+        "en": "RAG prompt template (FR + EN)",
+        "vi": "Mẫu prompt RAG (FR + EN)"
+      },
+      "creates": [
+        "documents"
+      ],
+      "modifies": [],
+      "traverses": []
+    }
+  ]
+}

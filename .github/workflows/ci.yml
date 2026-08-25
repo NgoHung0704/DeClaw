@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main, feat/phase-7-plugin-host]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    # Windows because that is the only environment where this suite has been
+    # observed green. Claiming Linux-green without running it would be the
+    # same error class the docs guards exist to prevent.
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run mypy declaw declaw_plugin_sdk
+      - run: uv run pytest
+
+  docs-site:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs-site
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The guards read real repository files and enumerate them with
+          # `git ls-files`, so a shallow checkout would hide modules from the
+          # coverage guard.
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: docs-site/.nvmrc
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+      - run: npm ci
+      - run: npm run guards
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - run: npm run build
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs-site/dist
+
+  deploy:
+    # Depends on docs-site only. The site's truthfulness is proven by its own
+    # guards; blocking publication on an unrelated Python failure is coupling
+    # nobody asked for. A red python job still marks the commit.
+    needs: docs-site
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -24,6 +24,7 @@ if TYPE_CHECKING:  # heavy imports stay lazy at runtime
     from declaw.audit.logger import DbAuditLogger
     from declaw.memory.episodic import EpisodicMemory
     from declaw.memory.semantic import SemanticMemory
+    from declaw.plugin_host.manifest import PluginManifest
 
 cli = typer.Typer(
     name="declaw",
@@ -188,11 +189,6 @@ def chat(
         if settings.sanitizer_required
         else None
     )
-    tools = default_registry().langchain_tools(
-        settings.language, approve, sanitizer=sanitizer, audit=audit
-    )
-    graph = build_brain(tools)
-
     sanitizer_state = "on" if sanitizer is not None else "off"
     console.print(
         f"[green]DeClaw chat[/green] - model [bold]{settings.model}[/bold], "
@@ -218,12 +214,55 @@ def chat(
     # A/B probe first - see CLAUDE.md Open decision "System prompt x tool-calling".
     # DCL-017's system_message() stays available for compositions that don't bind tools.
     async def _session() -> None:
-        # Schema + chat share one event loop so aiosqlite connections created
-        # during bootstrap stay usable for audit writes during the REPL.
+        # Schema, plugin subprocesses and the chat all share one event loop:
+        # aiosqlite connections and asyncio subprocess transports are both
+        # bound to the loop that created them. That is why the registry, the
+        # host and the graph are all assembled in here rather than above.
         await ensure_schema(engine)
-        await run_chat(
-            graph, read=read, write=write, debug=debug, language=settings.language
+
+        from declaw.plugin_host.grants_helper import load_grants, load_state
+        from declaw.plugin_host.host import PluginHost
+
+        host = PluginHost(
+            state=load_state(settings.data_dir),
+            grants=load_grants(settings.data_dir),
+            settings=settings,
+            audit=audit,
         )
+        await host.start()
+        for failure in host.failures():
+            console.print(f"[yellow]Plugin not loaded -[/yellow] {failure}")
+
+        registry = default_registry()
+        for plugin_tool in host.model_tools():
+            registry.register_instance(plugin_tool)
+
+        from declaw.documents.session import DOC_INTEL_PLUGIN, build_document_stack
+        from declaw.documents.tools import build_document_search_tool
+
+        if any(p.manifest.name == DOC_INTEL_PLUGIN for p in host.loaded()):
+            stack = build_document_stack(settings, host, sanitizer=sanitizer)
+            registry.register_instance(
+                build_document_search_tool(
+                    store=stack.store,
+                    chunk_sanitizer=stack.chunk_sanitizer,
+                    language=settings.language,
+                )
+            )
+
+        tools = registry.langchain_tools(
+            settings.language, approve, sanitizer=sanitizer, audit=audit
+        )
+        graph = build_brain(tools)
+
+        loaded = ", ".join(p.manifest.name for p in host.loaded()) or "none"
+        console.print(f"[dim]plugins: {loaded}[/dim]")
+        try:
+            await run_chat(
+                graph, read=read, write=write, debug=debug, language=settings.language
+            )
+        finally:
+            await host.stop()
 
     # Principle #7: every outbound network call (incl. each Ollama request) is
     # audited; anything outside the local allowlist is flagged (DCL-064).
@@ -397,6 +436,186 @@ def audit_export(
     console.print(f"[green]Audit trail exported[/green] to [bold]{written}[/bold]")
     if unreadable:
         console.print(f"[yellow]{unreadable} unreadable audit record(s) skipped.[/yellow]")
+
+
+@cli.command()
+def index(
+    folder: str = typer.Argument("", help="Folder to index. Defaults to the whole workspace."),
+) -> None:
+    """Index the documents in your workspace so you can ask questions about them."""
+    from rich.progress import BarColumn, Progress, TextColumn
+
+    from declaw.db.engine import ensure_schema, get_engine
+    from declaw.documents.indexer import IndexProgress
+    from declaw.documents.session import DOC_INTEL_PLUGIN, build_document_stack
+    from declaw.plugin_host.grants_helper import load_grants, load_state
+    from declaw.plugin_host.host import PluginHost
+    from declaw.tools.builtin._paths import WorkspacePathError, resolve_in_workspace
+
+    settings = get_settings()
+    settings.workspace_dir.mkdir(parents=True, exist_ok=True)
+    target: Path | None = None
+    if folder:
+        try:
+            target = resolve_in_workspace(folder)
+        except WorkspacePathError as exc:
+            console.print(
+                f"[red]{folder} is outside your workspace.[/red] "
+                f"DeClaw only indexes files under {settings.workspace_dir}. ({exc})"
+            )
+            raise typer.Exit(code=1) from None
+
+    async def _run() -> None:
+        # Check the embedding model before doing any work. Ollama answers 404
+        # for an unknown model, so without this every document fails with a
+        # bare HTTP error that tells the user nothing actionable.
+        from declaw.preflight import check_embedding_model_pulled
+
+        embedding = await check_embedding_model_pulled(settings)
+        if not embedding.passed:
+            console.print(f"[red]{embedding.message}[/red] {embedding.remedy}")
+            raise typer.Exit(code=1)
+
+        engine = get_engine()
+        await ensure_schema(engine)
+        host = PluginHost(
+            state=load_state(settings.data_dir),
+            grants=load_grants(settings.data_dir),
+            settings=settings,
+        )
+        await host.start()
+        try:
+            if not any(p.manifest.name == DOC_INTEL_PLUGIN for p in host.loaded()):
+                console.print(
+                    f"[red]The {DOC_INTEL_PLUGIN} plugin is not running,[/red] so there is "
+                    "nothing to parse documents with. Try: "
+                    f"declaw plugins enable {DOC_INTEL_PLUGIN}"
+                )
+                raise typer.Exit(code=1)
+
+            # sanitizer=None: indexing does not classify chunks. That happens
+            # at retrieval, on the top-k that actually enter the model.
+            stack = build_document_stack(settings, host, sanitizer=None)
+            with Progress(
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                TextColumn("{task.completed}/{task.total}"),
+                console=console,
+            ) as progress:
+                task_id = progress.add_task("Indexing", total=1)
+
+                def on_progress(step: IndexProgress) -> None:
+                    progress.update(
+                        task_id,
+                        completed=step.done,
+                        total=step.total or 1,
+                        description=step.path,
+                    )
+
+                report = await stack.indexer.index(target, on_progress=on_progress)
+        finally:
+            await host.stop()
+
+        console.print(
+            f"[green]Indexed {report.indexed}[/green], skipped {report.skipped} unchanged, "
+            f"{report.failed} failed."
+        )
+        for warning in report.warnings:
+            console.print(f"[yellow]{warning}[/yellow]")
+
+    asyncio.run(_run())
+
+
+plugins_app = typer.Typer(help="List and control the plugins DeClaw ships with.")
+cli.add_typer(plugins_app, name="plugins")
+
+
+def _known_plugin(name: str) -> PluginManifest:
+    """Resolve a plugin name to its manifest or exit with a readable error."""
+    from declaw.plugin_host.loader import builtin_plugins_dir, discover
+
+    found, _failures = discover(builtin_plugins_dir(get_settings()))
+    for candidate in found:
+        if candidate.manifest.name == name:
+            return candidate.manifest
+    known = ", ".join(sorted(c.manifest.name for c in found)) or "none"
+    console.print(f"[red]No plugin named {name!r}.[/red] Installed: {known}.")
+    raise typer.Exit(code=1)
+
+
+@plugins_app.command("list")
+def plugins_list() -> None:
+    """Show every shipped plugin, its state, and the permissions it holds."""
+    from declaw.plugin_host.grants_helper import load_grants, load_state
+    from declaw.plugin_host.loader import builtin_plugins_dir, discover
+
+    settings = get_settings()
+    found, failures = discover(builtin_plugins_dir(settings))
+    state = load_state(settings.data_dir)
+    grants = load_grants(settings.data_dir)
+
+    if not found and not failures:
+        console.print("[dim]No plugins found.[/dim]")
+        return
+
+    for candidate in found:
+        manifest = candidate.manifest
+        record = state.record(manifest.name)
+        if record.quarantined:
+            status_text = f"[red]quarantined[/red] ({record.quarantine_reason})"
+        elif not record.enabled:
+            status_text = "[yellow]disabled[/yellow]"
+        else:
+            status_text = "[green]enabled[/green]"
+        held = {p.value for p in grants.granted(manifest.name)}
+        console.print(f"[bold]{manifest.name}[/bold] {manifest.version} - {status_text}")
+        console.print(f"  {manifest.description_for_language(settings.language)}")
+        for permission in sorted(p.value for p in manifest.permissions.requested):
+            console.print(
+                f"  - {permission}: {'granted' if permission in held else 'not granted'}"
+            )
+    for failure in failures:
+        console.print(f"[red]{failure.directory.name}[/red]: {failure.reason}")
+
+
+@plugins_app.command("enable")
+def plugins_enable(name: str) -> None:
+    """Enable a plugin and clear any quarantine on it."""
+    from declaw.plugin_host.grants_helper import load_state
+
+    _known_plugin(name)
+    state = load_state(get_settings().data_dir)
+    state.set_enabled(name, True)
+    state.clear_quarantine(name)
+    console.print(f"[green]{name} enabled.[/green] It starts with the next 'declaw chat'.")
+
+
+@plugins_app.command("disable")
+def plugins_disable(name: str) -> None:
+    """Stop a plugin from starting."""
+    from declaw.plugin_host.grants_helper import load_state
+
+    _known_plugin(name)
+    load_state(get_settings().data_dir).set_enabled(name, False)
+    console.print(f"[yellow]{name} disabled.[/yellow]")
+
+
+@plugins_app.command("revoke")
+def plugins_revoke(name: str, permission: str) -> None:
+    """Take a permission away from a plugin. It is never auto-granted again."""
+    from declaw.plugin_host.grants_helper import load_grants
+    from declaw.plugin_host.manifest import PluginPermission
+
+    _known_plugin(name)
+    try:
+        parsed = PluginPermission(permission)
+    except ValueError:
+        allowed = ", ".join(sorted(p.value for p in PluginPermission))
+        console.print(f"[red]Unknown permission {permission!r}.[/red] Known: {allowed}.")
+        raise typer.Exit(code=1) from None
+    grants = load_grants(get_settings().data_dir)
+    asyncio.run(grants.revoke(name, parsed))
+    console.print(f"[green]{permission} revoked from {name}.[/green]")
 
 
 def main() -> None:

@@ -1,0 +1,258 @@
+.diagram {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+/* ---- plot -------------------------------------------------------------- */
+
+/* No frame, no viewport, no controls. The drawing sits on the page and scales
+   with its column; it only scrolls sideways below the width where its own
+   labels stop being legible. */
+.plot {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.plot__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 720px;
+  overflow: visible;
+}
+
+/* ---- nodes ------------------------------------------------------------- */
+
+.node__shape {
+  fill: var(--bg-raised);
+  stroke: var(--node-line, var(--ink-faint));
+  stroke-width: 1.5;
+  /* Without this a 1.5px border becomes 0.9px at 60% zoom and a dark-on-dark
+     outline simply stops being visible. */
+  vector-effect: non-scaling-stroke;
+  transition: stroke var(--dur-fast) var(--ease-out), fill var(--dur-fast) var(--ease-out);
+}
+.node__label {
+  fill: var(--ink);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.node--core .node__shape,
+.node--port .node__shape { fill: var(--signal-soft); --node-line: var(--signal); }
+.node--external .node__shape { --node-line: var(--signal-line); }
+.node--gate .node__shape { fill: var(--warn-soft); --node-line: var(--warn); }
+.node--exit .node__shape { fill: var(--bg-sunken); --node-line: var(--ink-faint); }
+.node--planned .node__shape {
+  fill: transparent;
+  --node-line: var(--ink-faint);
+  stroke-dasharray: 6 5;
+  opacity: 0.75;
+}
+.node--planned .node__label { fill: var(--ink-faint); }
+
+.node--interactive { cursor: pointer; }
+.node--interactive:hover .node__shape,
+.node--interactive:focus-visible .node__shape {
+  --node-line: var(--signal);
+  stroke-width: 2.2;
+  filter: drop-shadow(var(--glow));
+}
+.node--interactive:focus { outline: none; }
+
+/* ---- edges ------------------------------------------------------------- */
+
+.edge { color: var(--ink-faint); }
+.edge__line {
+  stroke: var(--ink-faint);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+  transition: stroke var(--dur-fast) var(--ease-out);
+}
+.edge__label {
+  fill: var(--ink-faint);
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  paint-order: stroke;
+  stroke: var(--bg-sunken);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+}
+.edge--interactive { cursor: pointer; }
+.edge--interactive:hover { color: var(--signal); }
+.edge--interactive:hover .edge__line { stroke: var(--signal); stroke-width: 2; }
+.edge--interactive:hover .edge__label { fill: var(--signal); }
+
+/* ---- companion list ---------------------------------------------------- */
+
+.companion {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg-raised);
+  padding: var(--space-3);
+  max-height: clamp(24rem, 56vh, 40rem);
+  overflow-y: auto;
+}
+.companion__title {
+  font-family: var(--font-display);
+  font-size: var(--step--2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+.companion__hint {
+  margin: var(--space-1) 0 var(--space-3);
+  font-size: var(--step--2);
+  color: var(--ink-faint);
+}
+.companion__list { display: grid; gap: 2px; }
+.companion__button {
+  width: 100%;
+  text-align: left;
+  font-family: var(--font-body);
+  padding: var(--space-2);
+}
+.companion__button--edge { color: var(--ink-faint); font-size: var(--step--2); }
+
+@media (max-width: 1100px) {
+  .diagram { grid-template-columns: 1fr; }
+  .companion { max-height: none; }
+}
+
+/* Motion is opt-in, never opt-out: reduced motion strips it everywhere,
+   including anything a library writes inline. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- the machine ------------------------------------------------------- */
+
+.chassis__shape {
+  fill: color-mix(in srgb, var(--bg-raised) 60%, transparent);
+  stroke: var(--signal-line);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 2 6;
+  stroke-linecap: round;
+}
+.chassis__label {
+  fill: var(--signal);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.slot__shape {
+  fill: var(--bg-sunken);
+  stroke: var(--ink-faint);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+.slot--port .slot__shape { fill: var(--signal-soft); stroke: var(--signal-line); }
+.slot__label { fill: var(--ink); font-family: var(--font-body); font-size: 12px; }
+
+.wire {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+.wire--bus { stroke: var(--signal-line); stroke-width: 2; }
+.wire--in { stroke: var(--signal-line); }
+.wire__label {
+  fill: var(--ink-faint);
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  paint-order: stroke;
+  stroke: var(--bg-sunken);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.part { cursor: pointer; }
+.part:focus { outline: none; }
+.part__shape {
+  fill: var(--bg-raised);
+  stroke: var(--line);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  transition: stroke var(--dur-fast) var(--ease-out);
+}
+.part:hover .part__shape,
+.part:focus-visible .part__shape {
+  stroke: var(--signal);
+  stroke-width: 2.4;
+  filter: drop-shadow(var(--glow));
+}
+.part__shape--open { fill: var(--bg-sunken); stroke: var(--signal); stroke-width: 1.8; }
+.part__label { fill: var(--ink); font-family: var(--font-body); font-size: 13px; }
+.part__count {
+  fill: var(--ink-faint);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.part__open-title {
+  fill: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+}
+.part__open-note { fill: var(--ink-muted); font-family: var(--font-body); font-size: 12px; }
+
+.subpart__shape {
+  fill: var(--bg-raised);
+  stroke: var(--line-soft);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.subpart__label {
+  fill: var(--ink-muted);
+  font-family: var(--font-code);
+  font-size: 11px;
+}
+
+.part__back { cursor: pointer; }
+.part__back rect {
+  fill: var(--bg-raised);
+  stroke: var(--line);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.part__back text {
+  fill: var(--ink-muted);
+  font-family: var(--font-display);
+  font-size: 11px;
+}
+.part__back:hover rect { stroke: var(--signal); }
+.part__back:hover text { fill: var(--signal); }
+
+.partdetail { display: flex; flex-direction: column; gap: var(--space-3); }
+
+/* ---- grouped bands ----------------------------------------------------- */
+
+.band__shape {
+  fill: color-mix(in srgb, var(--bg-raised) 45%, transparent);
+  stroke: var(--line-soft);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.band__label {
+  fill: var(--ink-faint);
+  font-family: var(--font-display);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.band--g-planned .band__shape { stroke-dasharray: 5 5; }
+.band--g-isolation .band__shape { stroke: var(--signal-line); }

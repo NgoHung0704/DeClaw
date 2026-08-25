@@ -1,0 +1,253 @@
+{
+  "component": "tool-registry",
+  "functions": [
+    {
+      "id": "langchain_tools",
+      "name": "ToolRegistry.langchain_tools",
+      "signature": "langchain_tools(language, approve, *, sanitizer=None, audit=None) -> list[StructuredTool]",
+      "file": "declaw/tools/registry.py",
+      "line": 105,
+      "note": {
+        "en": "Builds the brain-ready tool list. The same list feeds bind_tools and ToolNode, so the model and the executor can never disagree about what exists.",
+        "vi": "Dựng danh sách tool cho brain. Cùng một danh sách nạp cho bind_tools và ToolNode, nên model và bộ thực thi không thể lệch nhau về tool nào tồn tại."
+      }
+    },
+    {
+      "id": "register_instance",
+      "name": "ToolRegistry.register_instance",
+      "signature": "register_instance(tool: DeclawTool[Any]) -> DeclawTool[Any]",
+      "file": "declaw/tools/registry.py",
+      "line": 62,
+      "note": {
+        "en": "The single duplicate-name check. register() delegates here so both registration paths share one gate.",
+        "vi": "Chỗ duy nhất kiểm tra trùng tên. register() gọi lại hàm này để cả hai đường đăng ký dùng chung một cổng."
+      }
+    },
+    {
+      "id": "default_registry",
+      "name": "default_registry",
+      "signature": "default_registry() -> ToolRegistry",
+      "file": "declaw/tools/registry.py",
+      "line": 159,
+      "note": {
+        "en": "The explicit _BUILTIN_TOOLS tuple is the single auditable list of everything DeClaw ships out of the box.",
+        "vi": "Tuple _BUILTIN_TOOLS tường minh là danh sách kiểm toán được duy nhất về mọi thứ DeClaw ship sẵn."
+      }
+    },
+    {
+      "id": "wrap_tool_with_confirmation",
+      "name": "wrap_tool_with_confirmation",
+      "signature": "wrap_tool_with_confirmation(tool, language, approve, *, audit=None) -> StructuredTool",
+      "file": "declaw/tools/confirmation.py",
+      "line": 65,
+      "note": {
+        "en": "The gate for every non-READ tool. The wrapped tool keeps the same name, description and args_schema, so the gate is invisible to the prompt.",
+        "vi": "Cổng chặn cho mọi tool non-READ. Tool sau khi bọc giữ nguyên tên, mô tả và args_schema, nên model không nhìn thấy cổng này."
+      }
+    },
+    {
+      "id": "denial_message",
+      "name": "denial_message",
+      "signature": "denial_message(tool_name: str, language: Language) -> str",
+      "file": "declaw/tools/confirmation.py",
+      "line": 54,
+      "note": {
+        "en": "Public on purpose: the audit wrapper matches tool results against this exact string to record the outcome as denied.",
+        "vi": "Cố ý để public: wrapper audit so khớp kết quả tool với đúng chuỗi này để ghi kết quả là denied."
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "tool-dispatch",
+      "title": {
+        "en": "How one tool call reaches the tool",
+        "vi": "Một lời gọi tool đi tới tool như thế nào"
+      },
+      "nodes": [
+        {
+          "id": "model-call",
+          "kind": "port",
+          "label": {
+            "en": "Model emits a tool call",
+            "vi": "Model phát ra lời gọi tool"
+          }
+        },
+        {
+          "id": "audit-wrap",
+          "kind": "step",
+          "label": {
+            "en": "Audit wrapper (outermost)",
+            "vi": "Wrapper audit (ngoài cùng)"
+          }
+        },
+        {
+          "id": "classify",
+          "kind": "gate",
+          "label": {
+            "en": "Classification and external content?",
+            "vi": "Phân loại và có sinh nội dung ngoài?"
+          }
+        },
+        {
+          "id": "confirm",
+          "kind": "step",
+          "label": {
+            "en": "Confirmation gate asks the human",
+            "vi": "Cổng xác nhận hỏi người dùng"
+          }
+        },
+        {
+          "id": "sanitize",
+          "kind": "step",
+          "label": {
+            "en": "Sanitizer classifies the output",
+            "vi": "Sanitizer phân loại đầu ra"
+          }
+        },
+        {
+          "id": "run",
+          "kind": "step",
+          "label": {
+            "en": "Tool runs with validated args",
+            "vi": "Tool chạy với tham số đã kiểm"
+          }
+        },
+        {
+          "id": "observation",
+          "kind": "exit",
+          "label": {
+            "en": "ToolMessage back to the model",
+            "vi": "ToolMessage trả về cho model"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e-call",
+          "from": "model-call",
+          "to": "audit-wrap",
+          "label": {
+            "en": "every call",
+            "vi": "mọi lời gọi"
+          }
+        },
+        {
+          "id": "e-audit-classify",
+          "from": "audit-wrap",
+          "to": "classify",
+          "label": {
+            "en": "record then dispatch",
+            "vi": "ghi nhận rồi điều phối"
+          }
+        },
+        {
+          "id": "e-nonread",
+          "from": "classify",
+          "to": "confirm",
+          "label": {
+            "en": "non-READ: ask first",
+            "vi": "non-READ: hỏi trước"
+          }
+        },
+        {
+          "id": "e-read-external",
+          "from": "classify",
+          "to": "sanitize",
+          "label": {
+            "en": "READ + external content: sanitize",
+            "vi": "READ + nội dung ngoài: lọc"
+          }
+        },
+        {
+          "id": "e-confirm-run",
+          "from": "confirm",
+          "to": "run",
+          "label": {
+            "en": "approved",
+            "vi": "được duyệt"
+          }
+        },
+        {
+          "id": "e-sanitize-run",
+          "from": "sanitize",
+          "to": "run",
+          "label": {
+            "en": "SAFE passes through",
+            "vi": "SAFE thì đi tiếp"
+          }
+        },
+        {
+          "id": "e-run-out",
+          "from": "run",
+          "to": "observation",
+          "label": {
+            "en": "result or refusal",
+            "vi": "kết quả hoặc từ chối"
+          }
+        }
+      ]
+    }
+  ],
+  "snippets": [
+    {
+      "file": "declaw/tools/registry.py",
+      "start": 131,
+      "end": 140,
+      "code": "        tools: list[StructuredTool] = []\n        for name in self.names():\n            tool = self._tools[name]\n            if tool.classification is ToolClass.READ:\n                if sanitizer is not None and tool.produces_external_content:\n                    lc_tool = wrap_tool_with_sanitizer(tool, language, sanitizer)\n                else:\n                    lc_tool = tool.as_langchain_tool(language)\n            else:\n                lc_tool = wrap_tool_with_confirmation(tool, language, approve, audit=audit)",
+      "caption": {
+        "en": "READ external-content tools take the sanitizer branch; every non-READ tool takes the confirmation branch.",
+        "vi": "Tool READ sinh nội dung ngoài đi nhánh sanitizer; mọi tool non-READ đi nhánh xác nhận."
+      }
+    }
+  ],
+  "quotes": [
+    {
+      "file": "declaw/tools/confirmation.py",
+      "start": 54,
+      "end": 61,
+      "anchor": "the string is DeClaw-generated and",
+      "note": {
+        "en": "Denial detection is an exact string match, which is why the message is generated by DeClaw and never by the model.",
+        "vi": "Phát hiện từ chối dựa trên so khớp chuỗi chính xác, nên thông điệp do DeClaw sinh ra chứ không phải model."
+      }
+    },
+    {
+      "file": "declaw/tools/registry.py",
+      "start": 120,
+      "end": 126,
+      "anchor": "the audit wrapper is outermost",
+      "note": {
+        "en": "Audit wraps whichever branch was taken, so an event records the call as the model experienced it.",
+        "vi": "Audit bọc bên ngoài nhánh đã chọn, nên sự kiện ghi lại lời gọi đúng như model trải nghiệm."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-gate-not-chain",
+      "title": {
+        "en": "Confirmation and sanitizing are branches, not stages",
+        "vi": "Xác nhận và lọc là hai nhánh, không phải hai chặng"
+      },
+      "body": {
+        "en": "A READ tool that produces external content is sanitized; every non-READ tool is confirmed. The two are never composed, and the docstring says so: no such tool ships today.",
+        "vi": "Tool READ sinh nội dung ngoài thì được lọc; mọi tool non-READ thì phải xác nhận. Hai đường không bao giờ ghép lại, và docstring nói rõ: hiện chưa có tool nào như vậy."
+      },
+      "source": {
+        "file": "declaw/tools/registry.py",
+        "start": 127,
+        "end": 129,
+        "anchor": "hypothetical non-READ external-content tool",
+        "note": {
+          "en": "Stated in the method's own docstring.",
+          "vi": "Ghi ngay trong docstring của chính phương thức."
+        }
+      },
+      "principles": [
+        "P4",
+        "P6"
+      ]
+    }
+  ]
+}

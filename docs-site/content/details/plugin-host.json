@@ -1,0 +1,222 @@
+{
+  "component": "plugin-host",
+  "functions": [
+    {
+      "id": "PluginHost",
+      "name": "PluginHost",
+      "signature": "start / stop / call / model_tools / loaded / failures / enable / disable",
+      "file": "declaw/plugin_host/host.py",
+      "line": 64,
+      "note": {
+        "en": "The only surface the application touches. Startup is a pipeline where every stage can refuse, and a plugin failing any stage is skipped with an audited reason while the others load.",
+        "vi": "Bề mặt duy nhất mà ứng dụng chạm tới. Khởi động là một chuỗi giai đoạn mà giai đoạn nào cũng có quyền từ chối; plugin trượt ở bất kỳ giai đoạn nào sẽ bị bỏ qua kèm lý do được kiểm toán, các plugin khác vẫn nạp."
+      }
+    },
+    {
+      "id": "encode_frame",
+      "name": "encode_frame",
+      "signature": "encode_frame(frame: BaseModel) -> bytes",
+      "file": "declaw/plugin_host/ipc.py",
+      "line": 20,
+      "note": {
+        "en": "Refuses to emit an oversized frame, so the host never writes what the peer would have to reject.",
+        "vi": "Từ chối phát ra khung vượt kích thước, nên host không bao giờ ghi ra thứ mà đầu kia buộc phải từ chối."
+      }
+    },
+    {
+      "id": "decode_response",
+      "name": "decode_response",
+      "signature": "decode_response(line: bytes) -> ResponseFrame",
+      "file": "declaw/plugin_host/ipc.py",
+      "line": 30,
+      "note": {
+        "en": "Parses one NDJSON line into a validated response frame, raising a protocol violation on anything malformed.",
+        "vi": "Phân tích một dòng NDJSON thành khung phản hồi đã kiểm, ném lỗi vi phạm giao thức với mọi thứ dị dạng."
+      }
+    },
+    {
+      "id": "PluginSupervisor",
+      "name": "PluginSupervisor",
+      "signature": "class PluginSupervisor",
+      "file": "declaw/plugin_host/supervisor.py",
+      "line": 65,
+      "note": {
+        "en": "Restart backoff plus two counters with deliberately different semantics: crashes windowed, protocol violations cumulative.",
+        "vi": "Backoff khi khởi động lại cộng hai bộ đếm có ngữ nghĩa cố ý khác nhau: crash tính theo cửa sổ thời gian, vi phạm giao thức tính cộng dồn."
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "plugin-call",
+      "title": {
+        "en": "One capability call over the pipe",
+        "vi": "Một lời gọi capability qua ống"
+      },
+      "nodes": [
+        {
+          "id": "proxy",
+          "kind": "port",
+          "label": {
+            "en": "PluginTool._arun is invoked",
+            "vi": "PluginTool._arun được gọi"
+          }
+        },
+        {
+          "id": "validate",
+          "kind": "step",
+          "label": {
+            "en": "Args validated host-side from the announced schema",
+            "vi": "Tham số được kiểm phía host theo schema đã công bố"
+          }
+        },
+        {
+          "id": "send",
+          "kind": "step",
+          "label": {
+            "en": "invoke frame written as one NDJSON line",
+            "vi": "Khung invoke ghi thành một dòng NDJSON"
+          }
+        },
+        {
+          "id": "reply",
+          "kind": "gate",
+          "label": {
+            "en": "What came back?",
+            "vi": "Nhận lại được gì?"
+          }
+        },
+        {
+          "id": "result",
+          "kind": "exit",
+          "label": {
+            "en": "Result becomes a ToolMessage",
+            "vi": "Kết quả thành ToolMessage"
+          }
+        },
+        {
+          "id": "violation",
+          "kind": "exit",
+          "label": {
+            "en": "Protocol violation: process killed",
+            "vi": "Vi phạm giao thức: giết tiến trình"
+          }
+        },
+        {
+          "id": "timeout",
+          "kind": "exit",
+          "label": {
+            "en": "Timeout: process killed, never reused",
+            "vi": "Hết giờ: giết tiến trình, không tái dùng"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e-validate",
+          "from": "proxy",
+          "to": "validate",
+          "label": {
+            "en": "typed parameters only",
+            "vi": "chỉ tham số có kiểu"
+          }
+        },
+        {
+          "id": "e-send",
+          "from": "validate",
+          "to": "send",
+          "label": {
+            "en": "within the 32 MiB frame cap",
+            "vi": "trong giới hạn khung 32 MiB"
+          }
+        },
+        {
+          "id": "e-await",
+          "from": "send",
+          "to": "reply",
+          "label": {
+            "en": "one request in flight",
+            "vi": "mỗi lúc một request"
+          }
+        },
+        {
+          "id": "e-ok",
+          "from": "reply",
+          "to": "result",
+          "label": {
+            "en": "ok frame",
+            "vi": "khung ok"
+          }
+        },
+        {
+          "id": "e-bad",
+          "from": "reply",
+          "to": "violation",
+          "label": {
+            "en": "malformed or oversized frame",
+            "vi": "khung dị dạng hoặc quá lớn"
+          }
+        },
+        {
+          "id": "e-slow",
+          "from": "reply",
+          "to": "timeout",
+          "label": {
+            "en": "no answer within the declared timeout",
+            "vi": "không trả lời trong thời hạn đã khai báo"
+          }
+        }
+      ]
+    }
+  ],
+  "snippets": [
+    {
+      "file": "declaw/plugin_host/supervisor.py",
+      "start": 9,
+      "end": 12,
+      "code": "Violations are cumulative and crashes are windowed, and that asymmetry is\ndeliberate. A crash can be environmental and transient, so old ones are\nforgiven. Malformed frames are not transient — the plugin either speaks the\nprotocol or it does not — and since the first violation already kills the",
+      "caption": {
+        "en": "The asymmetry between crash counting and violation counting, stated where it is implemented.",
+        "vi": "Sự bất đối xứng giữa cách đếm crash và đếm vi phạm, ghi ngay nơi hiện thực nó."
+      }
+    }
+  ],
+  "quotes": [
+    {
+      "file": "declaw/plugin_host/supervisor.py",
+      "start": 9,
+      "end": 12,
+      "anchor": "Violations are cumulative and crashes are windowed",
+      "note": {
+        "en": "A crash can be environmental and transient, so old ones are forgiven. A malformed frame is not transient.",
+        "vi": "Một lần crash có thể do môi trường và chỉ thoáng qua, nên các lần cũ được bỏ qua. Khung dị dạng thì không thoáng qua."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-kill-after-timeout",
+      "title": {
+        "en": "A timed-out process is killed, never reused",
+        "vi": "Tiến trình hết giờ bị giết, không bao giờ tái dùng"
+      },
+      "body": {
+        "en": "Its unread answer is still sitting in the pipe. Reusing the process would let that stale reply be read as the answer to the next request.",
+        "vi": "Câu trả lời chưa đọc của nó vẫn nằm trong ống. Tái dùng tiến trình sẽ khiến phản hồi cũ bị đọc nhầm thành câu trả lời cho request kế tiếp."
+      },
+      "source": {
+        "file": "declaw/plugin_host/supervisor.py",
+        "start": 1,
+        "end": 12,
+        "anchor": "quarantined",
+        "note": {
+          "en": "The supervision rules are documented at the top of the module.",
+          "vi": "Các quy tắc giám sát được ghi ở đầu module."
+        }
+      },
+      "principles": [
+        "P6"
+      ]
+    }
+  ]
+}

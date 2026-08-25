@@ -1,0 +1,340 @@
+{
+  "site": {
+    "title": {
+      "en": "DeClaw Architecture",
+      "vi": "Kiến trúc DeClaw"
+    },
+    "tagline": {
+      "en": "How this repository is put together, and what it still owes.",
+      "vi": "Repo này được ghép lại thế nào, và còn nợ những gì."
+    },
+    "skipToContent": {
+      "en": "Skip to main content",
+      "vi": "Bỏ qua, tới nội dung chính"
+    }
+  },
+  "nav": {
+    "map": {
+      "en": "System map",
+      "vi": "Bản đồ hệ thống"
+    },
+    "components": {
+      "en": "Components",
+      "vi": "Thành phần"
+    },
+    "machine": {
+      "en": "The machine",
+      "vi": "Cỗ máy"
+    },
+    "debt": {
+      "en": "What is owed",
+      "vi": "Những chỗ còn nợ"
+    },
+    "label": {
+      "en": "Main sections",
+      "vi": "Các mục chính"
+    },
+    "languageLabel": {
+      "en": "Language",
+      "vi": "Ngôn ngữ"
+    },
+    "english": {
+      "en": "English",
+      "vi": "Tiếng Anh"
+    },
+    "vietnamese": {
+      "en": "Vietnamese",
+      "vi": "Tiếng Việt"
+    },
+    "phases": {
+      "en": "Phases",
+      "vi": "Giai đoạn"
+    }
+  },
+  "diagram": {
+    "companionTitle": {
+      "en": "Every part, in words",
+      "vi": "Mọi thành phần, bằng chữ"
+    },
+    "companionHint": {
+      "en": "The same nodes, edge labels and gate branches as the drawing. Use these buttons to open anything.",
+      "vi": "Cùng các node, nhãn cạnh và nhánh rẽ như hình vẽ. Dùng các nút này để mở bất cứ mục nào."
+    }
+  },
+  "map": {
+    "heading": {
+      "en": "Where this repository sits",
+      "vi": "Repo này nằm ở đâu"
+    },
+    "intro": {
+      "en": "Each edge opens the contract that is actually implemented in this repository. Contracts that live inside third-party libraries are omitted rather than guessed.",
+      "vi": "Mỗi cạnh mở ra hợp đồng thực sự được hiện thực trong repo này. Những hợp đồng nằm bên trong thư viện bên thứ ba thì bỏ qua chứ không đoán."
+    },
+    "ownershipHeading": {
+      "en": "Who owns and who writes",
+      "vi": "Ai sở hữu và ai ghi"
+    },
+    "ownershipIntro": {
+      "en": "The table new developers most often get wrong.",
+      "vi": "Bảng mà dev mới hay hiểu sai nhất."
+    },
+    "colStore": {
+      "en": "Store",
+      "vi": "Kho dữ liệu"
+    },
+    "colKind": {
+      "en": "Kind",
+      "vi": "Loại"
+    },
+    "colOwner": {
+      "en": "Owner",
+      "vi": "Sở hữu"
+    },
+    "colWriters": {
+      "en": "Writers",
+      "vi": "Nơi ghi"
+    },
+    "colReaders": {
+      "en": "Readers",
+      "vi": "Nơi đọc"
+    },
+    "colLifetime": {
+      "en": "Lifetime",
+      "vi": "Vòng đời"
+    }
+  },
+  "contract": {
+    "heading": {
+      "en": "Contract",
+      "vi": "Hợp đồng"
+    },
+    "transport": {
+      "en": "Transport",
+      "vi": "Kênh truyền"
+    },
+    "method": {
+      "en": "Method",
+      "vi": "Phương thức"
+    },
+    "path": {
+      "en": "Path",
+      "vi": "Đường dẫn"
+    },
+    "auth": {
+      "en": "Authentication",
+      "vi": "Xác thực"
+    },
+    "request": {
+      "en": "Request",
+      "vi": "Yêu cầu"
+    },
+    "response": {
+      "en": "Response",
+      "vi": "Phản hồi"
+    },
+    "errors": {
+      "en": "Failure modes",
+      "vi": "Các kiểu lỗi"
+    },
+    "none": {
+      "en": "Not applicable",
+      "vi": "Không áp dụng"
+    },
+    "principles": {
+      "en": "Principles at stake",
+      "vi": "Nguyên tắc liên quan"
+    },
+    "close": {
+      "en": "Close",
+      "vi": "Đóng"
+    }
+  },
+  "components": {
+    "heading": {
+      "en": "Every module, grouped by role",
+      "vi": "Mọi module, nhóm theo vai trò"
+    },
+    "intro": {
+      "en": "Every Python file tracked by git outside tests is documented by exactly one component. CI fails if a new file appears without one.",
+      "vi": "Mọi tệp Python được git theo dõi ngoài thư mục test đều thuộc đúng một thành phần. CI sẽ đỏ nếu xuất hiện tệp mới mà chưa có thành phần nào nhận."
+    },
+    "filterPhase": {
+      "en": "Filter by phase",
+      "vi": "Lọc theo giai đoạn"
+    },
+    "filterTicket": {
+      "en": "Filter by ticket",
+      "vi": "Lọc theo ticket"
+    },
+    "all": {
+      "en": "All",
+      "vi": "Tất cả"
+    },
+    "moduleCount": {
+      "en": "modules",
+      "vi": "module"
+    },
+    "tierA": {
+      "en": "Deep detail",
+      "vi": "Chi tiết sâu"
+    },
+    "tierB": {
+      "en": "Standard detail",
+      "vi": "Chi tiết chuẩn"
+    },
+    "clearFilter": {
+      "en": "Clear filter",
+      "vi": "Bỏ lọc"
+    },
+    "openDetail": {
+      "en": "Open component detail",
+      "vi": "Mở chi tiết thành phần"
+    }
+  },
+  "detail": {
+    "back": {
+      "en": "Back to components",
+      "vi": "Quay lại danh sách thành phần"
+    },
+    "modules": {
+      "en": "Modules",
+      "vi": "Các module"
+    },
+    "functions": {
+      "en": "Functions",
+      "vi": "Các hàm"
+    },
+    "flow": {
+      "en": "Call flow",
+      "vi": "Luồng gọi"
+    },
+    "code": {
+      "en": "Code, verbatim",
+      "vi": "Mã nguồn, nguyên văn"
+    },
+    "quotes": {
+      "en": "Cited without embedding",
+      "vi": "Trích dẫn không nhúng mã"
+    },
+    "why": {
+      "en": "Why it is written this way",
+      "vi": "Vì sao viết thế này"
+    },
+    "source": {
+      "en": "Source",
+      "vi": "Nguồn"
+    },
+    "tickets": {
+      "en": "Tickets that touched this",
+      "vi": "Các ticket đã đụng tới"
+    },
+    "viewOnGitHub": {
+      "en": "View on GitHub",
+      "vi": "Xem trên GitHub"
+    },
+    "signature": {
+      "en": "Signature",
+      "vi": "Chữ ký hàm"
+    }
+  },
+  "machine": {
+    "heading": {
+      "en": "DeClaw as a production line",
+      "vi": "DeClaw như một dây chuyền"
+    },
+    "intro": {
+      "en": "Intake on the left, the parts inside, exits on the right. Click a part to open it and see only its own pieces. Filtering by ticket lights the parts that ticket touched, including the ones it only passed through.",
+      "vi": "Cổng vào bên trái, các bộ phận bên trong, lối ra bên phải. Bấm vào một bộ phận để mở riêng nó ra. Lọc theo ticket sẽ làm sáng những bộ phận ticket đó chạm tới, kể cả bộ phận nó chỉ đi ngang qua."
+    },
+    "legendCreates": {
+      "en": "Created by this ticket",
+      "vi": "Do ticket này tạo ra"
+    },
+    "legendModifies": {
+      "en": "Modified by this ticket",
+      "vi": "Do ticket này sửa"
+    },
+    "legendTraverses": {
+      "en": "Only passed through",
+      "vi": "Chỉ đi ngang qua"
+    },
+    "noTicket": {
+      "en": "No ticket filter",
+      "vi": "Không lọc theo ticket"
+    },
+    "backToMachine": {
+      "en": "Back",
+      "vi": "Quay lại"
+    },
+    "modules": {
+      "en": "modules",
+      "vi": "module"
+    },
+    "openComponent": {
+      "en": "Open the full component",
+      "vi": "Mở chi tiết thành phần"
+    },
+    "partsList": {
+      "en": "Every part, in words",
+      "vi": "Mọi bộ phận, bằng chữ"
+    },
+    "partsHint": {
+      "en": "The same parts as the drawing. Open any of them from here.",
+      "vi": "Cùng các bộ phận như hình vẽ. Mở bất kỳ bộ phận nào từ đây."
+    }
+  },
+  "debt": {
+    "heading": {
+      "en": "What this project still owes",
+      "vi": "Dự án này còn nợ những gì"
+    },
+    "intro": {
+      "en": "Unbuilt subsystems, unvalidated claims and temporary measures. Every item is anchored to its source, so if someone fixes the underlying problem this page goes red in CI instead of quietly lying.",
+      "vi": "Các hệ thống con chưa xây, các khẳng định chưa kiểm chứng và những giải pháp tạm. Mỗi mục đều neo vào nguồn của nó, nên nếu ai đó sửa vấn đề gốc thì trang này sẽ đỏ trong CI thay vì lặng lẽ nói sai."
+    },
+    "unbuilt": {
+      "en": "Not built",
+      "vi": "Chưa xây"
+    },
+    "unvalidated": {
+      "en": "Not validated",
+      "vi": "Chưa kiểm chứng"
+    },
+    "temporary": {
+      "en": "Temporary",
+      "vi": "Tạm thời"
+    },
+    "affects": {
+      "en": "Affects",
+      "vi": "Ảnh hưởng tới"
+    }
+  },
+  "principles": {
+    "heading": {
+      "en": "The seven inviolable principles",
+      "vi": "Bảy nguyên tắc bất khả xâm phạm"
+    }
+  },
+  "phases": {
+    "heading": {
+      "en": "The build, phase by phase",
+      "vi": "Quá trình xây, theo từng giai đoạn"
+    },
+    "intro": {
+      "en": "Each phase gated the next. The order is not decoration: the sanitizer had to exist before anything read a stranger’s document, and the plugin host before doc-intel could be a plugin at all.",
+      "vi": "Mỗi giai đoạn là cửa chặn cho giai đoạn sau. Thứ tự này không phải để trang trí: sanitizer phải có trước khi đọc tài liệu của người lạ, và plugin host phải có trước khi doc-intel trở thành một plugin."
+    },
+    "ticketsDone": {
+      "en": "done",
+      "vi": "xong"
+    },
+    "components": {
+      "en": "Components touched",
+      "vi": "Thành phần liên quan"
+    },
+    "deferred": {
+      "en": "Deferred",
+      "vi": "Đã hoãn"
+    }
+  }
+}

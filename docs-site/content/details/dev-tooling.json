@@ -1,0 +1,87 @@
+{
+  "component": "dev-tooling",
+  "functions": [
+    {
+      "id": "sanitizer_benchmark",
+      "name": "scripts/sanitizer_benchmark.py",
+      "signature": "live benchmark runner",
+      "file": "scripts/sanitizer_benchmark.py",
+      "line": 1,
+      "note": {
+        "en": "Runs both the development corpus and the held-out set, printing detection seen versus unseen with a warning when the gap is wide.",
+        "vi": "Chạy cả bộ mẫu phát triển lẫn tập held-out, in ra khả năng phát hiện trên dữ liệu đã thấy so với chưa thấy, kèm cảnh báo khi khoảng cách lớn."
+      }
+    },
+    {
+      "id": "probe_mistral",
+      "name": "scripts/probe_mistral.py",
+      "signature": "tool-calling probe runner",
+      "file": "scripts/probe_mistral.py",
+      "line": 1,
+      "note": {
+        "en": "A thin runner over the frozen corpus; the raw graph it builds matches what chat actually composes.",
+        "vi": "Một trình chạy mỏng trên bộ mẫu đã đóng băng; graph thô nó dựng khớp với thứ chat thực sự lắp ráp."
+      }
+    },
+    {
+      "id": "preflight_script",
+      "name": "scripts/preflight.py",
+      "signature": "Rich renderer over the checks",
+      "file": "scripts/preflight.py",
+      "line": 1,
+      "note": {
+        "en": "Renders the preflight results and exits non-zero on failure.",
+        "vi": "Hiển thị kết quả preflight và thoát với mã khác 0 khi lỗi."
+      }
+    },
+    {
+      "id": "migrations",
+      "name": "alembic/versions",
+      "signature": "hand-written migrations",
+      "file": "alembic/env.py",
+      "line": 1,
+      "note": {
+        "en": "Migrations are hand-written because autogenerate cannot drive the async driver.",
+        "vi": "Migration được viết tay vì autogenerate không chạy được với driver bất đồng bộ."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [],
+  "quotes": [
+    {
+      "file": "alembic/env.py",
+      "start": 1,
+      "end": 30,
+      "anchor": "alembic",
+      "note": {
+        "en": "env.py builds a synchronous URL by default; overriding it with an async one is what breaks migrations.",
+        "vi": "env.py mặc định dựng URL đồng bộ; ghi đè bằng URL bất đồng bộ chính là thứ làm hỏng migration."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-scripts-covered",
+      "title": {
+        "en": "Dev tooling is documented too",
+        "vi": "Công cụ phát triển cũng được ghi lại"
+      },
+      "body": {
+        "en": "Scripts and migrations are git-tracked source. Excluding them from the coverage rule would let a new migration change the schema with nobody writing a word about it.",
+        "vi": "Script và migration đều là mã nguồn được git theo dõi. Loại chúng khỏi quy tắc độ phủ sẽ cho phép một migration mới đổi schema mà không ai viết một chữ nào về nó."
+      },
+      "source": {
+        "file": "alembic/env.py",
+        "start": 1,
+        "end": 30,
+        "anchor": "alembic",
+        "note": {
+          "en": "Migrations are real schema changes, not incidental files.",
+          "vi": "Migration là thay đổi schema thật, không phải tệp phụ."
+        }
+      },
+      "principles": []
+    }
+  ]
+}

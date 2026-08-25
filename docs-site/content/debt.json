@@ -1,0 +1,309 @@
+{
+  "items": [
+    {
+      "id": "debt-gateway-unbuilt",
+      "severity": "unbuilt",
+      "title": {
+        "en": "The FastAPI gateway does not exist",
+        "vi": "Gateway FastAPI chưa tồn tại"
+      },
+      "body": {
+        "en": "FastAPI, uvicorn and websockets are declared dependencies, and the architecture describes a loopback gateway on port 7842. The packages declaw/gateway and declaw/gateway/routes are zero bytes. Nothing serves anything today; the whole product is the CLI.",
+        "vi": "FastAPI, uvicorn và websockets đều là dependency đã khai báo, và kiến trúc mô tả một gateway loopback ở cổng 7842. Nhưng package declaw/gateway và declaw/gateway/routes rỗng 0 byte. Hiện chưa có gì phục vụ request; toàn bộ sản phẩm là CLI."
+      },
+      "components": [
+        "planned-surfaces"
+      ],
+      "source": {
+        "file": "declaw/config.py",
+        "start": 115,
+        "end": 122,
+        "anchor": "Inviolable Principle #2",
+        "note": {
+          "en": "The loopback rule is enforced in config, ahead of a gateway that has not been written.",
+          "vi": "Quy tắc loopback đã được cưỡng chế trong config, trước cả một gateway chưa được viết."
+        }
+      }
+    },
+    {
+      "id": "debt-sandbox-deferred",
+      "severity": "unbuilt",
+      "title": {
+        "en": "The Docker sandbox is deferred, and shell execution with it",
+        "vi": "Sandbox Docker đã hoãn, kéo theo cả chức năng chạy shell"
+      },
+      "body": {
+        "en": "Phase 3 was formally deferred for v0.1 because none of the MVP goals need a shell, and Docker Desktop is a heavier burden on a non-technical user than Ollama. Principle #3 stays in force: if shell execution ever returns it must go through the sandbox, never around it.",
+        "vi": "Phase 3 đã chính thức hoãn cho v0.1 vì không mục tiêu MVP nào cần shell, và Docker Desktop là gánh nặng lớn hơn Ollama với người dùng không rành kỹ thuật. Nguyên tắc #3 vẫn còn hiệu lực: nếu chức năng chạy shell quay lại, nó phải đi qua sandbox chứ không được đi vòng."
+      },
+      "components": [
+        "planned-surfaces"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 242,
+        "end": 242,
+        "anchor": "is deferred to post-MVP",
+        "note": {
+          "en": "The decision and its rationale are recorded in the living context document.",
+          "vi": "Quyết định và lý do được ghi trong tài liệu ngữ cảnh sống."
+        }
+      }
+    },
+    {
+      "id": "debt-sanitizer-heldout-gap",
+      "severity": "unvalidated",
+      "title": {
+        "en": "The sanitizer scores 38 points worse on data nobody here wrote",
+        "vi": "Sanitizer tệ hơn 38 điểm trên dữ liệu không do ai ở đây viết"
+      },
+      "body": {
+        "en": "Detection is 91.7% on the project's own corpus and 53.3% on an external held-out set. The category breakdown shows detection tracking corpus coverage almost exactly: 92% where samples are thick, 33% where the same family is phrased differently, and 0% for a family with no samples at all. Treat 91.7% as a corpus-specific score, not a capability claim.",
+        "vi": "Khả năng phát hiện đạt 91,7% trên bộ mẫu của chính dự án và 53,3% trên tập held-out bên ngoài. Bảng phân tích theo họ tấn công cho thấy khả năng phát hiện bám gần như chính xác theo độ phủ của bộ mẫu: 92% ở nơi có nhiều mẫu, 33% khi cùng họ nhưng diễn đạt khác, và 0% với họ hoàn toàn không có mẫu. Hãy coi 91,7% là điểm số riêng của bộ mẫu, không phải khẳng định về năng lực."
+      },
+      "components": [
+        "sanitizer",
+        "sanitizer-corpus"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 210,
+        "end": 210,
+        "anchor": "the gap is 38 points",
+        "note": {
+          "en": "Measured, and recorded with the correction that an earlier estimate was optimistic.",
+          "vi": "Đã đo, và ghi kèm đính chính rằng con số ước lượng trước đó là lạc quan."
+        }
+      }
+    },
+    {
+      "id": "debt-sanitizer-french",
+      "severity": "unvalidated",
+      "title": {
+        "en": "The sanitizer is measurably weaker in French",
+        "vi": "Sanitizer yếu hơn rõ rệt trong tiếng Pháp"
+      },
+      "body": {
+        "en": "Detection splits 96.7% English against 86.7% French, and switching to the French prompt made it slightly worse rather than better, so it is a model-capability gap and not a prompt-wiring bug. For a France-first product this is the most consequential known weakness in the layer.",
+        "vi": "Khả năng phát hiện là 96,7% với tiếng Anh so với 86,7% với tiếng Pháp, và chuyển sang prompt tiếng Pháp còn làm tệ đi một chút chứ không tốt lên, nên đây là giới hạn năng lực của model chứ không phải lỗi đấu nối prompt. Với một sản phẩm ưu tiên thị trường Pháp, đây là điểm yếu đã biết nghiêm trọng nhất của tầng này."
+      },
+      "components": [
+        "sanitizer"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 225,
+        "end": 225,
+        "anchor": "measurably weaker in French",
+        "note": {
+          "en": "Tested, hypothesis rejected, and written up rather than smoothed over.",
+          "vi": "Đã kiểm chứng, bác bỏ giả thuyết, và ghi lại thay vì làm nhẹ đi."
+        }
+      }
+    },
+    {
+      "id": "debt-embeddings-unencrypted",
+      "severity": "temporary",
+      "title": {
+        "en": "Embedding vectors are stored unencrypted",
+        "vi": "Vector nhúng đang lưu không mã hoá"
+      },
+      "body": {
+        "en": "Chunk text is Fernet-encrypted at rest, but the vectors are not, because Chroma must compare them. Embedding inversion can approximate the original text, and Phase 8a widened the exposure from agent memories to the client documents themselves.",
+        "vi": "Văn bản chunk được mã hoá Fernet khi lưu, nhưng vector thì không, vì Chroma phải so sánh chúng. Kỹ thuật đảo ngược embedding có thể tái tạo gần đúng văn bản gốc, và Phase 8a đã mở rộng phạm vi phơi bày từ bộ nhớ agent sang chính tài liệu của khách hàng."
+      },
+      "components": [
+        "memory",
+        "documents"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 126,
+        "end": 126,
+        "anchor": "embedding vectors are NOT encrypted",
+        "note": {
+          "en": "Recorded as a Phase 12 consideration when the encryption was built.",
+          "vi": "Được ghi nhận là hạng mục cho Phase 12 ngay khi xây phần mã hoá."
+        }
+      }
+    },
+    {
+      "id": "debt-egress-in-process",
+      "severity": "temporary",
+      "title": {
+        "en": "The egress monitor only sees its own process",
+        "vi": "Bộ giám sát egress chỉ thấy tiến trình của chính nó"
+      },
+      "body": {
+        "en": "Every outbound httpx request is audited, which covers every call DeClaw itself makes. It is in-process observation, not OS-level enforcement: it cannot see traffic from a subprocess or from a library that does not use httpx. The claim on the page is what the code does, not what a firewall would do.",
+        "vi": "Mọi request httpx đi ra đều được ghi kiểm toán, tức là bao phủ mọi lời gọi mà chính DeClaw thực hiện. Đây là quan sát trong tiến trình, không phải cưỡng chế ở mức hệ điều hành: nó không thấy lưu lượng từ tiến trình con hay từ thư viện không dùng httpx. Điều trang này khẳng định là những gì mã làm được, không phải những gì một firewall làm."
+      },
+      "components": [
+        "audit"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 132,
+        "end": 132,
+        "anchor": "in-process observation only",
+        "note": {
+          "en": "OS-level verification is tracked separately as a hardening ticket.",
+          "vi": "Việc kiểm chứng ở mức hệ điều hành được theo dõi riêng như một ticket gia cố."
+        }
+      }
+    },
+    {
+      "id": "debt-auto-grant",
+      "severity": "temporary",
+      "title": {
+        "en": "Builtin plugins grant themselves their permissions",
+        "vi": "Plugin builtin tự cấp quyền cho chính mình"
+      },
+      "body": {
+        "en": "The grants file starts empty and the permission dialog belongs to a later phase, so a builtin plugin is auto-granted what its manifest requests, once. What makes it tolerable is that it is audited and reversible. It must be closed in the same change that opens third-party install, because the justification does not extend one inch past builtin.",
+        "vi": "Tệp cấp quyền khởi đầu rỗng và hộp thoại xin quyền thuộc về một phase sau, nên plugin builtin được tự động cấp đúng những quyền manifest của nó xin, một lần. Điều khiến việc này chấp nhận được là nó có ghi kiểm toán và thu hồi được. Nó phải được đóng lại trong cùng thay đổi mở ra việc cài plugin bên thứ ba, vì lý do biện minh không nới ra được một chút nào ngoài phạm vi builtin."
+      },
+      "components": [
+        "plugin-host"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 150,
+        "end": 150,
+        "anchor": "auto-granted the permissions",
+        "note": {
+          "en": "The decision, its narrow justification, and the condition for closing it are all recorded.",
+          "vi": "Quyết định, lý do biện minh hẹp, và điều kiện để đóng lại đều đã được ghi."
+        }
+      }
+    },
+    {
+      "id": "debt-signature-scope",
+      "severity": "temporary",
+      "title": {
+        "en": "Plugin signatures cover the manifest, not the code",
+        "vi": "Chữ ký plugin chỉ phủ manifest, không phủ mã"
+      },
+      "body": {
+        "en": "What is signed is the raw plugin.yaml bytes, on the reasoning that the manifest is the security contract. The code it points at is not covered, so the manifest needs a file hash map before third-party install ships.",
+        "vi": "Thứ được ký là các byte thô của plugin.yaml, dựa trên lập luận rằng manifest chính là hợp đồng bảo mật. Mã mà nó trỏ tới thì chưa được phủ, nên manifest cần một bảng hash tệp trước khi mở việc cài plugin bên thứ ba."
+      },
+      "components": [
+        "plugin-host"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 285,
+        "end": 285,
+        "anchor": "signs only",
+        "note": {
+          "en": "Named as a prerequisite for third-party install.",
+          "vi": "Được nêu là điều kiện tiên quyết cho việc cài plugin bên thứ ba."
+        }
+      }
+    },
+    {
+      "id": "debt-retrieval-unmeasured",
+      "severity": "unvalidated",
+      "title": {
+        "en": "Nobody has measured whether the answers are good",
+        "vi": "Chưa ai đo xem câu trả lời có tốt không"
+      },
+      "body": {
+        "en": "Phase 8a proves the indexing, retrieval and citation machinery is correct. It does not prove retrieval quality: no benchmark scores whether the right passage comes back for a real question. That measurement is the next phase.",
+        "vi": "Phase 8a chứng minh bộ máy lập chỉ mục, truy hồi và trích dẫn là đúng. Nó không chứng minh chất lượng truy hồi: chưa có benchmark nào chấm xem đúng đoạn văn có được trả về cho một câu hỏi thật hay không. Phép đo đó thuộc về phase kế tiếp."
+      },
+      "components": [
+        "documents"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 262,
+        "end": 262,
+        "anchor": "Retrieval quality is still unmeasured",
+        "note": {
+          "en": "Stated plainly in the phase notes rather than implied by the passing tests.",
+          "vi": "Được nói thẳng trong ghi chú của phase chứ không để các test xanh ngụ ý hộ."
+        }
+      }
+    },
+    {
+      "id": "debt-episodic-unpopulated",
+      "severity": "unbuilt",
+      "title": {
+        "en": "Episodic memory exists and nothing writes to it",
+        "vi": "Bộ nhớ episodic đã có nhưng không có gì ghi vào"
+      },
+      "body": {
+        "en": "The table, the migration and the query API are all built and tested. No code path records an episode at the end of a task, so the store is permanently empty in practice. The same note also records that task_id is not yet threaded through chat tool calls, which is why audit events carry a null task id.",
+        "vi": "Bảng, migration và API truy vấn đều đã xây và có test. Nhưng không nhánh mã nào ghi lại một episode khi kết thúc tác vụ, nên trên thực tế kho này luôn rỗng. Cũng ghi chú đó nêu rằng task_id chưa được luồn qua các lời gọi tool trong chat, và đó là lý do sự kiện kiểm toán mang task id rỗng."
+      },
+      "components": [
+        "memory",
+        "audit"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 273,
+        "end": 273,
+        "anchor": "episodic memory still unpopulated",
+        "note": {
+          "en": "Carried forward across several phases rather than quietly dropped.",
+          "vi": "Được mang theo qua nhiều phase chứ không lặng lẽ bỏ đi."
+        }
+      }
+    },
+    {
+      "id": "debt-schema-stamping",
+      "severity": "temporary",
+      "title": {
+        "en": "The app creates its schema without stamping a migration",
+        "vi": "Ứng dụng tạo schema mà không đóng dấu migration"
+      },
+      "body": {
+        "en": "Startup calls create_all, which is idempotent and fine for development, but it does not stamp an Alembic revision. A packaged application that later needs to migrate an existing database has no recorded starting point. That story belongs to the packaging phase.",
+        "vi": "Lúc khởi động, ứng dụng gọi create_all — idempotent và ổn khi phát triển — nhưng không đóng dấu revision của Alembic. Một ứng dụng đã đóng gói mà sau này cần migrate một cơ sở dữ liệu sẵn có sẽ không có điểm xuất phát nào được ghi lại. Câu chuyện đó thuộc về phase đóng gói."
+      },
+      "components": [
+        "persistence",
+        "entry-cli"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 122,
+        "end": 122,
+        "anchor": "ensure_schema",
+        "note": {
+          "en": "Recorded as a packaging-phase concern when the schema bootstrap was written.",
+          "vi": "Được ghi nhận là việc của phase đóng gói ngay khi viết phần khởi tạo schema."
+        }
+      }
+    },
+    {
+      "id": "debt-memory-not-wired",
+      "severity": "unbuilt",
+      "title": {
+        "en": "Memory retrieval is built but not wired into the brain",
+        "vi": "Truy hồi bộ nhớ đã xây nhưng chưa đấu vào brain"
+      },
+      "body": {
+        "en": "The with_memory wrapper exists, is tested, and is deliberately absent from the default assembly. The reason is the same rule that keeps the system prompt out of chat: no prompt additions without an A/B measurement, because a previous prompt change silently collapsed tool-calling accuracy.",
+        "vi": "Wrapper with_memory đã có, đã có test, và cố ý vắng mặt trong bản lắp ráp mặc định. Lý do cũng chính là quy tắc giữ system prompt ra khỏi chat: không thêm gì vào prompt nếu chưa đo A/B, vì một lần đổi prompt trước đây đã âm thầm làm sập độ chính xác gọi tool."
+      },
+      "components": [
+        "brain-model",
+        "memory"
+      ],
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 273,
+        "end": 273,
+        "anchor": "still not in `build_brain`",
+        "note": {
+          "en": "An A/B probe is the stated precondition for enabling it.",
+          "vi": "Điều kiện tiên quyết đã nêu để bật nó lên là một phép đo A/B."
+        }
+      }
+    }
+  ]
+}

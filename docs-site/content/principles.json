@@ -1,0 +1,151 @@
+{
+  "principles": [
+    {
+      "id": "P1",
+      "title": {
+        "en": "Never store credentials in plaintext",
+        "vi": "Không bao giờ lưu credential dạng plaintext"
+      },
+      "body": {
+        "en": "Secrets go through the OS vault. An AES-256-GCM file is used only when keyring resolves to its fail backend, and it protects data at rest, not a compromised account.",
+        "vi": "Bí mật đi qua vault của hệ điều hành. Tệp AES-256-GCM chỉ dùng khi keyring rơi vào backend fail, và nó bảo vệ dữ liệu khi lưu chứ không bảo vệ được tài khoản đã bị chiếm."
+      },
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 28,
+        "end": 28,
+        "anchor": "NEVER store credentials in plaintext",
+        "note": {
+          "en": "Stated in the project living-context document.",
+          "vi": "Ghi trong tài liệu ngữ cảnh sống của dự án."
+        }
+      }
+    },
+    {
+      "id": "P2",
+      "title": {
+        "en": "Never bind the gateway outside loopback",
+        "vi": "Không bao giờ bind gateway ra ngoài loopback"
+      },
+      "body": {
+        "en": "Enforced as a config field validator, so a non-loopback host is refused when settings load rather than when something tries to bind.",
+        "vi": "Được thực thi bằng field validator của config, nên host không phải loopback bị từ chối ngay khi nạp thiết lập chứ không đợi lúc bind."
+      },
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 29,
+        "end": 29,
+        "anchor": "NEVER bind the gateway outside",
+        "note": {
+          "en": "Stated in the project living-context document.",
+          "vi": "Ghi trong tài liệu ngữ cảnh sống của dự án."
+        }
+      }
+    },
+    {
+      "id": "P3",
+      "title": {
+        "en": "Never execute shell commands outside the sandbox",
+        "vi": "Không bao giờ chạy lệnh shell ngoài sandbox"
+      },
+      "body": {
+        "en": "Still in force, and currently unexercised: shell execution was dropped from v0.1, so the sandbox package is empty rather than bypassed.",
+        "vi": "Vẫn còn hiệu lực và hiện chưa được dùng tới: việc chạy shell đã bị loại khỏi v0.1, nên package sandbox rỗng chứ không phải bị đi vòng."
+      },
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 30,
+        "end": 30,
+        "anchor": "NEVER execute shell commands outside the Docker sandbox",
+        "note": {
+          "en": "Stated in the project living-context document.",
+          "vi": "Ghi trong tài liệu ngữ cảnh sống của dự án."
+        }
+      }
+    },
+    {
+      "id": "P4",
+      "title": {
+        "en": "Never skip the sanitizer on outside content",
+        "vi": "Không bao giờ bỏ qua sanitizer với nội dung từ bên ngoài"
+      },
+      "body": {
+        "en": "File contents and retrieved document chunks are classified by a separate model session before the brain sees them, and the classifier fails closed.",
+        "vi": "Nội dung tệp và các chunk tài liệu truy hồi được một phiên model riêng phân loại trước khi brain nhìn thấy, và bộ phân loại fail-closed."
+      },
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 31,
+        "end": 31,
+        "anchor": "NEVER skip the sanitizer layer",
+        "note": {
+          "en": "Stated in the project living-context document.",
+          "vi": "Ghi trong tài liệu ngữ cảnh sống của dự án."
+        }
+      }
+    },
+    {
+      "id": "P5",
+      "title": {
+        "en": "Never auto-trust documents, email or web",
+        "vi": "Không bao giờ mặc nhiên tin tài liệu, email hay web"
+      },
+      "body": {
+        "en": "Untrusted content is fenced as data with explicit markers, and the sanitizer prompt states it must never obey instructions found inside that content.",
+        "vi": "Nội dung không tin cậy được rào lại thành dữ liệu với dấu phân định rõ ràng, và prompt của sanitizer nêu rõ không bao giờ tuân theo chỉ dẫn nằm trong nội dung đó."
+      },
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 32,
+        "end": 32,
+        "anchor": "NEVER auto-trust content from documents",
+        "note": {
+          "en": "Stated in the project living-context document.",
+          "vi": "Ghi trong tài liệu ngữ cảnh sống của dự án."
+        }
+      }
+    },
+    {
+      "id": "P6",
+      "title": {
+        "en": "Never pass raw input to a function as a shell string",
+        "vi": "Không bao giờ đưa đầu vào thô cho hàm dưới dạng chuỗi shell"
+      },
+      "body": {
+        "en": "Every tool takes a typed, pydantic-validated args schema, and plugin arguments are validated host-side from the announced JSON Schema before the subprocess sees them.",
+        "vi": "Mọi tool nhận một schema tham số có kiểu và được pydantic kiểm tra, còn tham số plugin được kiểm phía host theo JSON Schema đã công bố trước khi tiến trình con nhìn thấy."
+      },
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 33,
+        "end": 33,
+        "anchor": "NEVER let an LLM call a function with raw user input",
+        "note": {
+          "en": "Stated in the project living-context document.",
+          "vi": "Ghi trong tài liệu ngữ cảnh sống của dự án."
+        }
+      }
+    },
+    {
+      "id": "P7",
+      "title": {
+        "en": "Never make a network call without auditing it",
+        "vi": "Không bao giờ gọi mạng mà không ghi kiểm toán"
+      },
+      "body": {
+        "en": "httpx send is patched so every outbound request emits an event whether it succeeds or fails. The honest limit: this is in-process observation, not OS-level enforcement.",
+        "vi": "httpx send bị vá để mọi request đi ra đều phát sinh sự kiện, thành công hay thất bại. Giới hạn cần nói thật: đây là quan sát trong tiến trình, không phải cưỡng chế ở mức hệ điều hành."
+      },
+      "source": {
+        "file": "CLAUDE.md",
+        "start": 34,
+        "end": 34,
+        "anchor": "NEVER make a network call without logging it",
+        "note": {
+          "en": "Stated in the project living-context document.",
+          "vi": "Ghi trong tài liệu ngữ cảnh sống của dự án."
+        }
+      }
+    }
+  ]
+}

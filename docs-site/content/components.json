@@ -1,0 +1,614 @@
+{
+  "components": [
+    {
+      "id": "audit",
+      "group": "audit",
+      "tier": "A",
+      "title": {
+        "en": "Audit trail and egress monitor",
+        "vi": "Nhật ký kiểm toán và giám sát egress"
+      },
+      "summary": {
+        "en": "Typed, versioned events written on every tool call, permission prompt, quarantine and network request, rendered into plain-language summaries by deterministic templates rather than by a model.",
+        "vi": "Sự kiện có kiểu và có phiên bản, ghi lại mọi lời gọi tool, mọi lần hỏi quyền, mọi lần cách ly và mọi request mạng, rồi kết xuất thành câu chữ dễ đọc bằng template tất định chứ không phải bằng model."
+      },
+      "modules": [
+        "declaw/audit/__init__.py",
+        "declaw/audit/egress.py",
+        "declaw/audit/events.py",
+        "declaw/audit/export.py",
+        "declaw/audit/logger.py",
+        "declaw/audit/report.py",
+        "declaw/audit/sinks.py",
+        "declaw/audit/summary.py",
+        "declaw/audit/tooling.py"
+      ],
+      "tickets": [
+        "DCL-001",
+        "DCL-056",
+        "DCL-060",
+        "DCL-061",
+        "DCL-062",
+        "DCL-064",
+        "DCL-065",
+        "DCL-081",
+        "DCL-091",
+        "DCL-096"
+      ],
+      "detail": "audit"
+    },
+    {
+      "id": "brain-eval",
+      "group": "brain",
+      "tier": "B",
+      "title": {
+        "en": "Tool-calling benchmark",
+        "vi": "Benchmark gọi tool"
+      },
+      "summary": {
+        "en": "The frozen 50-prompt corpus and harness that turned model choice into a measurement rather than an opinion: it is what showed the system prompt collapsing tool accuracy, and what justified the model swap.",
+        "vi": "Bộ 50 prompt cố định và khung đo biến việc chọn model thành phép đo thay vì ý kiến: chính nó cho thấy system prompt làm sập độ chính xác gọi tool, và biện minh cho việc đổi model."
+      },
+      "modules": [
+        "declaw/brain/eval.py"
+      ],
+      "tickets": [],
+      "detail": "brain-eval"
+    },
+    {
+      "id": "brain-loop",
+      "group": "brain",
+      "tier": "A",
+      "title": {
+        "en": "Agent loop and state",
+        "vi": "Vòng lặp agent và state"
+      },
+      "summary": {
+        "en": "The two-node LangGraph machine: think, then run tools, then observe. A raising tool is normal operation here, so tool errors are converted into observations the model can recover from instead of tearing down the session.",
+        "vi": "Cỗ máy LangGraph hai node: nghĩ, rồi chạy tool, rồi quan sát. Tool ném lỗi là chuyện bình thường ở đây, nên lỗi tool được chuyển thành quan sát để model tự sửa thay vì làm sập phiên."
+      },
+      "modules": [
+        "declaw/brain/__init__.py",
+        "declaw/brain/loop.py",
+        "declaw/brain/state.py"
+      ],
+      "tickets": [
+        "DCL-001",
+        "DCL-010",
+        "DCL-011",
+        "DCL-021",
+        "DCL-022",
+        "DCL-023",
+        "DCL-024",
+        "DCL-043",
+        "DCL-055",
+        "DCL-110"
+      ],
+      "detail": "brain-loop"
+    },
+    {
+      "id": "brain-model",
+      "group": "brain",
+      "tier": "B",
+      "title": {
+        "en": "Model adapter and context window",
+        "vi": "Adapter model và cửa sổ ngữ cảnh"
+      },
+      "summary": {
+        "en": "Binds tools to a local Ollama chat model and keeps the prompt inside the window: token estimation, eviction, summarising compaction, and the tool-call repair wrapper that measurement removed from the default.",
+        "vi": "Gắn tool vào model chat Ollama cục bộ và giữ prompt trong giới hạn cửa sổ: ước lượng token, loại bỏ, nén có tóm tắt, và wrapper sửa lời gọi tool đã bị đo đạc loại khỏi mặc định."
+      },
+      "modules": [
+        "declaw/brain/chat_model.py",
+        "declaw/brain/compaction.py",
+        "declaw/brain/context.py",
+        "declaw/brain/memory_context.py",
+        "declaw/brain/ollama_client.py",
+        "declaw/brain/repair.py"
+      ],
+      "tickets": [
+        "DCL-003",
+        "DCL-012",
+        "DCL-013",
+        "DCL-014",
+        "DCL-015",
+        "DCL-040",
+        "DCL-050",
+        "DCL-055",
+        "DCL-064",
+        "DCL-106",
+        "DCL-107"
+      ],
+      "detail": "brain-model"
+    },
+    {
+      "id": "brain-repl",
+      "group": "brain",
+      "tier": "B",
+      "title": {
+        "en": "REPL and prompts",
+        "vi": "REPL và prompt"
+      },
+      "summary": {
+        "en": "The multi-turn chat loop with injected I/O, the console confirmation provider that asks the human without stalling the event loop, and the bilingual system prompts that chat deliberately does not seed.",
+        "vi": "Vòng chat nhiều lượt với I/O tiêm vào, provider xác nhận qua console hỏi người dùng mà không chặn event loop, và các system prompt song ngữ mà chat cố ý không nạp."
+      },
+      "modules": [
+        "declaw/brain/prompts.py",
+        "declaw/brain/repl.py",
+        "declaw/brain/stub_tools.py"
+      ],
+      "tickets": [
+        "DCL-010",
+        "DCL-016",
+        "DCL-017"
+      ],
+      "detail": "brain-repl"
+    },
+    {
+      "id": "credentials",
+      "group": "security",
+      "tier": "B",
+      "title": {
+        "en": "Credential store and encrypted fallback",
+        "vi": "Kho credential và fallback mã hoá"
+      },
+      "summary": {
+        "en": "Namespaced CRUD over the OS vault, with an AES-256-GCM file used only when keyring resolves to its fail backend. A registry of known secret names exists because keyring backends cannot enumerate.",
+        "vi": "CRUD theo namespace trên vault của hệ điều hành, kèm file AES-256-GCM chỉ dùng khi keyring rơi vào backend fail. Có danh sách tên secret đã biết vì backend keyring không liệt kê được."
+      },
+      "modules": [
+        "declaw/credentials/__init__.py",
+        "declaw/credentials/fallback.py",
+        "declaw/credentials/store.py"
+      ],
+      "tickets": [
+        "DCL-001",
+        "DCL-051",
+        "DCL-070",
+        "DCL-074"
+      ],
+      "detail": "credentials"
+    },
+    {
+      "id": "dev-tooling",
+      "group": "tooling",
+      "tier": "B",
+      "title": {
+        "en": "Scripts and migrations",
+        "vi": "Script và migration"
+      },
+      "summary": {
+        "en": "Probe runners, the sanitizer benchmark, the preflight renderer, and the hand-written Alembic migrations. Migrations are hand-written because autogenerate cannot drive the async driver.",
+        "vi": "Các script chạy probe, benchmark sanitizer, bộ hiển thị preflight, và các migration Alembic viết tay. Migration phải viết tay vì autogenerate không chạy được với driver bất đồng bộ."
+      },
+      "modules": [
+        "alembic/env.py",
+        "alembic/versions/3f1c2a9d4e5b_add_episodes_table.py",
+        "alembic/versions/7c4e1b90d3a2_add_indexed_documents_table.py",
+        "alembic/versions/80a2108a685a_tz_aware_datetimes_and_composite_audit_.py",
+        "alembic/versions/b067ce5acbad_initial_schema_tasks_audit_events.py",
+        "scripts/preflight.py",
+        "scripts/probe_mistral.py",
+        "scripts/probe_prompt_variants.py",
+        "scripts/sanitizer_benchmark.py"
+      ],
+      "tickets": [
+        "DCL-005",
+        "DCL-007",
+        "DCL-047",
+        "DCL-054",
+        "DCL-108"
+      ],
+      "detail": "dev-tooling"
+    },
+    {
+      "id": "doc-intel-plugin",
+      "group": "plugins",
+      "tier": "B",
+      "title": {
+        "en": "doc-intel plugin (parsers only)",
+        "vi": "Plugin doc-intel (chỉ parser)"
+      },
+      "summary": {
+        "en": "A deliberately thin plugin declaring exactly one capability, hidden from the model. It parses PDF, DOCX, XLSX and text into blocks and does nothing else, because parsing hostile binaries from strangers is what a subprocess boundary is worth having for.",
+        "vi": "Một plugin cố ý làm mỏng, khai báo đúng một capability và ẩn khỏi model. Nó phân tích PDF, DOCX, XLSX và văn bản thành các khối, không làm gì khác, vì việc phân tích tệp nhị phân từ người lạ mới là lý do đáng có một ranh giới tiến trình."
+      },
+      "modules": [
+        "plugins/builtin/doc-intel/chunker.py",
+        "plugins/builtin/doc-intel/main.py",
+        "plugins/builtin/doc-intel/models.py",
+        "plugins/builtin/doc-intel/parsers/__init__.py",
+        "plugins/builtin/doc-intel/parsers/docx.py",
+        "plugins/builtin/doc-intel/parsers/pdf.py",
+        "plugins/builtin/doc-intel/parsers/text.py",
+        "plugins/builtin/doc-intel/parsers/xlsx.py"
+      ],
+      "tickets": [
+        "DCL-100",
+        "DCL-101",
+        "DCL-102",
+        "DCL-103",
+        "DCL-104",
+        "DCL-105",
+        "DCL-107"
+      ],
+      "detail": "doc-intel-plugin"
+    },
+    {
+      "id": "documents",
+      "group": "documents",
+      "tier": "A",
+      "title": {
+        "en": "Document indexing, search and citations",
+        "vi": "Lập chỉ mục, tìm kiếm và trích dẫn tài liệu"
+      },
+      "summary": {
+        "en": "Owns embedding, encryption, the vector store, the hash-based incremental catalog, retrieval-time sanitizing and structural citations. The indexer never records a document it did not actually store.",
+        "vi": "Sở hữu việc nhúng vector, mã hoá, kho vector, catalog tăng dần dựa trên hash, việc lọc lúc truy hồi và trích dẫn dựng từ metadata. Indexer không bao giờ ghi nhận một tài liệu mà nó chưa thực sự lưu."
+      },
+      "modules": [
+        "declaw/documents/__init__.py",
+        "declaw/documents/catalog.py",
+        "declaw/documents/citations.py",
+        "declaw/documents/indexer.py",
+        "declaw/documents/models.py",
+        "declaw/documents/prompts.py",
+        "declaw/documents/search.py",
+        "declaw/documents/session.py",
+        "declaw/documents/store.py",
+        "declaw/documents/tools.py",
+        "declaw/documents/watcher.py"
+      ],
+      "tickets": [
+        "DCL-106",
+        "DCL-107",
+        "DCL-108",
+        "DCL-109",
+        "DCL-110",
+        "DCL-111",
+        "DCL-112"
+      ],
+      "detail": "documents"
+    },
+    {
+      "id": "entry-cli",
+      "group": "entry",
+      "tier": "B",
+      "title": {
+        "en": "Entry point, config and preflight",
+        "vi": "Điểm vào, cấu hình và preflight"
+      },
+      "summary": {
+        "en": "The Typer CLI every command starts from, the pydantic-settings config that refuses a non-loopback host, structured JSON logging, and the preflight checks that fail with an actionable remedy.",
+        "vi": "CLI Typer nơi mọi lệnh bắt đầu, config pydantic-settings từ chối host không phải loopback, log JSON có cấu trúc, và các kiểm tra preflight báo lỗi kèm cách khắc phục."
+      },
+      "modules": [
+        "declaw/__init__.py",
+        "declaw/config.py",
+        "declaw/log.py",
+        "declaw/main.py",
+        "declaw/preflight.py"
+      ],
+      "tickets": [
+        "DCL-001",
+        "DCL-003",
+        "DCL-006",
+        "DCL-016",
+        "DCL-017",
+        "DCL-041",
+        "DCL-043",
+        "DCL-056",
+        "DCL-061",
+        "DCL-062",
+        "DCL-064",
+        "DCL-065",
+        "DCL-090",
+        "DCL-091",
+        "DCL-107"
+      ],
+      "detail": "entry-cli"
+    },
+    {
+      "id": "memory",
+      "group": "memory",
+      "tier": "B",
+      "title": {
+        "en": "Memory: buffer, semantic, episodic, GDPR",
+        "vi": "Bộ nhớ: buffer, ngữ nghĩa, episodic, GDPR"
+      },
+      "summary": {
+        "en": "A bounded conversation buffer, a Fernet-encrypted Chroma collection, an episodic table, and the export/wipe pair that makes the data portable and erasable. Metadata stays plaintext so filters work.",
+        "vi": "Buffer hội thoại có giới hạn, một collection Chroma mã hoá Fernet, bảng episodic, và cặp export/wipe khiến dữ liệu vừa mang đi được vừa xoá được. Metadata để nguyên plaintext để bộ lọc còn chạy."
+      },
+      "modules": [
+        "declaw/memory/__init__.py",
+        "declaw/memory/buffer.py",
+        "declaw/memory/chroma.py",
+        "declaw/memory/crypto.py",
+        "declaw/memory/embeddings.py",
+        "declaw/memory/episodic.py",
+        "declaw/memory/gdpr.py",
+        "declaw/memory/semantic.py"
+      ],
+      "tickets": [
+        "DCL-001",
+        "DCL-050",
+        "DCL-051",
+        "DCL-052",
+        "DCL-053",
+        "DCL-054",
+        "DCL-055",
+        "DCL-056",
+        "DCL-074",
+        "DCL-106"
+      ],
+      "detail": "memory"
+    },
+    {
+      "id": "persistence",
+      "group": "data",
+      "tier": "B",
+      "title": {
+        "en": "SQLite engine and schema",
+        "vi": "Engine SQLite và schema"
+      },
+      "summary": {
+        "en": "The async engine, session helper and four SQLModel tables. UUID primary keys are deliberate: integer keys would collide once data syncs between devices.",
+        "vi": "Engine bất đồng bộ, helper session và bốn bảng SQLModel. Khoá chính UUID là lựa chọn có chủ đích: khoá số nguyên sẽ đụng nhau khi dữ liệu đồng bộ giữa các máy."
+      },
+      "modules": [
+        "declaw/db/__init__.py",
+        "declaw/db/engine.py",
+        "declaw/db/models.py"
+      ],
+      "tickets": [
+        "DCL-001",
+        "DCL-005",
+        "DCL-054",
+        "DCL-056",
+        "DCL-061",
+        "DCL-062",
+        "DCL-065",
+        "DCL-108"
+      ],
+      "detail": "persistence"
+    },
+    {
+      "id": "planned-surfaces",
+      "group": "planned",
+      "tier": "B",
+      "title": {
+        "en": "Declared but unbuilt surfaces",
+        "vi": "Bề mặt đã khai báo nhưng chưa xây"
+      },
+      "summary": {
+        "en": "Three empty files. The FastAPI gateway and the Docker sandbox are named throughout the architecture and dependencies, and neither exists yet: the packages contain zero bytes of code.",
+        "vi": "Ba tệp rỗng. Gateway FastAPI và sandbox Docker được nhắc tới khắp kiến trúc và trong dependency, nhưng chưa cái nào tồn tại: các package này chứa 0 byte mã."
+      },
+      "modules": [
+        "declaw/gateway/__init__.py",
+        "declaw/gateway/routes/__init__.py",
+        "declaw/sandbox/__init__.py"
+      ],
+      "tickets": [
+        "DCL-001"
+      ],
+      "detail": "planned-surfaces"
+    },
+    {
+      "id": "plugin-host",
+      "group": "plugins",
+      "tier": "A",
+      "title": {
+        "en": "Plugin host: isolation, IPC, supervision",
+        "vi": "Plugin host: cô lập, IPC, giám sát"
+      },
+      "summary": {
+        "en": "Loads, validates, launches and supervises plugin subprocesses. The environment is built from scratch rather than filtered, because a filter forgets a variable and a build cannot.",
+        "vi": "Nạp, kiểm tra, khởi chạy và giám sát các tiến trình con plugin. Môi trường được dựng từ đầu chứ không lọc, vì bộ lọc có thể quên một biến còn việc dựng thì không."
+      },
+      "modules": [
+        "declaw/plugin_host/__init__.py",
+        "declaw/plugin_host/errors.py",
+        "declaw/plugin_host/grants_helper.py",
+        "declaw/plugin_host/host.py",
+        "declaw/plugin_host/ipc.py",
+        "declaw/plugin_host/loader.py",
+        "declaw/plugin_host/manifest.py",
+        "declaw/plugin_host/permissions.py",
+        "declaw/plugin_host/process.py",
+        "declaw/plugin_host/schema.py",
+        "declaw/plugin_host/signing.py",
+        "declaw/plugin_host/state.py",
+        "declaw/plugin_host/supervisor.py",
+        "declaw/plugin_host/tools.py"
+      ],
+      "tickets": [
+        "DCL-001",
+        "DCL-080",
+        "DCL-081",
+        "DCL-083",
+        "DCL-090",
+        "DCL-091",
+        "DCL-092",
+        "DCL-093",
+        "DCL-094",
+        "DCL-095",
+        "DCL-096",
+        "DCL-100",
+        "DCL-107"
+      ],
+      "detail": "plugin-host"
+    },
+    {
+      "id": "plugin-sdk",
+      "group": "plugins",
+      "tier": "A",
+      "title": {
+        "en": "Plugin SDK and wire protocol",
+        "vi": "SDK plugin và giao thức truyền"
+      },
+      "summary": {
+        "en": "What a plugin is written against. It never imports DeClaw, and both sides import the same protocol module so the wire format cannot drift. Every capability flag defaults to the cautious value.",
+        "vi": "Thứ mà một plugin được viết dựa trên. Nó không bao giờ import DeClaw, và cả hai phía cùng import một module giao thức nên định dạng truyền không thể lệch. Mọi cờ capability mặc định ở giá trị thận trọng nhất."
+      },
+      "modules": [
+        "declaw_plugin_sdk/__init__.py",
+        "declaw_plugin_sdk/_isolation.py",
+        "declaw_plugin_sdk/bootstrap.py",
+        "declaw_plugin_sdk/declaration.py",
+        "declaw_plugin_sdk/protocol.py",
+        "declaw_plugin_sdk/runtime.py"
+      ],
+      "tickets": [
+        "DCL-090",
+        "DCL-092",
+        "DCL-093",
+        "DCL-094",
+        "DCL-100"
+      ],
+      "detail": "plugin-sdk"
+    },
+    {
+      "id": "sanitizer",
+      "group": "security",
+      "tier": "A",
+      "title": {
+        "en": "Dual-model sanitizer",
+        "vi": "Sanitizer hai model"
+      },
+      "summary": {
+        "en": "A second, stateless model session classifies untrusted content SAFE or UNSAFE before the brain ever sees it. It fails closed: anything unparseable becomes UNSAFE rather than passing through.",
+        "vi": "Một phiên model thứ hai, không trạng thái, phân loại nội dung không tin cậy là SAFE hay UNSAFE trước khi brain nhìn thấy. Nó fail-closed: thứ gì không phân tích được thì thành UNSAFE chứ không lọt qua."
+      },
+      "modules": [
+        "declaw/sanitizer/__init__.py",
+        "declaw/sanitizer/benchmark.py",
+        "declaw/sanitizer/classifier.py",
+        "declaw/sanitizer/pipeline.py",
+        "declaw/sanitizer/prompts.py",
+        "declaw/sanitizer/quarantine.py",
+        "declaw/sanitizer/sanitizer.py",
+        "declaw/sanitizer/verdict.py"
+      ],
+      "tickets": [
+        "DCL-001",
+        "DCL-040",
+        "DCL-041",
+        "DCL-043",
+        "DCL-046",
+        "DCL-047",
+        "DCL-110"
+      ],
+      "detail": "sanitizer"
+    },
+    {
+      "id": "sanitizer-corpus",
+      "group": "security",
+      "tier": "B",
+      "title": {
+        "en": "Injection corpus and the held-out set",
+        "vi": "Bộ mẫu tấn công và tập held-out"
+      },
+      "summary": {
+        "en": "Locked EN/FR corpora plus an external, mechanically-labelled held-out set. The held-out set exists because the sanitizer scored 91.7% on data we wrote and 53.3% on data we did not.",
+        "vi": "Bộ mẫu EN/FR đã khoá cộng một tập held-out bên ngoài được gán nhãn máy móc. Tập held-out tồn tại vì sanitizer đạt 91,7% trên dữ liệu do ta viết và 53,3% trên dữ liệu không phải của ta."
+      },
+      "modules": [
+        "declaw/sanitizer/corpus/__init__.py",
+        "declaw/sanitizer/corpus/benign.py",
+        "declaw/sanitizer/corpus/heldout.py",
+        "declaw/sanitizer/corpus/injections.py",
+        "declaw/sanitizer/corpus/models.py"
+      ],
+      "tickets": [
+        "DCL-041",
+        "DCL-046",
+        "DCL-047"
+      ],
+      "detail": "sanitizer-corpus"
+    },
+    {
+      "id": "tool-base",
+      "group": "tools",
+      "tier": "B",
+      "title": {
+        "en": "Typed tool base class",
+        "vi": "Lớp cơ sở cho tool có kiểu"
+      },
+      "summary": {
+        "en": "Every tool is a pydantic-validated definition with a typed args schema and bilingual descriptions, so the model never hands a raw string to anything and the French description is not an afterthought.",
+        "vi": "Mọi tool là một định nghĩa được pydantic kiểm tra, có schema tham số rõ kiểu và mô tả song ngữ, nên model không bao giờ đưa chuỗi thô cho bất cứ thứ gì và mô tả tiếng Pháp không phải chuyện thêm vào sau."
+      },
+      "modules": [
+        "declaw/tools/__init__.py",
+        "declaw/tools/base.py"
+      ],
+      "tickets": [
+        "DCL-001",
+        "DCL-020",
+        "DCL-043"
+      ],
+      "detail": "tool-base"
+    },
+    {
+      "id": "tool-filesystem",
+      "group": "tools",
+      "tier": "B",
+      "title": {
+        "en": "Filesystem tools and the workspace boundary",
+        "vi": "Tool hệ thống tệp và ranh giới workspace"
+      },
+      "summary": {
+        "en": "Read, list, write and move, all pinned inside the workspace by one resolver that rejects traversal, absolute paths, NUL bytes and, on Windows, drive specs and NTFS alternate data streams.",
+        "vi": "Đọc, liệt kê, ghi và di chuyển, tất cả bị ghim trong workspace bởi một resolver duy nhất từ chối traversal, đường dẫn tuyệt đối, byte NUL, và trên Windows là drive spec cùng NTFS alternate data stream."
+      },
+      "modules": [
+        "declaw/tools/builtin/__init__.py",
+        "declaw/tools/builtin/_paths.py",
+        "declaw/tools/builtin/filesystem.py"
+      ],
+      "tickets": [
+        "DCL-001",
+        "DCL-021",
+        "DCL-022",
+        "DCL-023",
+        "DCL-024",
+        "DCL-026",
+        "DCL-043",
+        "DCL-092"
+      ],
+      "detail": "tool-filesystem"
+    },
+    {
+      "id": "tool-registry",
+      "group": "tools",
+      "tier": "A",
+      "title": {
+        "en": "Tool registry and the confirmation gate",
+        "vi": "Registry công cụ và cổng xác nhận"
+      },
+      "summary": {
+        "en": "The single source of truth for how a tool reaches the model. READ tools auto-run, external-content READ tools are sanitized, every non-READ tool waits for a human, and audit wraps whichever branch was taken.",
+        "vi": "Nguồn sự thật duy nhất cho việc tool đến tay model. Tool READ chạy thẳng, tool READ sinh nội dung ngoài thì được lọc, mọi tool non-READ phải chờ người duyệt, và audit bọc bên ngoài nhánh đã chọn."
+      },
+      "modules": [
+        "declaw/tools/confirmation.py",
+        "declaw/tools/registry.py"
+      ],
+      "tickets": [
+        "DCL-021",
+        "DCL-022",
+        "DCL-023",
+        "DCL-024",
+        "DCL-025",
+        "DCL-043",
+        "DCL-061",
+        "DCL-090",
+        "DCL-110"
+      ],
+      "detail": "tool-registry"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+manifest_version: 1
+name: overreach-plugin
+version: 1.0.0
+description_en: Test plugin whose code asks for more than its manifest.
+description_fr: Plugin de test dont le code demande plus que son manifeste.
+entrypoint: main.py

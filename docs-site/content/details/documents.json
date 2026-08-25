@@ -1,0 +1,257 @@
+{
+  "component": "documents",
+  "functions": [
+    {
+      "id": "DocumentIndexer",
+      "name": "DocumentIndexer",
+      "signature": "class DocumentIndexer",
+      "file": "declaw/documents/indexer.py",
+      "line": 69,
+      "note": {
+        "en": "Walks the workspace, skips unchanged files by content hash, parses through the plugin, and stores chunks.",
+        "vi": "Duyệt workspace, bỏ qua tệp không đổi theo hash nội dung, phân tích qua plugin, rồi lưu các chunk."
+      }
+    },
+    {
+      "id": "search_documents",
+      "name": "search_documents",
+      "signature": "search_documents(...) -> SearchOutcome",
+      "file": "declaw/documents/search.py",
+      "line": 98,
+      "note": {
+        "en": "Retrieves top-k chunks and classifies only those, because the trust boundary that matters is content entering the model context.",
+        "vi": "Truy hồi top-k chunk và chỉ phân loại chừng đó, vì ranh giới tin cậy đáng kể là nội dung đi vào ngữ cảnh của model."
+      }
+    },
+    {
+      "id": "ChunkSanitizer",
+      "name": "ChunkSanitizer",
+      "signature": "class ChunkSanitizer",
+      "file": "declaw/documents/search.py",
+      "line": 52,
+      "note": {
+        "en": "Classifies each distinct chunk once, concurrently, caching verdicts by SHA-256 — never the text itself.",
+        "vi": "Phân loại mỗi chunk khác nhau đúng một lần, chạy song song, cache verdict theo SHA-256 — không bao giờ cache văn bản."
+      }
+    },
+    {
+      "id": "format_source",
+      "name": "format_source",
+      "signature": "format_source(hit: SearchHit) -> str",
+      "file": "declaw/documents/citations.py",
+      "line": 31,
+      "note": {
+        "en": "Builds a citation from retrieval metadata, never from model output.",
+        "vi": "Dựng trích dẫn từ metadata truy hồi, không bao giờ từ đầu ra của model."
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "index-and-search",
+      "title": {
+        "en": "From a folder to a cited answer",
+        "vi": "Từ một thư mục tới câu trả lời có trích dẫn"
+      },
+      "nodes": [
+        {
+          "id": "folder",
+          "kind": "port",
+          "label": {
+            "en": "Folder of documents",
+            "vi": "Thư mục tài liệu"
+          }
+        },
+        {
+          "id": "hash",
+          "kind": "gate",
+          "label": {
+            "en": "Has the content hash changed?",
+            "vi": "Hash nội dung có đổi không?"
+          }
+        },
+        {
+          "id": "parse",
+          "kind": "step",
+          "label": {
+            "en": "doc-intel subprocess parses it",
+            "vi": "Tiến trình con doc-intel phân tích"
+          }
+        },
+        {
+          "id": "store",
+          "kind": "step",
+          "label": {
+            "en": "Chunks embedded and encrypted",
+            "vi": "Chunk được nhúng vector và mã hoá"
+          }
+        },
+        {
+          "id": "query",
+          "kind": "port",
+          "label": {
+            "en": "User asks a question",
+            "vi": "Người dùng đặt câu hỏi"
+          }
+        },
+        {
+          "id": "topk",
+          "kind": "step",
+          "label": {
+            "en": "Top-k chunks retrieved",
+            "vi": "Truy hồi top-k chunk"
+          }
+        },
+        {
+          "id": "screen",
+          "kind": "step",
+          "label": {
+            "en": "Retrieved chunks classified",
+            "vi": "Các chunk truy hồi được phân loại"
+          }
+        },
+        {
+          "id": "answer",
+          "kind": "exit",
+          "label": {
+            "en": "Answer with structural citations",
+            "vi": "Câu trả lời kèm trích dẫn dựng từ metadata"
+          }
+        },
+        {
+          "id": "withheld",
+          "kind": "exit",
+          "label": {
+            "en": "Withheld passages disclosed",
+            "vi": "Thông báo các đoạn bị giữ lại"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e-scan",
+          "from": "folder",
+          "to": "hash",
+          "label": {
+            "en": "one pass over the workspace",
+            "vi": "một lượt duyệt workspace"
+          }
+        },
+        {
+          "id": "e-changed",
+          "from": "hash",
+          "to": "parse",
+          "label": {
+            "en": "changed or new",
+            "vi": "đã đổi hoặc mới"
+          }
+        },
+        {
+          "id": "e-same",
+          "from": "hash",
+          "to": "store",
+          "label": {
+            "en": "unchanged: skipped, never opened",
+            "vi": "không đổi: bỏ qua, không mở tệp"
+          }
+        },
+        {
+          "id": "e-chunks",
+          "from": "parse",
+          "to": "store",
+          "label": {
+            "en": "blocks become chunks",
+            "vi": "các khối thành chunk"
+          }
+        },
+        {
+          "id": "e-ask",
+          "from": "query",
+          "to": "topk",
+          "label": {
+            "en": "embedded query",
+            "vi": "câu hỏi được nhúng vector"
+          }
+        },
+        {
+          "id": "e-screen",
+          "from": "topk",
+          "to": "screen",
+          "label": {
+            "en": "only what enters the context",
+            "vi": "chỉ thứ đi vào ngữ cảnh"
+          }
+        },
+        {
+          "id": "e-safe",
+          "from": "screen",
+          "to": "answer",
+          "label": {
+            "en": "SAFE passages",
+            "vi": "các đoạn SAFE"
+          }
+        },
+        {
+          "id": "e-unsafe",
+          "from": "screen",
+          "to": "withheld",
+          "label": {
+            "en": "UNSAFE passages, counted and reported",
+            "vi": "các đoạn UNSAFE, được đếm và báo lại"
+          }
+        }
+      ]
+    }
+  ],
+  "snippets": [
+    {
+      "file": "declaw/documents/indexer.py",
+      "start": 144,
+      "end": 146,
+      "code": "        stat = resolved.stat()\n        # Recorded only now: a document that failed above is retried next run.\n        await self.catalog.record(",
+      "caption": {
+        "en": "The catalog write happens only after chunks land, so a half-failed document is retried rather than remembered as done.",
+        "vi": "Việc ghi catalog chỉ xảy ra sau khi chunk đã lưu, nên tài liệu hỏng giữa chừng sẽ được thử lại chứ không bị coi là xong."
+      }
+    }
+  ],
+  "quotes": [
+    {
+      "file": "declaw/documents/search.py",
+      "start": 53,
+      "end": 58,
+      "anchor": "never the text itself",
+      "note": {
+        "en": "The verdict cache is keyed by hash, so identical text at different ordinals is classified once and the cache never holds content.",
+        "vi": "Cache verdict khoá theo hash, nên cùng một văn bản ở vị trí khác nhau chỉ phân loại một lần và cache không bao giờ giữ nội dung."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-retrieval-time",
+      "title": {
+        "en": "Chunks are sanitized at retrieval, not at index time",
+        "vi": "Chunk được lọc lúc truy hồi, không phải lúc lập chỉ mục"
+      },
+      "body": {
+        "en": "At the measured median latency of the sanitizer model, classifying every chunk at index time would take ten to twenty minutes for a single 100-page PDF and days for a real workspace. The boundary that matters is content entering the model context.",
+        "vi": "Với độ trễ trung vị đã đo của model sanitizer, phân loại mọi chunk lúc lập chỉ mục sẽ mất mười tới hai mươi phút cho một PDF 100 trang và nhiều ngày cho một workspace thật. Ranh giới đáng kể là nội dung đi vào ngữ cảnh của model."
+      },
+      "source": {
+        "file": "declaw/documents/search.py",
+        "start": 1,
+        "end": 20,
+        "anchor": "chunk",
+        "note": {
+          "en": "The module documents the top-k-only rule.",
+          "vi": "Module ghi rõ quy tắc chỉ xử lý top-k."
+        }
+      },
+      "principles": [
+        "P4",
+        "P5"
+      ]
+    }
+  ]
+}

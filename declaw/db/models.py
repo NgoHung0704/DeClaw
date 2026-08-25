@@ -156,3 +156,24 @@ class AuditEvent(SQLModel, table=True):
         description="Structured event payload (free-form JSON).",
     )
     created_at: datetime = Field(default_factory=_utcnow, sa_column=_dt_col(index=True))
+
+
+class IndexedDocument(SQLModel, table=True):
+    """One indexed document, keyed by workspace-relative path (DCL-108).
+
+    The content hash is what makes re-indexing cheap: an unchanged file is
+    skipped without ever being opened by a parser. SQLite rather than a JSON
+    file — the opposite of the call made for ``plugin_state.json``, because
+    this is a machine-maintained index over potentially thousands of files
+    looked up by hash on every pass, not four fields of user policy.
+    """
+
+    __tablename__ = "indexed_documents"
+
+    path: str = Field(primary_key=True, max_length=1024, description="Workspace-relative path.")
+    content_sha256: str = Field(index=True, max_length=64)
+    size_bytes: int
+    mtime: datetime = Field(sa_column=Column(UTCDateTime(), nullable=False))
+    doc_type: str = Field(max_length=32)
+    chunk_count: int
+    indexed_at: datetime = Field(default_factory=_utcnow, sa_column=_dt_col(index=True))
