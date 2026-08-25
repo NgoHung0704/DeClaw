@@ -1,68 +1,146 @@
 .diagram {
   display: grid;
-  grid-template-columns: minmax(0, 3fr) minmax(0, 1fr);
-  gap: var(--gap);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 20rem);
+  gap: var(--space-4);
   align-items: start;
 }
 
-/* Wide diagrams scroll inside their own box. The page body never scrolls
-   sideways because of a drawing. */
-.diagram__scroll {
-  overflow-x: auto;
+/* ---- canvas ------------------------------------------------------------ */
+
+.canvas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.canvas__frame {
+  position: relative;
+  height: clamp(28rem, 64vh, 46rem);
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--panel);
-  padding: 0.75rem;
+  background-color: var(--bg-sunken);
+  background-image: radial-gradient(circle at 1px 1px, var(--grid-line) 1px, transparent 0);
+  background-size: var(--grid-size) var(--grid-size);
+  cursor: grab;
+  touch-action: none;
+}
+.canvas__frame:active { cursor: grabbing; }
+.canvas__stage { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+.canvas__controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.canvas__button { border-color: var(--line); background: var(--bg-raised); }
+.canvas__hint { font-size: var(--step--2); color: var(--ink-faint); font-family: var(--font-display); }
+
+.diagram__svg { display: block; overflow: visible; }
+
+/* ---- nodes ------------------------------------------------------------- */
+
+.node__shape {
+  fill: var(--bg-raised);
+  stroke: var(--node-line, var(--ink-faint));
+  stroke-width: 1.5;
+  /* Without this a 1.5px border becomes 0.9px at 60% zoom and a dark-on-dark
+     outline simply stops being visible. */
+  vector-effect: non-scaling-stroke;
+  transition: stroke var(--dur-fast) var(--ease-out), fill var(--dur-fast) var(--ease-out);
+}
+.node__label {
+  fill: var(--ink);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 500;
 }
 
-/* Rendered at natural size so text stays legible; the container scrolls
-   instead of the drawing shrinking until nothing can be read. */
-.diagram__svg { display: block; max-width: none; }
+.node--core .node__shape,
+.node--port .node__shape { fill: var(--signal-soft); --node-line: var(--signal); }
+.node--external .node__shape { --node-line: var(--signal-line); }
+.node--gate .node__shape { fill: var(--warn-soft); --node-line: var(--warn); }
+.node--exit .node__shape { fill: var(--bg-sunken); --node-line: var(--ink-faint); }
+.node--planned .node__shape {
+  fill: transparent;
+  --node-line: var(--ink-faint);
+  stroke-dasharray: 6 5;
+  opacity: 0.75;
+}
+.node--planned .node__label { fill: var(--ink-faint); }
 
-.diagram__box { fill: var(--step); stroke: var(--line); stroke-width: 1.2; }
-.diagram__box--port { fill: var(--port); }
-.diagram__box--gate { fill: var(--gate); }
-.diagram__box--exit { fill: var(--exit); }
-.diagram__box--planned { fill: var(--planned); stroke-dasharray: 4 3; }
-.diagram__box--external { fill: var(--accent-soft); }
-.diagram__box--store { fill: var(--exit); }
+.node--interactive { cursor: pointer; }
+.node--interactive:hover .node__shape,
+.node--interactive:focus-visible .node__shape {
+  --node-line: var(--signal);
+  stroke-width: 2.2;
+  filter: drop-shadow(var(--glow));
+}
+.node--interactive:focus { outline: none; }
 
-.diagram__label { fill: var(--ink); font-size: 13px; font-family: var(--font); }
-.diagram__edge { fill: none; stroke: var(--ink-soft); stroke-width: 1.4; }
-.diagram__edge-label {
-  fill: var(--ink-soft);
-  font-size: 11px;
-  font-family: var(--font);
+/* ---- edges ------------------------------------------------------------- */
+
+.edge { color: var(--ink-faint); }
+.edge__line {
+  stroke: var(--ink-faint);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+  transition: stroke var(--dur-fast) var(--ease-out);
+}
+.edge__label {
+  fill: var(--ink-faint);
+  font-family: var(--font-display);
+  font-size: 10.5px;
   paint-order: stroke;
-  stroke: var(--panel);
-  stroke-width: 3px;
+  stroke: var(--bg-sunken);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
 }
+.edge--interactive { cursor: pointer; }
+.edge--interactive:hover { color: var(--signal); }
+.edge--interactive:hover .edge__line { stroke: var(--signal); stroke-width: 2; }
+.edge--interactive:hover .edge__label { fill: var(--signal); }
+
+/* ---- companion list ---------------------------------------------------- */
 
 .companion {
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background: var(--panel);
-  padding: 0.75rem;
+  background: var(--bg-raised);
+  padding: var(--space-3);
+  max-height: clamp(24rem, 56vh, 40rem);
+  overflow-y: auto;
 }
-.companion__title { margin: 0 0 0.25rem; font-size: 0.95rem; }
-.companion__hint { margin: 0 0 0.6rem; font-size: 0.84rem; color: var(--ink-soft); }
-.companion__list { display: grid; gap: 0.3rem; }
+.companion__title {
+  font-family: var(--font-display);
+  font-size: var(--step--2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+.companion__hint {
+  margin: var(--space-1) 0 var(--space-3);
+  font-size: var(--step--2);
+  color: var(--ink-faint);
+}
+.companion__list { display: grid; gap: 2px; }
 .companion__button {
   width: 100%;
   text-align: left;
-  font-size: 0.86rem;
-  padding: 0.3rem 0.5rem;
+  font-family: var(--font-body);
+  padding: var(--space-2);
 }
-.companion__button--edge { color: var(--ink-soft); }
-.companion__button[data-dimmed='true'] { opacity: 0.45; }
+.companion__button--edge { color: var(--ink-faint); font-size: var(--step--2); }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
   .diagram { grid-template-columns: 1fr; }
+  .companion { max-height: none; }
 }
 
-/* Motion is opt-in, never opt-out: the default state has no transitions. */
-@media (prefers-reduced-motion: no-preference) {
-  .panel { transition: transform 160ms ease, opacity 160ms ease; }
-  .diagram__box { transition: opacity 120ms linear; }
-  .card { transition: border-color 120ms linear; }
+/* Motion is opt-in, never opt-out: reduced motion strips it everywhere,
+   including anything a library writes inline. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

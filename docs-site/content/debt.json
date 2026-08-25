@@ -41,8 +41,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 237,
-        "end": 237,
+        "start": 242,
+        "end": 242,
         "anchor": "is deferred to post-MVP",
         "note": {
           "en": "The decision and its rationale are recorded in the living context document.",
@@ -67,8 +67,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 205,
-        "end": 205,
+        "start": 210,
+        "end": 210,
         "anchor": "the gap is 38 points",
         "note": {
           "en": "Measured, and recorded with the correction that an earlier estimate was optimistic.",
@@ -92,8 +92,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 220,
-        "end": 220,
+        "start": 225,
+        "end": 225,
         "anchor": "measurably weaker in French",
         "note": {
           "en": "Tested, hypothesis rejected, and written up rather than smoothed over.",
@@ -193,8 +193,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 280,
-        "end": 280,
+        "start": 285,
+        "end": 285,
         "anchor": "signs only",
         "note": {
           "en": "Named as a prerequisite for third-party install.",
@@ -218,8 +218,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 257,
-        "end": 257,
+        "start": 262,
+        "end": 262,
         "anchor": "Retrieval quality is still unmeasured",
         "note": {
           "en": "Stated plainly in the phase notes rather than implied by the passing tests.",
@@ -244,8 +244,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 268,
-        "end": 268,
+        "start": 273,
+        "end": 273,
         "anchor": "episodic memory still unpopulated",
         "note": {
           "en": "Carried forward across several phases rather than quietly dropped.",
@@ -296,8 +296,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 268,
-        "end": 268,
+        "start": 273,
+        "end": 273,
         "anchor": "still not in `build_brain`",
         "note": {
           "en": "An A/B probe is the stated precondition for enabling it.",

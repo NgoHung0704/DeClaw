@@ -1,119 +1,115 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useLang, useT } from '../i18n/lang';
-import { layoutGraph, requiredColumnGap, type LayoutResult } from './layout';
+import { useMemo } from 'react';
+import { useLang } from '../i18n/lang';
+import type { Loc } from '../content/types';
+import { assignLanes, assignMidShifts, attachments, layerGraph, type Box } from './geometry';
+import { ArrowDefs, DiagramEdge, DiagramNode } from './parts';
 import { CompanionList, type ListEdge, type ListNode } from './CompanionList';
+import { Canvas } from './Canvas';
 
-const BOX = { maxWidth: 165, fontSize: 13, padding: 9, lineHeight: 16 };
-const MIN_COLUMN_GAP = 150;
-const DIM_OPACITY = 0.22;
+export type DiagramNodeInput = ListNode & {
+  /** Authored position. Small flow graphs omit it and get layered instead. */
+  x?: number;
+  y?: number;
+  w?: number;
+  h?: number;
+};
 
-export type DiagramNode = ListNode & { column: number };
+const FLOW_BOX = { w: 210, h: 66 };
+const PAD = 40;
 
 export function Diagram(props: {
-  nodes: DiagramNode[];
+  nodes: DiagramNodeInput[];
   edges: ListEdge[];
   dimmed: Set<string>;
   onSelect: (kind: 'node' | 'edge', id: string) => void;
+  canvas?: { width: number; height: number };
+  label: string;
 }) {
   const { lang } = useLang();
-  const t = useT();
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [widthBudget, setWidthBudget] = useState(BOX.maxWidth);
 
-  const layout: LayoutResult = useMemo(
-    () =>
-      layoutGraph({
-        nodes: props.nodes.map((n) => ({ id: n.id, label: n.label[lang], column: n.column })),
-        edges: props.edges.map((e) => ({
-          id: e.id,
-          from: e.from,
-          to: e.to,
-          label: e.label[lang],
-        })),
-        box: { ...BOX, maxWidth: widthBudget },
-        columnGap: Math.max(MIN_COLUMN_GAP, requiredColumnGap({ nodes: props.nodes, edges: props.edges })),
-      }),
-    [props.nodes, props.edges, lang, widthBudget],
-  );
-
-  // Re-measure with the browser's real metrics. The estimator is a fallback
-  // for jsdom, where getComputedTextLength() returns 0 — so a test using it
-  // proves internal consistency, and only a real browser proves text fits.
-  useLayoutEffect(() => {
-    const svg = svgRef.current;
-    if (!svg) return;
-    let widest = 0;
-    svg.querySelectorAll<SVGTextContentElement>('.diagram__label tspan').forEach((node) => {
-      const measured = node.getComputedTextLength?.() ?? 0;
-      if (measured > widest) widest = measured;
-    });
-    if (widest > widthBudget && widthBudget > BOX.maxWidth * 0.6) {
-      setWidthBudget(Math.max(BOX.maxWidth * 0.6, widthBudget * 0.9));
+  const boxes = useMemo<Map<string, Box>>(() => {
+    const authored = props.nodes.every((n) => typeof n.x === 'number');
+    if (authored) {
+      return new Map(
+        props.nodes.map((n) => [n.id, { x: n.x!, y: n.y!, w: n.w!, h: n.h! }] as const),
+      );
     }
-  }, [lang, layout, widthBudget]);
+    return layerGraph(
+      props.nodes.map((n) => ({ id: n.id, w: n.w ?? FLOW_BOX.w, h: n.h ?? FLOW_BOX.h })),
+      props.edges,
+      { colGap: 110, rowGap: 34 },
+    );
+  }, [props.nodes, props.edges]);
+
+  const size = useMemo(() => {
+    if (props.canvas) return props.canvas;
+    let width = 0;
+    let height = 0;
+    for (const box of boxes.values()) {
+      width = Math.max(width, box.x + box.w);
+      height = Math.max(height, box.y + box.h);
+    }
+    return { width: width + PAD * 2, height: height + PAD * 2 };
+  }, [boxes, props.canvas]);
+
+  const lanes = useMemo(() => assignLanes(props.edges), [props.edges]);
+  const shifts = useMemo(() => assignMidShifts(props.edges, boxes), [props.edges, boxes]);
+  const attached = useMemo(() => attachments(props.edges), [props.edges]);
+
+  const label = (loc: Loc) => loc[lang];
 
   return (
     <div className="diagram">
-      <div className="diagram__scroll">
+      <Canvas width={size.width} height={size.height} label={props.label}>
         <svg
-          ref={svgRef}
-          viewBox={`-8 -8 ${layout.width + 40} ${layout.height + 24}`}
-          width={layout.width + 40}
-          height={layout.height + 24}
           className="diagram__svg"
+          width={size.width}
+          height={size.height}
+          viewBox={`0 0 ${size.width} ${size.height}`}
           role="presentation"
         >
-          {layout.routes.map((route) => {
-            const edge = props.edges.find((e) => e.id === route.id)!;
-            return (
-              <g key={route.id} data-edge-group={route.id}>
-                <polyline
-                  points={route.points.map((p) => `${p.x},${p.y}`).join(' ')}
-                  className="diagram__edge"
+          <ArrowDefs />
+          <g transform={props.canvas ? undefined : `translate(${PAD}, ${PAD})`}>
+            {props.edges.map((edge, i) => {
+              const from = boxes.get(edge.from);
+              const to = boxes.get(edge.to);
+              if (!from || !to) return null;
+              const dimmed = props.dimmed.has(edge.from) || props.dimmed.has(edge.to);
+              return (
+                <DiagramEdge
+                  key={edge.id}
+                  from={from}
+                  to={to}
+                  label={label(edge.label)}
+                  lane={lanes[i]}
+                  midShift={shifts[i]}
+                  attachment={attached[i]}
+                  dimmed={dimmed}
+                  index={i}
+                  onActivate={() => props.onSelect('edge', edge.id)}
                 />
-                <text x={route.labelX} y={route.labelY} textAnchor={route.labelAnchor} className="diagram__edge-label">
-                  {t(edge.label)}
-                </text>
-              </g>
-            );
-          })}
-          {[...layout.boxes.values()].map((box) => {
-            const node = props.nodes.find((n) => n.id === box.id)!;
-            return (
-              // Dimming is inline opacity on the PARENT group. Two opacities
-              // then multiply instead of one overwriting the other, which is
-              // what breaks a `.dimmed` class the moment anything writes an
-              // inline style onto the same element.
-              <g
-                key={box.id}
-                data-node-group={box.id}
-                style={{ opacity: props.dimmed.has(box.id) ? DIM_OPACITY : 1 }}
-              >
-                <rect
-                  x={box.x}
-                  y={box.y}
-                  width={box.w}
-                  height={box.h}
-                  rx={8}
-                  className={`diagram__box diagram__box--${node.kind}`}
+              );
+            })}
+            {props.nodes.map((node, i) => {
+              const box = boxes.get(node.id);
+              if (!box) return null;
+              return (
+                <DiagramNode
+                  key={node.id}
+                  id={node.id}
+                  box={box}
+                  label={label(node.label)}
+                  kind={node.kind}
+                  dimmed={props.dimmed.has(node.id)}
+                  index={i}
+                  onActivate={() => props.onSelect('node', node.id)}
                 />
-                <text
-                  x={box.x + box.w / 2}
-                  y={box.y + BOX.padding + BOX.fontSize}
-                  className="diagram__label"
-                  textAnchor="middle"
-                >
-                  {box.lines.map((line, i) => (
-                    <tspan key={line} x={box.x + box.w / 2} dy={i === 0 ? 0 : BOX.lineHeight}>
-                      {line}
-                    </tspan>
-                  ))}
-                </text>
-              </g>
-            );
-          })}
+              );
+            })}
+          </g>
         </svg>
-      </div>
+      </Canvas>
+
       <CompanionList
         nodes={props.nodes}
         edges={props.edges}

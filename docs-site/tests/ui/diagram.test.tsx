@@ -1,19 +1,19 @@
 /** @vitest-environment jsdom */
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { Diagram } from '../../src/diagram/Diagram';
 import { LangProvider } from '../../src/i18n/lang';
 
 const nodes = [
-  { id: 'a', label: { en: 'Intake', vi: 'Cổng vào' }, column: 0, kind: 'port' },
-  { id: 'b', label: { en: 'Sanitizer', vi: 'Bộ lọc' }, column: 1, kind: 'step' },
+  { id: 'a', label: { en: 'Intake', vi: 'Cổng vào' }, kind: 'port', x: 0, y: 0, w: 180, h: 60 },
+  { id: 'b', label: { en: 'Sanitizer', vi: 'Bộ lọc' }, kind: 'step', x: 320, y: 0, w: 180, h: 60 },
 ];
 const edges = [{ id: 'e1', from: 'a', to: 'b', label: { en: 'file content', vi: 'nội dung tệp' } }];
 
 const renderDiagram = (dimmed: Set<string>) =>
   render(
     <LangProvider lang="en" setLang={() => {}}>
-      <Diagram nodes={nodes} edges={edges} dimmed={dimmed} onSelect={() => {}} />
+      <Diagram nodes={nodes} edges={edges} dimmed={dimmed} onSelect={() => {}} label="test" />
     </LangProvider>,
   );
 
@@ -40,8 +40,11 @@ describe('dimming', () => {
 describe('the companion list is the keyboard surface', () => {
   it('offers a real button for every node', () => {
     renderDiagram(new Set());
+    // Scoped to the companion list on purpose: the SVG node is now a focusable
+    // button too, so an unscoped query matches both and proves neither.
+    const list = within(document.querySelector('.companion') as HTMLElement);
     for (const node of nodes) {
-      expect(screen.getByRole('button', { name: node.label.en })).toBeTruthy();
+      expect(list.getByRole('button', { name: node.label.en })).toBeTruthy();
     }
   });
 

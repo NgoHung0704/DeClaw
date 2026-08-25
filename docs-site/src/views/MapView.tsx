@@ -7,7 +7,11 @@ import { useNavigate, useRoute } from '../router/Router';
 import { ContractPanel } from './ContractPanel';
 import { OwnershipTable } from './OwnershipTable';
 
-const systems = systemsJson as unknown as { nodes: SystemNode[]; edges: SystemEdge[] };
+const systems = systemsJson as unknown as {
+  nodes: SystemNode[];
+  edges: SystemEdge[];
+  canvas: { width: number; height: number };
+};
 
 export function MapView() {
   const t = useT();
@@ -21,7 +25,10 @@ export function MapView() {
     id: n.id,
     label: n.label,
     kind: n.kind,
-    column: n.column,
+    x: n.x,
+    y: n.y,
+    w: n.w,
+    h: n.h,
   }));
   const edges = systems.edges.map((e) => ({
     id: e.id,
@@ -40,7 +47,14 @@ export function MapView() {
       <section>
         <h2>{t(ui.map.heading)}</h2>
         <p className="lede">{t(ui.map.intro)}</p>
-        <Diagram nodes={nodes} edges={edges} dimmed={new Set()} onSelect={select} />
+        <Diagram
+          nodes={nodes}
+          edges={edges}
+          dimmed={new Set()}
+          onSelect={select}
+          canvas={systems.canvas}
+          label={t(ui.map.heading)}
+        />
         <ul className="node-notes">
           {systems.nodes.map((node) => (
             <li key={node.id} data-kind={node.kind}>

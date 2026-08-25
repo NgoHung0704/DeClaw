@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { AnimatePresence } from 'motion/react';
 import { ui } from './content/load';
 import type { Lang } from './content/types';
 import { LangProvider, useT } from './i18n/lang';
@@ -8,11 +9,13 @@ import { ComponentsView } from './views/ComponentsView';
 import { DetailView } from './views/DetailView';
 import { MachineView } from './views/MachineView';
 import { DebtView } from './views/DebtView';
+import { PhasesView } from './views/PhasesView';
 
-const VIEWS = ['map', 'components', 'machine', 'debt'] as const;
+const VIEWS = ['map', 'phases', 'components', 'machine', 'debt'] as const;
 type ViewName = (typeof VIEWS)[number];
 
 function CurrentView({ view, id }: { view: string; id?: string }) {
+  if (view === 'phases') return <PhasesView />;
   if (view === 'components') return <ComponentsView />;
   if (view === 'component' && id) return <DetailView id={id} />;
   if (view === 'machine') return <MachineView />;
@@ -80,7 +83,9 @@ function Shell() {
       </header>
 
       <main id="main" data-view={view}>
-        <CurrentView view={view} id={route.segments[1]} />
+        <AnimatePresence mode="wait">
+          <CurrentView key={view} view={view} id={route.segments[1]} />
+        </AnimatePresence>
       </main>
     </>
   );
