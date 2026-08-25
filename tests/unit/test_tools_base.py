@@ -138,3 +138,39 @@ def test_tool_is_frozen() -> None:
     tool = EchoTool()
     with pytest.raises(ValidationError):
         tool.name = "renamed"
+
+
+# --- confirmation_preview (DCL-116) ----------------------------------------
+
+
+def test_confirmation_preview_defaults_to_none() -> None:
+    # Existing tools must be completely unaffected.
+    from declaw.tools.builtin.filesystem import FilesystemWriteTool
+
+    assert FilesystemWriteTool().confirmation_preview({"path": "a.txt"}) is None
+
+
+def test_a_tool_can_override_the_preview() -> None:
+    from typing import Any
+
+    from pydantic import BaseModel
+
+    from declaw.tools.base import DeclawTool, ToolClass
+
+    class Args(BaseModel):
+        count: int
+
+    class PreviewTool(DeclawTool[Args]):
+        name: str = "preview_tool"
+        description_en: str = "x"
+        description_fr: str = "x"
+        classification: ToolClass = ToolClass.WRITE
+        args_schema: type[Args] = Args
+
+        def confirmation_preview(self, args: dict[str, Any]) -> str | None:
+            return f"Move {args['count']} files"
+
+        async def _arun(self, args: Args) -> str:
+            return "done"
+
+    assert PreviewTool().confirmation_preview({"count": 12}) == "Move 12 files"
