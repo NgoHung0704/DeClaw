@@ -6,7 +6,7 @@ import { useT } from '../i18n/lang';
 import { ArrowDefs } from './parts';
 import { busRoute } from './trunk';
 import { wrapLabel, charBudget } from './wrap';
-import { Canvas } from './Canvas';
+import { Plot } from './Plot';
 
 const systems = systemsJson as unknown as {
   nodes: SystemNode[];
@@ -40,18 +40,11 @@ export function SystemMap(props: { onOpenEdge: (edgeId: string) => void }) {
   );
 
   return (
-    <Canvas
+    <Plot
       width={systems.canvas.width}
       height={systems.canvas.height}
       label={t(hub.label)}
     >
-      <svg
-        className="diagram__svg"
-        width={systems.canvas.width}
-        height={systems.canvas.height}
-        viewBox={`0 0 ${systems.canvas.width} ${systems.canvas.height}`}
-        role="presentation"
-      >
         <ArrowDefs />
 
         {directEdges.map((edge, i) => {
@@ -173,8 +166,7 @@ export function SystemMap(props: { onOpenEdge: (edgeId: string) => void }) {
             </motion.g>
           );
         })}
-      </svg>
-    </Canvas>
+    </Plot>
   );
 }
 

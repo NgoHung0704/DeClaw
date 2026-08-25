@@ -35,7 +35,7 @@ describe('Layer 1 — system map', () => {
     const edge = systemEdges.find((e) => e.contract.path === '/api/embed')!;
     // Scoped to the drawing: the same edge is also a button in the companion
     // list, so an unscoped query matches both and proves neither.
-    const svg = within(document.querySelector('.diagram__svg') as unknown as HTMLElement);
+    const svg = within(document.querySelector('.plot__svg') as unknown as HTMLElement);
     await user.click(svg.getByRole('button', { name: edge.label.en }));
     expect(window.location.hash).toContain(`edge/${edge.id}`);
     expect(screen.getByText('/api/embed')).toBeTruthy();
@@ -45,7 +45,7 @@ describe('Layer 1 — system map', () => {
     const user = userEvent.setup();
     render(<App />);
     const edge = systemEdges.find((e) => e.contract.path === '/api/embed')!;
-    const svg = within(document.querySelector('.diagram__svg') as unknown as HTMLElement);
+    const svg = within(document.querySelector('.plot__svg') as unknown as HTMLElement);
     await user.click(svg.getByRole('button', { name: edge.label.en }));
     for (const err of edge.contract.errors) {
       expect(screen.getByText(err.code)).toBeTruthy();

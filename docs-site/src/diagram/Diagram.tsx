@@ -4,7 +4,7 @@ import type { Loc } from '../content/types';
 import { assignLanes, assignMidShifts, attachments, layerGraph, type Box } from './geometry';
 import { ArrowDefs, DiagramEdge, DiagramNode } from './parts';
 import { CompanionList, type ListEdge, type ListNode } from './CompanionList';
-import { Canvas } from './Canvas';
+import { Plot } from './Plot';
 
 export type DiagramNodeInput = ListNode & {
   /** Authored position. Small flow graphs omit it and get layered instead. */
@@ -60,14 +60,7 @@ export function Diagram(props: {
 
   return (
     <div className="diagram">
-      <Canvas width={size.width} height={size.height} label={props.label}>
-        <svg
-          className="diagram__svg"
-          width={size.width}
-          height={size.height}
-          viewBox={`0 0 ${size.width} ${size.height}`}
-          role="presentation"
-        >
+      <Plot width={size.width} height={size.height} label={props.label}>
           <ArrowDefs />
           <g transform={props.canvas ? undefined : `translate(${PAD}, ${PAD})`}>
             {props.edges.map((edge, i) => {
@@ -107,8 +100,7 @@ export function Diagram(props: {
               );
             })}
           </g>
-        </svg>
-      </Canvas>
+      </Plot>
 
       <CompanionList
         nodes={props.nodes}
