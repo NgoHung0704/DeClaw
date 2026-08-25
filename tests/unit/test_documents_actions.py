@@ -130,3 +130,129 @@ def test_a_long_plan_is_summarised_not_dumped(workspace: Path) -> None:
     assert "30" in preview
     assert preview.count("\n") < 15
     assert "more" in preview.lower()
+
+
+# --- document_summarize (DCL-113) ------------------------------------------
+
+from typing import Any  # noqa: E402
+
+from declaw.documents.models import SearchHit  # noqa: E402
+from declaw.documents.search import ChunkSanitizer  # noqa: E402
+
+
+class _Store:
+    def __init__(self, hits: list[SearchHit]) -> None:
+        self._hits = hits
+        self.queries: list[str] = []
+
+    async def search(self, query: str, *, k: int = 5) -> list[SearchHit]:
+        self.queries.append(query)
+        return self._hits[:k]
+
+
+def _hit(path: str, page: int | None = 3) -> SearchHit:
+    return SearchHit(
+        chunk_id=f"{path}:0",
+        doc_id=path,
+        path=path,
+        text=f"clause from {path}",
+        ordinal=0,
+        distance=0.1,
+        page=page,
+        page_end=page,
+    )
+
+
+def _summarize_tool(hits: list[SearchHit], language: Any = "en") -> tuple[Any, _Store]:
+    from declaw.documents.actions import build_document_summarize_tool
+
+    store = _Store(hits)
+    tool = build_document_summarize_tool(
+        store=store, chunk_sanitizer=ChunkSanitizer(None), language=language
+    )
+    return tool, store
+
+
+def test_the_summary_file_is_written(workspace: Path) -> None:
+    tool, _store = _summarize_tool([_hit("contrat.pdf")])
+    asyncio.run(
+        tool.run_validated({"query": "resiliation", "summary": "Le preavis est de trois mois."})
+    )
+    written = (workspace / "summary.md").read_text(encoding="utf-8")
+    assert "Le preavis est de trois mois." in written
+
+
+def test_sources_come_from_retrieval_not_from_the_model(workspace: Path) -> None:
+    # The rule that survives from DCL-062: the model never invents a citation.
+    tool, store = _summarize_tool([_hit("contrat.pdf", page=12)])
+    asyncio.run(
+        tool.run_validated(
+            {
+                "query": "resiliation",
+                "summary": "According to invented-source.pdf page 99, ...",
+            }
+        )
+    )
+    written = (workspace / "summary.md").read_text(encoding="utf-8")
+    assert "contrat.pdf p.12" in written
+    assert store.queries == ["resiliation"]
+    # The model's invented citation stays in its prose but never in the sources.
+    sources_block = written.split("Sources")[1]
+    assert "invented-source.pdf" not in sources_block
+
+
+def test_the_file_declares_that_a_model_wrote_it(workspace: Path) -> None:
+    tool, _store = _summarize_tool([_hit("contrat.pdf")])
+    asyncio.run(tool.run_validated({"query": "q", "summary": "resume"}))
+    written = (workspace / "summary.md").read_text(encoding="utf-8")
+    assert "AI" in written or "IA" in written
+    assert "verify" in written.lower()
+
+
+def test_the_french_summary_is_in_french(workspace: Path) -> None:
+    tool, _store = _summarize_tool([_hit("contrat.pdf")], language="fr")
+    asyncio.run(tool.run_validated({"query": "q", "summary": "resume"}))
+    written = (workspace / "summary.md").read_text(encoding="utf-8")
+    assert "IA locale" in written
+    assert "vérifiez les sources" in written
+    assert "Sources" in written
+    # No English leaking into French copy: this is a France-first product.
+    assert "verify" not in written.lower()
+    assert "Written by" not in written
+
+
+def test_it_refuses_to_overwrite_by_default(workspace: Path) -> None:
+    (workspace / "summary.md").write_text("existing work", encoding="utf-8")
+    tool, _store = _summarize_tool([_hit("contrat.pdf")])
+    with pytest.raises(ValueError):
+        asyncio.run(tool.run_validated({"query": "q", "summary": "new"}))
+    assert (workspace / "summary.md").read_text(encoding="utf-8") == "existing work"
+
+
+def test_overwrite_is_possible_when_asked(workspace: Path) -> None:
+    (workspace / "summary.md").write_text("existing", encoding="utf-8")
+    tool, _store = _summarize_tool([_hit("contrat.pdf")])
+    asyncio.run(tool.run_validated({"query": "q", "summary": "new", "overwrite": True}))
+    assert "new" in (workspace / "summary.md").read_text(encoding="utf-8")
+
+
+def test_a_summary_path_outside_the_workspace_is_refused(workspace: Path) -> None:
+    tool, _store = _summarize_tool([_hit("contrat.pdf")])
+    with pytest.raises(ValueError):
+        asyncio.run(
+            tool.run_validated({"query": "q", "summary": "s", "path": "../escape.md"})
+        )
+
+
+def test_a_summary_with_no_matching_documents_still_writes_but_says_so(
+    workspace: Path,
+) -> None:
+    tool, _store = _summarize_tool([])
+    asyncio.run(tool.run_validated({"query": "q", "summary": "resume"}))
+    written = (workspace / "summary.md").read_text(encoding="utf-8")
+    assert "resume" in written
+
+
+def test_the_summarize_tool_is_write_class_so_it_is_gated(workspace: Path) -> None:
+    tool, _store = _summarize_tool([])
+    assert tool.classification is ToolClass.WRITE

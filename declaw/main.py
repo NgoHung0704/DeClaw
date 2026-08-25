@@ -241,9 +241,22 @@ def chat(
         from declaw.documents.tools import build_document_search_tool
 
         if any(p.manifest.name == DOC_INTEL_PLUGIN for p in host.loaded()):
+            from declaw.documents.actions import (
+                OrganizeFilesTool,
+                build_document_summarize_tool,
+            )
+
             stack = build_document_stack(settings, host, sanitizer=sanitizer)
             registry.register_instance(
                 build_document_search_tool(
+                    store=stack.store,
+                    chunk_sanitizer=stack.chunk_sanitizer,
+                    language=settings.language,
+                )
+            )
+            registry.register_instance(OrganizeFilesTool())
+            registry.register_instance(
+                build_document_summarize_tool(
                     store=stack.store,
                     chunk_sanitizer=stack.chunk_sanitizer,
                     language=settings.language,
