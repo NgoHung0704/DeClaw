@@ -73,6 +73,17 @@ class DeclawTool(BaseModel, Generic[ArgsT]):
         """Return the description in the requested language."""
         return self.description_fr if language == "fr" else self.description_en
 
+    def confirmation_preview(self, args: dict[str, Any]) -> str | None:
+        """Human-readable approval text, or ``None`` for the default rendering.
+
+        The default prompt renders ``tool.name(key=value, ...)``, which is fine
+        for a two-argument write and unreadable for a thirty-move plan. An
+        unreadable approval prompt trains people to click through, which is the
+        one habit the confirmation gate exists to prevent — so a tool whose
+        arguments are a *plan* renders its own summary instead.
+        """
+        return None
+
     async def run_validated(self, raw_args: dict[str, Any]) -> str:
         """Validate ``raw_args`` against ``args_schema`` then call ``_arun``.
 

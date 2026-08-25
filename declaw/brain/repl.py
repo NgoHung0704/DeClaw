@@ -95,6 +95,14 @@ def make_console_confirmation_provider(
     """
 
     def question(tool: DeclawTool[Any], args: dict[str, Any]) -> str:
+        # A tool whose arguments are a plan renders its own summary: thirty
+        # raw key=value pairs in a prompt is how people learn to press 'y'
+        # without reading.
+        preview = tool.confirmation_preview(args)
+        if preview is not None:
+            if language == "fr":
+                return f"{preview}\nAutoriser ? [y/N] "
+            return f"{preview}\nAllow? [y/N] "
         rendered = ", ".join(f"{key}={value!r}" for key, value in args.items())
         if language == "fr":
             return f"DeClaw veut appeler {tool.name}({rendered}). Autoriser ? [y/N] "

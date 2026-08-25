@@ -350,3 +350,58 @@ async def test_registry_write_tool_is_gated_through_graph(workspace: Path) -> No
     tool_msgs = [m for m in result["messages"] if isinstance(m, ToolMessage)]
     assert any("denied" in str(m.content).lower() for m in tool_msgs)
     assert not (workspace / "new.txt").exists()  # the gate prevented the write
+
+
+# --- confirmation preview in the console prompt (DCL-116) ------------------
+
+
+async def test_the_prompt_uses_a_tools_preview_when_it_has_one() -> None:
+    from typing import Any
+
+    from pydantic import BaseModel
+
+    from declaw.brain.repl import make_console_confirmation_provider
+    from declaw.tools.base import DeclawTool, ToolClass
+
+    class Args(BaseModel):
+        count: int
+
+    class PreviewTool(DeclawTool[Args]):
+        name: str = "organize_files"
+        description_en: str = "x"
+        description_fr: str = "x"
+        classification: ToolClass = ToolClass.WRITE
+        args_schema: type[Args] = Args
+
+        def confirmation_preview(self, args: dict[str, Any]) -> str | None:
+            return "Move 12 files:\n  a.pdf -> ACME/a.pdf"
+
+        async def _arun(self, args: Args) -> str:
+            return "done"
+
+    asked: list[str] = []
+
+    def prompt(question: str) -> str:
+        asked.append(question)
+        return "y"
+
+    approve = make_console_confirmation_provider(prompt, "en")
+    assert await approve(PreviewTool(), {"count": 12}) is True
+    assert "Move 12 files" in asked[0]
+    assert "a.pdf -> ACME/a.pdf" in asked[0]
+    assert "[y/N]" in asked[0]
+
+
+async def test_tools_without_a_preview_keep_the_old_prompt() -> None:
+    from declaw.brain.repl import make_console_confirmation_provider
+    from declaw.tools.builtin.filesystem import FilesystemWriteTool
+
+    asked: list[str] = []
+
+    def prompt(question: str) -> str:
+        asked.append(question)
+        return "n"
+
+    approve = make_console_confirmation_provider(prompt, "en")
+    await approve(FilesystemWriteTool(), {"path": "a.txt", "content": "x"})
+    assert "filesystem_write(" in asked[0]
