@@ -66,6 +66,28 @@ export function MachineView() {
         }
       />
 
+      {/* The drawing's keyboard surface. Parts inside the SVG are focusable,
+          but focus behaviour on <g> varies by browser, so the reliable way in
+          is a list of real buttons built from the same content. */}
+      <nav className="partlist" aria-label={t(ui.machine.partsList)}>
+        <h3 className="partlist__title">{t(ui.machine.partsList)}</h3>
+        <p className="partlist__hint">{t(ui.machine.partsHint)}</p>
+        <ul className="partlist__items">
+          {machineContent.parts.map((part) => (
+            <li key={part.id}>
+              <button
+                type="button"
+                className="chip"
+                aria-current={openPart === part.id ? 'true' : undefined}
+                onClick={() => setQuery({ part: part.id })}
+              >
+                {`${t(part.label)} · ${part.subparts.length}`}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
       {openedPart && (
         <section className="partdetail">
           <h3>{t(openedPart.label)}</h3>

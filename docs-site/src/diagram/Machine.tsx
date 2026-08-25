@@ -7,7 +7,7 @@ import { useT } from '../i18n/lang';
 import { busRoute } from './trunk';
 import { ArrowDefs } from './parts';
 import { wrapLabel, charBudget } from './wrap';
-import { Canvas } from './Canvas';
+import { Plot } from './Plot';
 
 type SubPart = { id: string; file: string; label: string; path: string };
 type Part = {
@@ -98,14 +98,7 @@ export function MachineDiagram(props: {
   );
 
   return (
-    <Canvas width={canvas.width} height={canvas.height} label={t(machine.chassis.label)}>
-      <svg
-        className="diagram__svg machine"
-        width={canvas.width}
-        height={canvas.height}
-        viewBox={`0 0 ${canvas.width} ${canvas.height}`}
-        role="presentation"
-      >
+    <Plot width={canvas.width} height={canvas.height} label={t(machine.chassis.label)}>
         <ArrowDefs />
 
         {/* intake ports */}
@@ -330,8 +323,7 @@ export function MachineDiagram(props: {
             </motion.g>
           )}
         </AnimatePresence>
-      </svg>
-    </Canvas>
+    </Plot>
   );
 }
 

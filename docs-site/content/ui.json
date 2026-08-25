@@ -273,6 +273,14 @@
     "openComponent": {
       "en": "Open the full component",
       "vi": "Mở chi tiết thành phần"
+    },
+    "partsList": {
+      "en": "Every part, in words",
+      "vi": "Mọi bộ phận, bằng chữ"
+    },
+    "partsHint": {
+      "en": "The same parts as the drawing. Open any of them from here.",
+      "vi": "Cùng các bộ phận như hình vẽ. Mở bất kỳ bộ phận nào từ đây."
     }
   },
   "debt": {
@@ -305,24 +313,6 @@
     "heading": {
       "en": "The seven inviolable principles",
       "vi": "Bảy nguyên tắc bất khả xâm phạm"
-    }
-  },
-  "canvas": {
-    "zoomIn": {
-      "en": "Zoom in",
-      "vi": "Phóng to"
-    },
-    "zoomOut": {
-      "en": "Zoom out",
-      "vi": "Thu nhỏ"
-    },
-    "fit": {
-      "en": "Fit",
-      "vi": "Vừa khung"
-    },
-    "hint": {
-      "en": "Drag to pan. Ctrl + scroll to zoom.",
-      "vi": "Kéo để di chuyển. Ctrl + cuộn để phóng to."
     }
   },
   "phases": {
