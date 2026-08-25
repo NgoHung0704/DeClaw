@@ -79,6 +79,15 @@ parsing UI code.
 Prose fields are `{ "en": "...", "vi": "..." }`. Structural fields (ids, paths, line
 numbers) are language-neutral, so a path is guarded once rather than twice.
 
+**Path convention:** every `file` field is a **repo-root-relative POSIX path**
+(`declaw/tools/registry.py`), never absolute and never relative to `docs-site/`. The
+guards, the `file:line` display and the GitHub deep-link builder all consume the same
+field, so a split convention would let two of the three silently disagree.
+
+**Citable file types:** snippets and quotes may target **any git-tracked text file** —
+`.py`, but also `plugin.yaml`, `pyproject.toml`, `CLAUDE.md` and `docs/*.md`. Debt
+items anchored into `CLAUDE.md` depend on this.
+
 ### 5.1 snippet vs quote — structurally exclusive
 
 - A **snippet** embeds code: has `code`, must NOT have `anchor`. Guarded verbatim.
@@ -197,7 +206,11 @@ audit -> confirmation -> sanitizer -> tool chain would misrepresent the code.
    appears **inside** the declared range. Boundary checking alone stays green when a
    paragraph is inserted above and the citation slides onto different content.
 3. **module-coverage** — every git-tracked `.py` outside `tests/` appears in at least
-   one component's `modules[]`, read from `components.json` **alone**. A companion
+   one component's `modules[]`, read from `components.json` **alone**. That universe
+   is **112 files today** (95 mypy-checked files in `declaw` + `declaw_plugin_sdk`,
+   plus 4 in `scripts/`, 5 in `alembic/`, 8 in `plugins/builtin/doc-intel/`), verified
+   with `git ls-files`. The guard derives this set at run time and never hardcodes the
+   number, so adding a module is a coverage failure, not a count failure. A companion
    assertion proves a module mentioned only by `tickets.json` still fails, so a module
    cannot pass merely by being named in a ticket. Using `git ls-files` keeps
    `__pycache__` and ignored files out by construction.
@@ -244,7 +257,10 @@ command pass a following `&&`.
   `pytest`. Windows because that is the only environment where the suite has been
   observed green; asserting Linux-green without running it would be the same error
   class the guards exist to prevent.
-- **docs-site** (`ubuntu-latest`): `npm ci`, guards, build, upload Pages artifact.
+- **docs-site** (`ubuntu-latest`, Node pinned to 22 LTS via `.nvmrc` and
+  `actions/setup-node`): `npm ci`, guards, build, upload Pages artifact. The version is
+  pinned because local development runs Node 24 and an unpinned runner would make CI a
+  different environment than the one the work was verified in.
 - **deploy**: GitHub Pages, on pushes to `feat/phase-7-plugin-host` and `main`, so the
   page is visible without merging first.
 
