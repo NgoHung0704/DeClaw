@@ -518,7 +518,7 @@ def index(
 
         console.print(
             f"[green]Indexed {report.indexed}[/green], skipped {report.skipped} unchanged, "
-            f"{report.failed} failed."
+            f"removed {report.removed} no longer on disk, {report.failed} failed."
         )
         for warning in report.warnings:
             console.print(f"[yellow]{warning}[/yellow]")
