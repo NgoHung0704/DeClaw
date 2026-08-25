@@ -4,15 +4,43 @@
       "id": "tool-registry",
       "group": "tools",
       "tier": "A",
-      "title": { "en": "Tool registry and wrapper order", "vi": "Registry công cụ và thứ tự bọc" },
+      "title": {
+        "en": "Tool registry and wrapper order",
+        "vi": "Registry công cụ và thứ tự bọc"
+      },
       "summary": {
         "en": "Single source of truth for how a tool reaches the model: READ tools auto-run, non-READ tools are gated, audit wraps outermost.",
         "vi": "Nguồn sự thật duy nhất cho việc một tool đến tay model: tool READ chạy thẳng, tool non-READ bị chặn hỏi, audit bọc ngoài cùng."
       },
-      "modules": ["declaw/tools/registry.py"],
+      "modules": [
+        "declaw/tools/registry.py"
+      ],
       "tickets": [],
       "detail": "tool-registry",
-      "sources": [{ "file": "declaw/tools/registry.py", "start": 105, "end": 148 }]
+      "snippets": [
+        {
+          "file": "declaw/tools/registry.py",
+          "start": 131,
+          "end": 140,
+          "code": "        tools: list[StructuredTool] = []\n        for name in self.names():\n            tool = self._tools[name]\n            if tool.classification is ToolClass.READ:\n                if sanitizer is not None and tool.produces_external_content:\n                    lc_tool = wrap_tool_with_sanitizer(tool, language, sanitizer)\n                else:\n                    lc_tool = tool.as_langchain_tool(language)\n            else:\n                lc_tool = wrap_tool_with_confirmation(tool, language, approve, audit=audit)",
+          "caption": {
+            "en": "READ external-content tools take the sanitizer branch; every non-READ tool takes the confirmation branch.",
+            "vi": "Tool READ sinh nội dung ngoài đi nhánh sanitizer; mọi tool non-READ đi nhánh xác nhận."
+          }
+        }
+      ],
+      "quotes": [
+        {
+          "file": "declaw/tools/registry.py",
+          "start": 120,
+          "end": 126,
+          "anchor": "the audit wrapper is outermost",
+          "note": {
+            "en": "Audit wraps whichever branch was taken, so an event records the call as the model experienced it.",
+            "vi": "Audit bọc bên ngoài nhánh đã chọn, nên sự kiện ghi lại lời gọi đúng như model trải nghiệm."
+          }
+        }
+      ]
     }
   ]
 }
