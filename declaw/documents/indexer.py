@@ -49,6 +49,7 @@ class IndexReport:
     indexed: int = 0
     skipped: int = 0
     failed: int = 0
+    removed: int = 0
     warnings: list[str] = field(default_factory=list)
 
 
@@ -110,7 +111,43 @@ class DocumentIndexer:
                 report.failed += 1
                 report.warnings.append(f"{relative}: {exc}")
                 logger.warning(f"Indexing failed for {relative}: {exc}")
+
+        await self._reconcile(root, candidates, report)
         return report
+
+    async def _reconcile(
+        self, root: Path, seen: list[Path], report: IndexReport
+    ) -> None:
+        """Forget documents whose files are no longer on disk.
+
+        Without this the index never forgets: a rename doubles the document, a
+        delete leaves it, and search cites files that do not exist. For a
+        product sold on GDPR grounds, continuing to quote a document the user
+        deleted is the wrong failure to have — it is a right-to-erasure
+        problem, not a staleness problem.
+
+        Scope matters. ``declaw index dossier/`` walks one subfolder, so only
+        catalog entries UNDER THAT SUBFOLDER may be pruned; comparing against
+        the whole catalog would delete the index for everything the user did
+        not point at.
+        """
+        try:
+            scope = root.relative_to(self.workspace).as_posix()
+        except ValueError:
+            # Root outside the workspace: the walk found nothing of ours, so
+            # there is nothing we may safely prune.
+            return
+        prefix = "" if scope in {"", "."} else f"{scope}/"
+
+        present = {path.relative_to(self.workspace).as_posix() for path in seen}
+        for known in await self.catalog.known_paths():
+            if not known.startswith(prefix):
+                continue  # outside the walked subtree: not ours to prune
+            if known in present:
+                continue
+            self.store.delete_document(document_id(known))
+            await self.catalog.forget(known)
+            report.removed += 1
 
     async def _index_one(self, relative: str, report: IndexReport) -> None:
         # Re-validate through the workspace boundary even though rglob started

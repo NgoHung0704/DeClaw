@@ -243,3 +243,98 @@ async def test_indexing_an_empty_workspace_reports_nothing(
     index, _parser, _workspace = indexer
     report = await index.index()
     assert (report.indexed, report.skipped, report.failed) == (0, 0, 0)
+
+
+# --- reconciliation: the index must forget what is gone (Phase 8b) ----------
+
+
+async def test_a_deleted_file_is_pruned_from_the_index(
+    indexer: tuple[DocumentIndexer, FakeParser, Path],
+) -> None:
+    # The defect this phase exists to fix: a document the user deleted must
+    # stop being quoted, and stop being cited.
+    index, _parser, workspace = indexer
+    _write(workspace, "contrat.txt")
+    await index.index()
+    assert index.store.count() == 1
+
+    (workspace / "contrat.txt").unlink()
+    report = await index.index()
+
+    assert report.removed == 1
+    assert index.store.count() == 0
+    assert await index.catalog.known_paths() == []
+
+
+async def test_a_renamed_file_moves_rather_than_doubling(
+    indexer: tuple[DocumentIndexer, FakeParser, Path],
+) -> None:
+    index, _parser, workspace = indexer
+    _write(workspace, "contrat.txt")
+    await index.index()
+
+    (workspace / "contrat.txt").rename(workspace / "archive.txt")
+    report = await index.index()
+
+    assert report.indexed == 1
+    assert report.removed == 1
+    assert index.store.count() == 1
+    assert await index.catalog.known_paths() == ["archive.txt"]
+
+
+async def test_search_never_cites_a_file_that_is_gone(
+    indexer: tuple[DocumentIndexer, FakeParser, Path],
+) -> None:
+    index, _parser, workspace = indexer
+    _write(workspace, "a.txt")
+    _write(workspace, "b.txt")
+    await index.index()
+    (workspace / "a.txt").unlink()
+    await index.index()
+
+    hits = await index.store.search("content", k=5)
+    assert {h.path for h in hits} == {"b.txt"}
+
+
+async def test_indexing_a_subfolder_does_not_prune_outside_it(
+    indexer: tuple[DocumentIndexer, FakeParser, Path],
+) -> None:
+    # The dangerous half: `declaw index dossier/` must not wipe the index for
+    # everything the user did not point at.
+    index, _parser, workspace = indexer
+    _write(workspace, "racine.txt")
+    _write(workspace, "dossier/interne.txt")
+    await index.index()
+    assert index.store.count() == 2
+
+    report = await index.index(workspace / "dossier")
+
+    assert report.removed == 0
+    assert sorted(await index.catalog.known_paths()) == ["dossier/interne.txt", "racine.txt"]
+    assert index.store.count() == 2
+
+
+async def test_a_subfolder_walk_still_prunes_inside_its_own_scope(
+    indexer: tuple[DocumentIndexer, FakeParser, Path],
+) -> None:
+    index, _parser, workspace = indexer
+    _write(workspace, "racine.txt")
+    _write(workspace, "dossier/interne.txt")
+    await index.index()
+
+    (workspace / "dossier" / "interne.txt").unlink()
+    report = await index.index(workspace / "dossier")
+
+    assert report.removed == 1
+    assert await index.catalog.known_paths() == ["racine.txt"]
+
+
+async def test_nothing_is_pruned_when_nothing_changed(
+    indexer: tuple[DocumentIndexer, FakeParser, Path],
+) -> None:
+    index, _parser, workspace = indexer
+    _write(workspace, "a.txt")
+    await index.index()
+    report = await index.index()
+    assert report.removed == 0
+    assert report.skipped == 1
