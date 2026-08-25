@@ -7,6 +7,7 @@ export default defineConfig({
     // Guards are node-side; UI specs opt in with a
     // `@vitest-environment jsdom` docblock at the top of the file.
     environment: 'node',
+    setupFiles: ['tests/setup.ts'],
     include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
   },
 });
