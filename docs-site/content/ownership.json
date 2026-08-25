@@ -1,0 +1,194 @@
+{
+  "stores": [
+    {
+      "id": "tasks",
+      "label": { "en": "tasks", "vi": "tasks" },
+      "kind": { "en": "SQLite table", "vi": "Bảng SQLite" },
+      "lifetime": { "en": "Persisted. Not touched by memory wipe.", "vi": "Lưu lâu dài. Lệnh xoá bộ nhớ không đụng tới." },
+      "owner": "persistence",
+      "writers": ["entry-cli"],
+      "readers": ["audit", "memory"],
+      "enforcement": {
+        "file": "declaw/db/models.py",
+        "start": 81,
+        "end": 84,
+        "anchor": "A single user request processed by the agent",
+        "note": {
+          "en": "One row per user request. Nothing populates it from chat yet, which is why audit events still carry a null task id.",
+          "vi": "Mỗi yêu cầu người dùng một dòng. Hiện chat chưa ghi vào đây, nên các sự kiện kiểm toán vẫn mang task id rỗng."
+        }
+      }
+    },
+    {
+      "id": "audit_events",
+      "label": { "en": "audit_events", "vi": "audit_events" },
+      "kind": { "en": "SQLite table, append-only", "vi": "Bảng SQLite, chỉ thêm" },
+      "lifetime": { "en": "Persisted. Survives memory wipe, which records counts only.", "vi": "Lưu lâu dài. Sống sót qua lệnh xoá bộ nhớ, lệnh đó chỉ ghi lại số đếm." },
+      "owner": "audit",
+      "writers": ["audit"],
+      "readers": ["audit", "entry-cli"],
+      "enforcement": {
+        "file": "declaw/db/models.py",
+        "start": 131,
+        "end": 133,
+        "anchor": "Append-only audit record",
+        "note": {
+          "en": "The audit logger is the only writer, and it commits one session per event.",
+          "vi": "Bộ ghi kiểm toán là nơi ghi duy nhất, và mỗi sự kiện commit một phiên."
+        }
+      }
+    },
+    {
+      "id": "episodes",
+      "label": { "en": "episodes", "vi": "episodes" },
+      "kind": { "en": "SQLite table", "vi": "Bảng SQLite" },
+      "lifetime": { "en": "Persisted, and emptied by declaw memory wipe.", "vi": "Lưu lâu dài, và bị dọn sạch bởi declaw memory wipe." },
+      "owner": "memory",
+      "writers": ["memory"],
+      "readers": ["memory"],
+      "enforcement": {
+        "file": "declaw/db/models.py",
+        "start": 97,
+        "end": 105,
+        "anchor": "Episodic memory",
+        "note": {
+          "en": "The table exists and nothing populates it yet: no episode is recorded at end of task.",
+          "vi": "Bảng đã có nhưng chưa có gì ghi vào: chưa ghi episode nào khi kết thúc tác vụ."
+        }
+      }
+    },
+    {
+      "id": "indexed_documents",
+      "label": { "en": "indexed_documents", "vi": "indexed_documents" },
+      "kind": { "en": "SQLite table", "vi": "Bảng SQLite" },
+      "lifetime": { "en": "Persisted. A document is recorded only after its chunks land.", "vi": "Lưu lâu dài. Một tài liệu chỉ được ghi nhận sau khi chunk của nó đã lưu xong." },
+      "owner": "documents",
+      "writers": ["documents"],
+      "readers": ["documents"],
+      "enforcement": {
+        "file": "declaw/documents/indexer.py",
+        "start": 144,
+        "end": 146,
+        "anchor": "retried next run",
+        "note": {
+          "en": "A document that failed halfway is retried rather than remembered as done.",
+          "vi": "Tài liệu hỏng giữa chừng sẽ được thử lại chứ không bị ghi nhận là đã xong."
+        }
+      }
+    },
+    {
+      "id": "declaw_semantic",
+      "label": { "en": "declaw_semantic", "vi": "declaw_semantic" },
+      "kind": { "en": "Chroma collection", "vi": "Collection Chroma" },
+      "lifetime": { "en": "Persisted, emptied by declaw memory wipe, exported by declaw memory export.", "vi": "Lưu lâu dài, bị dọn bởi declaw memory wipe, xuất ra bởi declaw memory export." },
+      "owner": "memory",
+      "writers": ["memory"],
+      "readers": ["memory", "brain-model"],
+      "enforcement": {
+        "file": "declaw/memory/semantic.py",
+        "start": 1,
+        "end": 12,
+        "anchor": "declaw_semantic",
+        "note": {
+          "en": "Text is encrypted at rest; metadata stays plaintext so Chroma filters still work.",
+          "vi": "Văn bản được mã hoá khi lưu; metadata để nguyên plaintext để bộ lọc Chroma còn chạy được."
+        }
+      }
+    },
+    {
+      "id": "declaw_documents",
+      "label": { "en": "declaw_documents", "vi": "declaw_documents" },
+      "kind": { "en": "Chroma collection", "vi": "Collection Chroma" },
+      "lifetime": { "en": "Persisted. Rebuilt incrementally by declaw index.", "vi": "Lưu lâu dài. Được dựng lại tăng dần bởi declaw index." },
+      "owner": "documents",
+      "writers": ["documents"],
+      "readers": ["documents"],
+      "enforcement": {
+        "file": "declaw/documents/session.py",
+        "start": 28,
+        "end": 29,
+        "anchor": "COLLECTION_PURPOSE",
+        "note": {
+          "en": "The purpose becomes the namespaced collection name declaw_documents.",
+          "vi": "Giá trị purpose trở thành tên collection theo namespace: declaw_documents."
+        }
+      }
+    },
+    {
+      "id": "plugin_state",
+      "label": { "en": "plugin_state.json", "vi": "plugin_state.json" },
+      "kind": { "en": "Plain JSON file", "vi": "Tệp JSON thuần" },
+      "lifetime": { "en": "Persisted. Quarantine survives restart; crash counters deliberately do not.", "vi": "Lưu lâu dài. Trạng thái cách ly sống sót qua khởi động lại; bộ đếm crash thì cố ý không." },
+      "owner": "plugin-host",
+      "writers": ["plugin-host"],
+      "readers": ["plugin-host", "entry-cli"],
+      "enforcement": {
+        "file": "declaw/plugin_host/state.py",
+        "start": 3,
+        "end": 5,
+        "anchor": "Deliberately not SQLite",
+        "note": {
+          "en": "Readable and diffable on purpose: this is the user's own policy.",
+          "vi": "Cố ý để đọc được và diff được: đây là chính sách của chính người dùng."
+        }
+      }
+    },
+    {
+      "id": "plugin_grants",
+      "label": { "en": "plugin_grants.json", "vi": "plugin_grants.json" },
+      "kind": { "en": "Plain JSON file", "vi": "Tệp JSON thuần" },
+      "lifetime": { "en": "Persisted. A revoke is permanent, because auto_granted records that the offer was already made.", "vi": "Lưu lâu dài. Thu hồi là vĩnh viễn, vì auto_granted ghi lại rằng quyền đã từng được đề nghị." },
+      "owner": "plugin-host",
+      "writers": ["plugin-host"],
+      "readers": ["plugin-host", "entry-cli"],
+      "enforcement": {
+        "file": "declaw/plugin_host/permissions.py",
+        "start": 14,
+        "end": 16,
+        "anchor": "plain JSON on purpose",
+        "note": {
+          "en": "A user grant can never open a permission the manifest did not request.",
+          "vi": "Quyền do người dùng cấp không bao giờ mở được một quyền mà manifest chưa xin."
+        }
+      }
+    },
+    {
+      "id": "keyring-secrets",
+      "label": { "en": "OS vault, declaw namespace", "vi": "Vault hệ điều hành, namespace declaw" },
+      "kind": { "en": "OS credential store", "vi": "Kho credential của hệ điều hành" },
+      "lifetime": { "en": "Persisted outside the app. Removed only by purge over the known-names list.", "vi": "Lưu bên ngoài ứng dụng. Chỉ bị xoá bằng purge trên danh sách tên đã biết." },
+      "owner": "credentials",
+      "writers": ["credentials"],
+      "readers": ["memory", "documents"],
+      "enforcement": {
+        "file": "declaw/credentials/store.py",
+        "start": 34,
+        "end": 36,
+        "anchor": "KNOWN_SECRET_NAMES",
+        "note": {
+          "en": "Keyring backends cannot enumerate, so this list is the only way to clean up.",
+          "vi": "Backend keyring không liệt kê được, nên danh sách này là cách duy nhất để dọn dẹp."
+        }
+      }
+    },
+    {
+      "id": "quarantine",
+      "label": { "en": "Quarantine store", "vi": "Kho cách ly" },
+      "kind": { "en": "In-memory only", "vi": "Chỉ nằm trong bộ nhớ" },
+      "lifetime": { "en": "Ephemeral: it is lost when the process exits. Only the hash and reason reach the audit trail.", "vi": "Tạm thời: mất khi tiến trình kết thúc. Chỉ hash và lý do đi vào nhật ký kiểm toán." },
+      "owner": "sanitizer",
+      "writers": ["sanitizer"],
+      "readers": ["sanitizer"],
+      "enforcement": {
+        "file": "declaw/sanitizer/quarantine.py",
+        "start": 11,
+        "end": 15,
+        "anchor": "for later human review",
+        "note": {
+          "en": "Content is kept for a human to inspect and never returned toward the brain.",
+          "vi": "Nội dung được giữ lại để con người xem và không bao giờ trả ngược về brain."
+        }
+      }
+    }
+  ]
+}

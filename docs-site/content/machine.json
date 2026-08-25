@@ -1,0 +1,313 @@
+{
+  "id": "machine",
+  "title": {
+    "en": "DeClaw as a production line",
+    "vi": "DeClaw như một dây chuyền sản xuất"
+  },
+  "nodes": [
+    {
+      "id": "port-prompt",
+      "kind": "port",
+      "column": 0,
+      "component": "brain-repl",
+      "label": {
+        "en": "Intake: a user turn",
+        "vi": "Cổng vào: một lượt người dùng"
+      }
+    },
+    {
+      "id": "port-document",
+      "kind": "port",
+      "column": 0,
+      "component": "documents",
+      "label": {
+        "en": "Intake: a folder of documents",
+        "vi": "Cổng vào: một thư mục tài liệu"
+      }
+    },
+    {
+      "id": "part-brain",
+      "kind": "step",
+      "column": 1,
+      "component": "brain-loop",
+      "label": {
+        "en": "Agent loop decides",
+        "vi": "Vòng lặp agent quyết định"
+      }
+    },
+    {
+      "id": "part-index",
+      "kind": "step",
+      "column": 1,
+      "component": "documents",
+      "label": {
+        "en": "Indexer stores chunks",
+        "vi": "Indexer lưu các chunk"
+      }
+    },
+    {
+      "id": "part-audit",
+      "kind": "step",
+      "column": 2,
+      "component": "audit",
+      "label": {
+        "en": "Audit wrapper, outermost",
+        "vi": "Wrapper audit, ngoài cùng"
+      }
+    },
+    {
+      "id": "gate-classification",
+      "kind": "gate",
+      "column": 3,
+      "label": {
+        "en": "READ, and does it produce outside content?",
+        "vi": "Là READ, và có sinh nội dung từ bên ngoài không?"
+      }
+    },
+    {
+      "id": "part-confirmation",
+      "kind": "step",
+      "column": 4,
+      "component": "tool-registry",
+      "label": {
+        "en": "Confirmation gate asks you",
+        "vi": "Cổng xác nhận hỏi bạn"
+      }
+    },
+    {
+      "id": "part-sanitizer",
+      "kind": "step",
+      "column": 4,
+      "component": "sanitizer",
+      "label": {
+        "en": "Sanitizer classifies the content",
+        "vi": "Sanitizer phân loại nội dung"
+      }
+    },
+    {
+      "id": "part-tool",
+      "kind": "step",
+      "column": 5,
+      "component": "tool-filesystem",
+      "label": {
+        "en": "Tool runs with typed arguments",
+        "vi": "Tool chạy với tham số có kiểu"
+      }
+    },
+    {
+      "id": "part-plugin",
+      "kind": "step",
+      "column": 5,
+      "component": "plugin-host",
+      "label": {
+        "en": "Plugin subprocess, over a pipe",
+        "vi": "Tiến trình con plugin, qua ống"
+      }
+    },
+    {
+      "id": "exit-answer",
+      "kind": "exit",
+      "column": 6,
+      "component": "brain-repl",
+      "label": {
+        "en": "Exit: an answer, with citations",
+        "vi": "Lối ra: câu trả lời, kèm trích dẫn"
+      }
+    },
+    {
+      "id": "exit-fs",
+      "kind": "exit",
+      "column": 6,
+      "component": "tool-filesystem",
+      "label": {
+        "en": "Exit: a file written or moved",
+        "vi": "Lối ra: một tệp được ghi hoặc di chuyển"
+      }
+    },
+    {
+      "id": "exit-audit-db",
+      "kind": "exit",
+      "column": 6,
+      "component": "persistence",
+      "label": {
+        "en": "Exit: a row in the audit trail",
+        "vi": "Lối ra: một dòng trong nhật ký kiểm toán"
+      }
+    },
+    {
+      "id": "exit-quarantine",
+      "kind": "exit",
+      "column": 6,
+      "component": "sanitizer",
+      "label": {
+        "en": "Exit: quarantined, and you are told",
+        "vi": "Lối ra: bị cách ly, và bạn được báo"
+      }
+    },
+    {
+      "id": "exit-ollama",
+      "kind": "exit",
+      "column": 6,
+      "component": "brain-model",
+      "label": {
+        "en": "Exit: the only network egress",
+        "vi": "Lối ra: luồng ra mạng duy nhất"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "m-prompt-brain",
+      "from": "port-prompt",
+      "to": "part-brain",
+      "label": {
+        "en": "your words",
+        "vi": "lời của bạn"
+      }
+    },
+    {
+      "id": "m-doc-index",
+      "from": "port-document",
+      "to": "part-index",
+      "label": {
+        "en": "unchanged files skipped by hash",
+        "vi": "tệp không đổi bị bỏ qua theo hash"
+      }
+    },
+    {
+      "id": "m-brain-ollama",
+      "from": "part-brain",
+      "to": "exit-ollama",
+      "label": {
+        "en": "inference, audited",
+        "vi": "suy luận, có ghi kiểm toán"
+      }
+    },
+    {
+      "id": "m-index-ollama",
+      "from": "part-index",
+      "to": "exit-ollama",
+      "label": {
+        "en": "embedding, audited",
+        "vi": "nhúng vector, có ghi kiểm toán"
+      }
+    },
+    {
+      "id": "m-brain-audit",
+      "from": "part-brain",
+      "to": "part-audit",
+      "label": {
+        "en": "a tool call",
+        "vi": "một lời gọi tool"
+      }
+    },
+    {
+      "id": "m-audit-gate",
+      "from": "part-audit",
+      "to": "gate-classification",
+      "label": {
+        "en": "recorded, then dispatched",
+        "vi": "ghi nhận xong rồi điều phối"
+      }
+    },
+    {
+      "id": "m-audit-db",
+      "from": "part-audit",
+      "to": "exit-audit-db",
+      "label": {
+        "en": "ok, denied or error",
+        "vi": "ok, bị từ chối hoặc lỗi"
+      }
+    },
+    {
+      "id": "m-gate-confirm",
+      "from": "gate-classification",
+      "to": "part-confirmation",
+      "label": {
+        "en": "non-READ: ask the human first",
+        "vi": "không phải READ: hỏi người dùng trước"
+      }
+    },
+    {
+      "id": "m-gate-sanitize",
+      "from": "gate-classification",
+      "to": "part-sanitizer",
+      "label": {
+        "en": "READ and outside content: sanitize instead",
+        "vi": "READ và có nội dung ngoài: chuyển sang lọc"
+      }
+    },
+    {
+      "id": "m-confirm-tool",
+      "from": "part-confirmation",
+      "to": "part-tool",
+      "label": {
+        "en": "approved",
+        "vi": "được duyệt"
+      }
+    },
+    {
+      "id": "m-confirm-answer",
+      "from": "part-confirmation",
+      "to": "exit-answer",
+      "label": {
+        "en": "denied: the model is told so",
+        "vi": "bị từ chối: model được báo lại"
+      }
+    },
+    {
+      "id": "m-sanitize-tool",
+      "from": "part-sanitizer",
+      "to": "part-tool",
+      "label": {
+        "en": "SAFE passes through",
+        "vi": "SAFE thì đi tiếp"
+      }
+    },
+    {
+      "id": "m-sanitize-quarantine",
+      "from": "part-sanitizer",
+      "to": "exit-quarantine",
+      "label": {
+        "en": "UNSAFE, or unparseable",
+        "vi": "UNSAFE, hoặc không phân tích được"
+      }
+    },
+    {
+      "id": "m-tool-fs",
+      "from": "part-tool",
+      "to": "exit-fs",
+      "label": {
+        "en": "inside the workspace only",
+        "vi": "chỉ trong phạm vi workspace"
+      }
+    },
+    {
+      "id": "m-tool-plugin",
+      "from": "part-tool",
+      "to": "part-plugin",
+      "label": {
+        "en": "plugin-backed capability",
+        "vi": "capability do plugin cung cấp"
+      }
+    },
+    {
+      "id": "m-plugin-answer",
+      "from": "part-plugin",
+      "to": "exit-answer",
+      "label": {
+        "en": "result becomes an observation",
+        "vi": "kết quả trở thành một quan sát"
+      }
+    },
+    {
+      "id": "m-tool-answer",
+      "from": "part-tool",
+      "to": "exit-answer",
+      "label": {
+        "en": "result or refusal",
+        "vi": "kết quả hoặc lời từ chối"
+      }
+    }
+  ]
+}
