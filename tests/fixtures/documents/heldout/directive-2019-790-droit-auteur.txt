@@ -1,0 +1,1064 @@
+L_2019130FR.01009201.xml
+
+17.5.2019
+
+FR
+
+Journal officiel de l'Union européenne
+
+L 130/92
+
+DIRECTIVE (UE) 2019/790 DU PARLEMENT EUROPÉEN ET DU CONSEIL
+
+du 17 avril 2019
+
+sur le droit d'auteur et les droits voisins dans le marché unique numérique et modifiant les directives 96/9/CE et 2001/29/CE
+
+(Texte présentant de l'intérêt pour l'EEE)
+
+LE PARLEMENT EUROPÉEN ET LE CONSEIL DE L'UNION EUROPÉENNE,
+
+vu le traité sur le fonctionnement de l'Union européenne, et notamment son article 53, paragraphe 1, et ses articles 62 et 114,
+
+vu la proposition de la Commission européenne,
+
+après transmission du projet d'acte législatif aux parlements nationaux,
+
+vu l'avis du Comité économique et social européen (1),
+
+vu l'avis du Comité des régions (2),
+
+statuant conformément à la procédure législative ordinaire (3),
+
+considérant ce qui suit:
+
+(1)
+
+Le traité sur le fonctionnement de l'Union européenne prévoit l'établissement d'un marché intérieur et l'instauration d'un système propre à empêcher les distorsions de concurrence dans le marché intérieur. Poursuivre l'harmonisation des dispositions législatives des États membres sur le droit d'auteur et les droits voisins devrait contribuer à la réalisation de ces objectifs.
+
+(2)
+
+Les directives qui ont été adoptées dans le domaine du droit d'auteur et des droits voisins contribuent au fonctionnement du marché intérieur, assurent un niveau élevé de protection aux titulaires de droits, facilitent l'acquisition des droits et instaurent un cadre permettant l'exploitation des œuvres et autres objets protégés. Ce cadre juridique harmonisé contribue au bon fonctionnement du marché intérieur et stimule l'innovation, la créativité, l'investissement et la production de nouveaux contenus, y compris dans l'environnement numérique, afin d'éviter la fragmentation du marché intérieur. La protection offerte par ce cadre juridique contribue également à la réalisation de l'objectif de l'Union visant à respecter et à promouvoir la diversité culturelle, tout en mettant en évidence l'héritage culturel commun de l'Europe. L'article 167, paragraphe 4, du traité sur le fonctionnement de l'Union européenne impose à l'Union de tenir compte des aspects culturels dans son action.
+
+(3)
+
+L'évolution rapide des technologies continue à modifier la manière dont les œuvres et autres objets protégés sont créés, produits, distribués et exploités. Il apparaît sans cesse de nouveaux modèles économiques et de nouveaux acteurs. La législation en la matière doit résister à l'épreuve du temps afin de ne pas entraver l'évolution des technologies. Les objectifs et les principes définis par le cadre de l'Union en matière de droit d'auteur restent satisfaisants. Néanmoins, une insécurité juridique subsiste, tant pour les titulaires de droits que pour les utilisateurs, en ce qui concerne certaines utilisations, notamment transfrontières, d'œuvres et autres objets protégés dans l'environnement numérique. Comme l'indique la communication de la Commission du 9 décembre 2015 intitulée «Vers un cadre moderne et plus européen pour le droit d'auteur», il est nécessaire, dans certains domaines, d'adapter et de compléter le cadre actuel de l'Union en matière de droit d'auteur, tout en maintenant un niveau élevé de protection du droit d'auteur et des droits voisins. La présente directive prévoit des règles visant à adapter certaines exceptions et limitations au droit d'auteur et aux droits voisins à l'environnement numérique et transfrontière, ainsi que des mesures destinées à faciliter certaines pratiques d'octroi de licences, notamment, mais pas seulement, en ce qui concerne la diffusion d'œuvres indisponibles dans le commerce et d'autres objets protégés, et la disponibilité en ligne d'œuvres audiovisuelles sur les plateformes de vidéo à la demande, en vue d'assurer un accès plus large aux contenus. Elle contient également des règles destinées à faciliter l'utilisation de contenus qui sont dans le domaine public. Afin de réaliser un marché performant et équitable pour le droit d'auteur, il devrait également exister des règles sur les droits dans les publications, sur l'utilisation des œuvres ou autres objets protégés par les prestataires de services en ligne qui stockent et donnent accès à des contenus téléversés par leurs utilisateurs, sur la transparence des contrats d'auteurs et d'artistes interprètes ou exécutants, et sur la rémunération de ces auteurs et artistes interprètes ou exécutants, de même qu'il devrait exister un mécanisme de révocation des droits que les auteurs et artistes interprètes ou exécutants ont transférés sur une base exclusive.
+
+(4)
+
+La présente directive se fonde, tout en les complétant, sur les règles fixées dans les directives actuellement en vigueur dans ce domaine, notamment les directives 96/9/CE (4), 2000/31/CE (5), 2001/29/CE (6), 2006/115/CE (7), 2009/24/CE (8), 2012/28/UE (9) et 2014/26/UE (10) du Parlement européen et du Conseil.
+
+(5)
+
+En matière de recherche, d'innovation, d'éducation et de conservation du patrimoine culturel, les technologies numériques permettent de nouveaux types d'utilisations qui ne sont pas clairement couverts par les règles de l'Union en vigueur en matière d'exceptions et de limitations. En outre, le caractère facultatif des exceptions et limitations prévues par les directives 96/9/CE, 2001/29/CE et 2009/24/CE dans ces matières pourrait avoir des conséquences néfastes sur le fonctionnement du marché intérieur. Cela vaut, en particulier, pour les utilisations transfrontières, dont l'importance ne cesse de croître dans l'environnement numérique. Il convient donc de réévaluer, à la lumière de ces nouvelles utilisations, les exceptions et limitations prévues actuellement dans le droit de l'Union qui sont pertinentes pour la recherche scientifique, l'innovation, l'enseignement et la conservation du patrimoine culturel. Il y a lieu d'instaurer des exceptions ou limitations obligatoires pour l'utilisation de technologies de fouille de textes et de données, l'illustration dans le cadre de l'enseignement dans l'environnement numérique et pour la conservation du patrimoine culturel. Les exceptions et limitations en vigueur dans le droit de l'Union devraient continuer à s'appliquer, notamment à la fouille de textes et de données ainsi qu'à l'enseignement et aux activités de conservation, tant qu'elles ne limitent pas le champ d'application des exceptions ou limitations obligatoires prévues dans la présente directive, que les États membres sont tenus de mettre en œuvre dans leur droit national. Il convient, dès lors, de modifier les directives 96/9/CE et 2001/29/CE.
+
+(6)
+
+Les exceptions et limitations prévues dans la présente directive tendent vers un juste équilibre entre les droits et les intérêts des auteurs et autres titulaires de droits, d'une part, et des utilisateurs, d'autre part. Elles ne peuvent s'appliquer que dans certains cas particuliers qui ne portent pas atteinte à l'exploitation normale de l'œuvre ou autre objet protégé ni ne causent un préjudice injustifié aux intérêts légitimes des titulaires de droits.
+
+(7)
+
+La protection des mesures techniques prévue dans la directive 2001/29/CE reste indispensable pour assurer la protection et l'exercice effectif des droits conférés aux auteurs et aux autres titulaires de droits en vertu du droit de l'Union. Il convient de maintenir cette protection, tout en veillant à ce que l'utilisation de mesures techniques n'empêche pas les bénéficiaires de jouir des exceptions et limitations prévues par la présente directive. Les titulaires de droits devraient avoir la possibilité d'y veiller par des mesures volontaires. Ils devraient rester libres de choisir les moyens appropriés pour permettre aux bénéficiaires des exceptions et limitations prévues par la présente directive d'en bénéficier. En l'absence de mesures volontaires, les États membres devraient prendre des mesures appropriées conformément à l'article 6, paragraphe 4, premier alinéa, de la directive 2001/29/CE, y compris lorsque des œuvres et autres objets protégés sont mis à la disposition du public via des services à la demande.
+
+(8)
+
+Les nouvelles technologies permettent une analyse informatique automatisée d'informations sous forme numérique, telles que du texte, des sons, des images ou des données, ce que l'on appelle généralement la fouille de textes et de données. Cette fouille de textes et de données rend possible le traitement de grandes quantités d'informations en vue d'acquérir de nouvelles connaissances et de découvrir de nouvelles tendances. Les technologies de fouille de textes et de données sont très répandues dans l'ensemble de l'économie numérique; toutefois, il est largement reconnu que la fouille de textes et de données peut être en particulier profitable à la communauté des chercheurs, et ainsi soutenir l'innovation. Ces technologies bénéficient aux universités et à d'autres organismes de recherche, de même qu'aux institutions du patrimoine culturel, étant donné qu'elles pourraient également effectuer des recherches dans le cadre de leurs activités principales. Cependant, dans l'Union, ces organismes et institutions sont confrontés à une insécurité juridique, ne sachant pas dans quelle mesure il leur est possible d'effectuer une fouille de textes et de données sur des contenus. Dans certains cas, la fouille de textes et de données peut entraîner des actes protégés par le droit d'auteur, par le droit sui generis sur la base de données, ou par les deux, notamment en ce qui concerne la reproduction d'œuvres ou autres objets protégés, l'extraction de contenus d'une base de données, ou les deux, ce qui est par exemple le cas lorsque les données sont normalisées lors du processus de fouille de textes et de données. Lorsque aucune exception ou limitation ne s'applique, l'autorisation de procéder à de tels actes est requise des titulaires de droits.
+
+(9)
+
+La fouille de textes et de données peut également porter sur de simples éléments factuels ou données non protégés par le droit d'auteur, et dans ce cas, aucune autorisation au titre de la législation sur le droit d'auteur n'est nécessaire. Il peut également exister des situations dans lesquelles la fouille de textes et de données n'entraîne pas d'actes de reproduction ou dans lesquelles les reproductions effectuées relèvent de l'exception obligatoire concernant les actes de reproduction provisoires prévue à l'article 5, paragraphe 1, de la directive 2001/29/CE, qui devrait continuer à s'appliquer aux techniques de fouille de textes et de données qui ne conduisent pas à la réalisation de copies qui dépassent le champ d'application de cette exception.
+
+(10)
+
+Le droit de l'Union prévoit certaines exceptions et limitations portant sur des utilisations à des fins de recherche scientifique qui peuvent s'appliquer aux actes de fouille de textes et de données. Cependant, ces exceptions et limitations sont facultatives et ne sont pas entièrement adaptées à l'utilisation de technologies dans le domaine de la recherche scientifique. En outre, lorsque les chercheurs ont accès de manière licite à du contenu, par exemple au moyen d'abonnements à des publications ou de licences en libre accès, les conditions des licences pourraient exclure la fouille de textes et de données. Comme les recherches s'effectuent de plus en plus avec l'aide de la technologie numérique, la compétitivité de l'Union en tant qu'espace de recherche risque d'en pâtir, à moins que des mesures ne soient prises pour remédier à l'insécurité juridique concernant la fouille de textes et de données.
+
+(11)
+
+L'insécurité juridique concernant la fouille de textes et de données devrait être traitée en prévoyant, au bénéfice des universités et autres organismes de recherche, ainsi que des institutions du patrimoine culturel, une exception obligatoire au droit de reproduction exclusif et au droit d'empêcher l'extraction à partir d'une base de données. En concordance avec l'actuelle politique de la recherche de l'Union, qui encourage les universités et les instituts de recherche à collaborer avec le secteur privé, les organismes de recherche devraient également bénéficier d'une telle exception lorsque leurs activités de recherche sont menées dans le cadre de partenariats public-privé. Les organismes de recherche et les institutions du patrimoine culturel devraient rester les bénéficiaires de cette exception, mais ils devraient pouvoir s'appuyer sur leurs partenaires privés pour effectuer des fouilles de textes et de données, y compris en utilisant leurs outils technologiques.
+
+(12)
+
+Les organismes de recherche dans l'ensemble de l'Union englobent une grande variété d'entités dont l'objectif premier est d'effectuer des recherches scientifiques ou de le faire tout en assurant des services éducatifs. Au sens de la présente directive, le terme «recherche scientifique» devrait s'entendre comme couvrant à la fois les sciences naturelles et les sciences humaines. Compte tenu de la diversité de ces entités, il est important d'avoir une compréhension commune de ce que sont des organismes de recherche. Outre les universités ou les autres établissements d'enseignement supérieur et leurs bibliothèques, cette notion devrait également englober des entités telles que les instituts de recherche et les hôpitaux qui font de la recherche. Malgré leurs différences en termes de forme juridique et de structure juridiques, les organismes de recherche dans les États membres ont généralement en commun d'exercer leur activité soit à but non lucratif, soit dans le cadre d'une mission d'intérêt public reconnue par l'État. Une telle mission d'intérêt public pourrait, par exemple, se traduire par un financement public ou par des dispositions dans les législations nationales ou les marchés publics. Inversement, les organismes sur lesquels des entreprises commerciales ont une influence déterminante leur permettant d'exercer un contrôle en raison d'éléments structurels tels que leur qualité d'actionnaire ou d'associé, ce qui pourrait conduire à un accès préférentiel aux résultats des recherches, ne devraient pas être considérés comme des organismes de recherche aux fins de la présente directive.
+
+(13)
+
+Les institutions du patrimoine culturel devraient s'entendre comme couvrant les bibliothèques accessibles au public et les musées, quels que soient les types d'œuvres ou autres objets protégés qu'ils détiennent dans leurs collections permanentes, de même que les archives et les institutions dépositaires du patrimoine cinématographique ou sonore. Elles devraient aussi s'entendre comme englobant, entre autres, les bibliothèques nationales et les archives nationales et, dans la mesure où leurs archives et leurs bibliothèques accessibles au public sont concernées, les établissements d'enseignement, les organismes de recherche et les organismes publics de radiodiffusion.
+
+(14)
+
+L'exception relative à la fouille de textes et de données devrait s'appliquer aux organismes de recherche et aux institutions du patrimoine culturel, y compris aux personnes qui y sont rattachées, pour ce qui est des contenus auxquels ils ont accès de manière licite. L'accès licite devrait s'entendre comme couvrant l'accès à des contenus fondé sur une politique de libre accès ou en vertu d'arrangements contractuels entre, d'une part, les titulaires de droits et, d'autre part, les organismes de recherche ou les institutions du patrimoine culturel, comme des abonnements, ou en vertu d'autres voies légales. Par exemple, les personnes rattachées à un organisme de recherche ou à une institution du patrimoine culturel qui a souscrit des abonnements à certains contenus sont réputées bénéficier de l'accès licite à ces abonnements. L'accès licite devrait également désigner l'accès à des contenus librement accessibles en ligne.
+
+(15)
+
+Dans certains cas, par exemple aux fins de la vérification a posteriori des résultats de la recherche scientifique, les organismes de recherche et les institutions du patrimoine culturel pourraient avoir besoin de conserver des copies faites dans le cadre de l'exception aux fins d'effectuer de la fouille de textes et de données. En pareils cas, les copies devraient être stockées en lieu sûr. Les États membres devraient être libres de décider, au niveau national et après concertation avec les acteurs concernés, des modalités plus précises de conservation des copies, notamment la capacité de désigner des organismes de confiance aux fins du stockage de ces copies. Afin que l'application de cette exception ne soit pas restreinte indûment, ces modalités devraient être proportionnées et limitées à ce qui est nécessaire à la conservation des copies en toute sécurité et à la prévention de leurs utilisations non autorisées. Les utilisations des copies aux fins d'activités de recherche scientifique autres que la fouille de textes et de données, comme l'examen scientifique par des pairs ou la recherche commune, devraient continuer à relever, le cas échéant, de l'exception ou de la limitation prévue à l'article 5, paragraphe 3, point a), de la directive 2001/29/CE.
+
+(16)
+
+Eu égard au nombre potentiellement élevé de demandes d'accès et de téléchargements de leurs œuvres ou autres objets protégés, les titulaires de droits devraient être autorisés à appliquer des mesures lorsqu'il existe un risque que la sécurité et l'intégrité de leurs systèmes ou bases de données soient compromises. Ces mesures pourraient par exemple servir à garantir que seules les personnes ayant accès de manière licite à leurs données puissent y accéder, notamment sur la base de la validation de leur adresse IP ou de l'authentification de l'utilisateur. Ces mesures devraient rester proportionnées aux risques inhérents, ne devraient pas aller au-delà de ce qui est nécessaire pour atteindre l'objectif visant à assurer la sécurité et l'intégrité du système et ne devraient pas compromettre l'application effective de l'exception.
+
+(17)
+
+Compte tenu de la nature et l'étendue de l'exception, qui est limitée aux entités qui font de la recherche scientifique, le préjudice potentiel que cette exception pourrait occasionner aux titulaires de droits serait minime. Les États membres ne devraient, dès lors, pas prévoir de compensation pour les titulaires de droits en ce qui concerne les utilisations relevant des exceptions en matière de fouille de textes et de données introduites par la présente directive.
+
+(18)
+
+Au-delà de l'importance qu'elles revêtent pour la recherche scientifique, les techniques de fouille de textes et de données sont aussi largement utilisées par des entités privées et publiques pour analyser de gros volumes de données dans différents domaines de l'existence et à des fins diverses, notamment pour les services publics, pour la prise de décisions commerciales complexes et pour l'élaboration de nouvelles applications ou technologies. Les titulaires de droits devraient conserver la possibilité d'autoriser les utilisations de leurs œuvres ou autres objets protégés qui ne relèvent pas du champ d'application de l'exception obligatoire prévue par la présente directive concernant la fouille de textes et de données à des fins de recherche scientifique et de celui des exceptions et limitations existantes prévues par la directive 2001/29/CE. Parallèlement, il y a lieu de tenir compte du fait que les utilisateurs qui ont recours à la fouille de textes et de données pourraient se trouver dans une insécurité juridique quant à savoir si des reproductions et des extractions effectuées aux fins de la fouille de textes et de données peuvent être effectuées sur des œuvres ou autres objets protégés accessibles de manière licite, en particulier lorsque les reproductions ou extractions effectuées aux fins de l'opération technique ne remplissent pas toutes les conditions de l'exception en vigueur pour les actes de reproduction provisoires prévue à l'article 5, paragraphe 1, de la directive 2001/29/CE. Afin d'améliorer la sécurité juridique dans ces situations et d'encourager également l'innovation dans le secteur privé, la présente directive devrait, dans certaines conditions, prévoir une exception ou une limitation pour les reproductions et extractions d'œuvres ou autres objets protégés aux fins de la fouille de textes et de données, et autoriser la conservation des copies ainsi effectuées pendant toute la durée nécessaire aux fins de cette fouille de textes et de données.
+
+Cette exception ou limitation ne devrait s'appliquer que lorsque le bénéficiaire a accès de manière licite aux œuvres ou autres objets protégés, y compris lorsque ceux-ci ont été mis à la disposition du public en ligne, et dans la mesure où les titulaires de droits n'ont pas réservé de manière appropriée les droits de reproduction et d'extraction pour la fouille de textes et de données. En ce qui concerne les contenus mis à la disposition du public en ligne, la réservation de ces droits ne devrait être jugée appropriée que si elle est effectuée au moyen de procédés lisibles par machine, y compris des métadonnées et les conditions générales d'utilisation d'un site internet ou d'un service. La réservation de droits aux fins de la fouille de textes et de données ne devrait pas affecter d'autres utilisations. Dans d'autres cas, il peut être approprié de réserver les droits par d'autres moyens, comme des accords contractuels ou une déclaration unilatérale. Les titulaires de droits devraient pouvoir appliquer des mesures destinées à garantir le respect de leurs droits réservés. Cette exception ou limitation ne devrait pas porter atteinte à l'exception obligatoire concernant la fouille de textes et de données à des fins de recherche scientifique prévue dans la présente directive, pas plus qu'à l'exception en vigueur pour les actes de reproduction provisoires prévue à l'article 5, paragraphe 1, de la directive 2001/29/CE.
+
+(19)
+
+L'article 5, paragraphe 3, point a), de la directive 2001/29/CE autorise les États membres à prévoir une exception ou une limitation aux droits de reproduction, de communication au public et de mise à la disposition du public d'œuvres ou autres objets protégés de manière que chacun puisse y avoir accès de l'endroit et au moment qu'il choisit individuellement, à des fins exclusives d'illustration dans le cadre de l'enseignement. En outre, l'article 6, paragraphe 2, point b), et l'article 9, point b), de la directive 96/9/CE autorisent l'utilisation d'une base de données et l'extraction d'une partie substantielle du contenu de celle-ci à des fins d'illustration dans le cadre de l'enseignement. La portée de ces exceptions ou limitations manque de clarté lorsqu'elles s'appliquent aux utilisations numériques. En outre, il n'est pas clairement établi si ces exceptions ou limitations s'appliqueraient dans le cas de l'enseignement dispensé en ligne et à distance. De plus, le cadre juridique existant ne prévoit pas d'effet transfrontière. Cette situation pourrait entraver le développement des activités d'enseignement s'appuyant sur le numérique et de l'enseignement à distance. Par conséquent, l'introduction d'une nouvelle exception ou limitation obligatoire est nécessaire pour garantir que les établissements d'enseignement bénéficient d'une sécurité juridique totale en cas d'utilisation d'œuvres ou autres objets protégés dans le cadre d'activités pédagogiques numériques, notamment en ligne et dans des situations transfrontières.
+
+(20)
+
+Alors que les programmes d'enseignement à distance et d'éducation transfrontière sont surtout développés au niveau de l'enseignement supérieur, des outils et des ressources numériques sont de plus en plus utilisés à tous les niveaux d'enseignement, notamment pour améliorer et enrichir l'expérience d'apprentissage. L'exception ou la limitation prévue dans la présente directive devrait, dès lors, bénéficier à tous les établissements d'enseignement reconnus par un État membre, notamment les établissements d'enseignement primaire et secondaire, de formation professionnelle et d'enseignement supérieur. Elle ne devrait s'appliquer que dans la mesure où les utilisations sont justifiées par la finalité non commerciale de l'activité d'enseignement concernée. La structure organisationnelle et les moyens de financement d'un établissement d'enseignement ne devraient pas être les éléments déterminants pour établir si l'activité est de nature non commerciale.
+
+(21)
+
+L'exception ou la limitation prévue par la présente directive à des fins exclusives d'illustration dans le cadre de l'enseignement devrait s'entendre comme couvrant les utilisations numériques d'œuvres ou autres objets protégés, en vue de soutenir, d'enrichir ou de compléter l'enseignement, y compris les activités d'apprentissage. La distribution de logiciels autorisés dans le cadre de cette exception ou limitation devrait être limitée à la transmission numérique de logiciels. Dans la plupart des cas, la notion d'illustration ne concernerait, dès lors, que les utilisations de parties ou d'extraits d'œuvres, qui ne devraient pas se substituer à l'achat de matériel principalement destiné au marché éducatif. Lorsqu'ils appliquent l'exception ou la limitation, les États membres devraient rester libres de préciser, pour les différents types d'œuvres ou autres objets protégés, et d'une manière équilibrée, la proportion d'une œuvre ou d'un autre objet protégé qui peut être utilisée à des fins exclusives d'illustration dans le cadre de l'enseignement. Les utilisations autorisées dans le cadre de l'exception ou de la limitation devraient être entendues comme celles couvrant les besoins d'accessibilité spécifiques des personnes handicapées, dans le cadre de l'illustration à des fins d'enseignement.
+
+(22)
+
+L'utilisation des œuvres ou autres objets protégés en vertu de l'exception ou de la limitation à des fins exclusives d'illustration dans le cadre de l'enseignement prévue dans la présente directive ne devrait avoir lieu que dans le cadre des activités d'enseignement et d'apprentissage menées sous la responsabilité des établissements d'enseignement, y compris pendant les examens ou pendant des activités d'enseignement qui ont lieu en dehors des locaux des établissements d'enseignement, par exemple dans des musées, des bibliothèques ou d'autres institutions du patrimoine culturel, et devrait être limitée à ce qui est nécessaire aux fins de telles activités. L'exception ou la limitation devrait porter à la fois sur les utilisations d'œuvres ou autres objets protégés faites en classe ou dans d'autres lieux par des moyens numériques, par exemple des tableaux blancs électroniques ou des appareils numériques qui pourraient être connectés à l'internet, et sur les utilisations faites à distance par l'intermédiaire de réseaux électroniques sécurisés, comme dans le cadre des cours en ligne ou l'accès à du matériel éducatif destiné à compléter un cours donné. Il convient d'entendre par réseaux électroniques sécurisés un environnement numérique d'enseignement et d'apprentissage dont l'accès est limité aux enseignants d'un établissement d'enseignement et aux élèves ou aux étudiants inscrits à un programme de cours, notamment au moyen d'une procédure appropriée d'authentification, y compris une authentification sur la base de mots de passe.
+
+(23)
+
+Différentes modalités, fondées sur la mise en œuvre de l'exception ou de la limitation prévue par la directive 2001/29/CE ou sur des accords de licence couvrant d'autres utilisations, ont été mises en place dans un certain nombre d'États membres afin de faciliter les utilisations pédagogiques d'œuvres et autres objets protégés. Ces modalités ont généralement été définies en tenant compte des besoins des établissements d'enseignement et des différents niveaux d'éducation. S'il est essentiel d'harmoniser la portée de la nouvelle exception ou limitation obligatoire par rapport aux utilisations numériques et aux activités d'enseignement transfrontières, les modalités de mise en œuvre peuvent varier d'un État membre à l'autre, pour autant qu'elles n'entravent ni l'application effective de l'exception ou de la limitation ni les utilisations transfrontières. Par exemple, les États membres devraient rester libres d'exiger que l'utilisation des œuvres ou autres objets protégés respecte les droits moraux des auteurs et des artistes interprètes ou exécutants. Les États membres devraient ainsi pouvoir s'appuyer sur les accords existants conclus au niveau national. En particulier, ils pourraient décider de subordonner l'application de l'exception ou de la limitation, entièrement ou partiellement, à la disponibilité de licences adéquates, couvrant au moins les mêmes utilisations que celles autorisées au titre de l'exception ou de la limitation. Pour les cas où les licences ne couvrent que partiellement les utilisations autorisées au titre de l'exception ou de la limitation, les États membres devraient veiller à ce que l'exception ou la limitation s'applique à toutes les autres utilisations.
+
+Les États membres pourraient, par exemple, faire usage de ce mécanisme pour donner la priorité aux licences pour le matériel qui est principalement destiné au marché éducatif ou aux licences sur des partitions de musique. Afin d'éviter que le fait de subordonner l'application de l'exception à la disponibilité de licences entraîne une insécurité juridique ou une charge administrative pour les établissements d'enseignement, les États membres qui adoptent une telle approche devraient prendre des mesures concrètes afin d'assurer un accès aisé aux dispositifs d'octroi de licences permettant les utilisations numériques d'œuvres ou autres objets protégés à des fins d'illustration dans le cadre de l'enseignement, et de faire en sorte que les établissements d'enseignement soient informés de l'existence de ces dispositifs d'octroi de licences. Ces dispositifs d'octroi de licences devraient répondre aux besoins des établissements d'enseignement. Des outils d'information visant à garantir la visibilité des dispositifs d'octroi de licences existants pourraient également être élaborés. Ces dispositifs pourraient, par exemple, reposer sur l'octroi de licences collectives ou l'octroi de licences collectives étendues, afin d'éviter aux établissements d'enseignement de devoir négocier individuellement avec les titulaires de droits. Afin de garantir la sécurité juridique, les États membres devraient préciser à quelles conditions un établissement d'enseignement peut utiliser des œuvres ou autres objets protégés dans le cadre de cette exception et, inversement, quand il devrait agir en vertu d'un dispositif d'octroi de licences.
+
+(24)
+
+Les États membres devraient rester libres de prévoir une compensation équitable pour les titulaires de droits en contrepartie des utilisations numériques de leurs œuvres ou autres objets protégés dans le cadre de l'exception ou de la limitation prévue par la présente directive à des fins d'illustration dans le cadre de l'enseignement. Lors de la détermination du niveau de la compensation équitable, les États membres devraient dûment tenir compte, entre autres, de leurs objectifs éducatifs et du préjudice causé aux titulaires de droits. Les États membres qui décident de prévoir une compensation équitable devraient encourager l'utilisation de systèmes qui n'entraînent pas de charge administrative pour les établissements d'enseignement.
+
+(25)
+
+Les institutions du patrimoine culturel œuvrent à la conservation de leurs collections pour les générations futures. Un acte de conservation d'une œuvre ou autre objet protégé se trouvant dans la collection d'une institution du patrimoine culturel pourrait nécessiter une reproduction et, dès lors, requérir l'autorisation des titulaires de droits concernés. Les technologies numériques offrent de nouvelles possibilités de conserver le patrimoine contenu dans ces collections, mais elles font naître également de nouveaux défis. Face à ces derniers, il est nécessaire d'adapter le cadre juridique existant en prévoyant une exception obligatoire au droit de reproduction pour permettre ces actes de conservation par lesdites institutions.
+
+(26)
+
+L'existence de différentes approches dans les États membres en ce qui concerne les actes de reproduction en vue de la conservation par les institutions du patrimoine culturel entravent la coopération transfrontière, le partage des moyens de conservation et la mise en place de réseaux transfrontières de conservation dans le marché intérieur par ces institutions, ce qui entraîne une utilisation inefficiente des ressources. Ceci peut avoir une incidence négative sur la conservation du patrimoine culturel.
+
+(27)
+
+Les États membres devraient, dès lors, être tenus de prévoir une exception permettant aux institutions du patrimoine culturel de reproduire des œuvres et autres objets protégés qui se trouvent à titre permanent dans leurs collections à des fins de conservation, par exemple pour remédier à l'obsolescence technologique ou à la dégradation des supports originaux, ou pour assurer ces œuvres et autres objets protégés. Une telle exception devrait permettre la réalisation de copies en utilisant l'outil, le moyen ou la technologie de conservation qui convient, sous quelque format et sur quelque support que ce soit, en nombre suffisant et à n'importe quel stade de la vie d'une œuvre ou autre objet protégé, et dans la mesure requise à des fins de conservation. Les actes de reproduction effectués par les institutions du patrimoine culturel à des fins autres que la conservation des œuvres et autres objets protégés de leurs collections permanentes devraient rester soumis à l'autorisation des titulaires de droits, sauf s'ils sont autorisés par d'autres exceptions ou limitations prévues dans le droit de l'Union.
+
+(28)
+
+Les institutions du patrimoine culturel ne possèdent pas nécessairement les moyens techniques ni les compétences pour s'acquitter elles-mêmes des actes nécessaires à la conservation de leurs collections, en particulier dans l'environnement numérique, et pourraient, par conséquent, avoir recours à l'aide d'autres institutions culturelles et d'autres tiers à cette fin. Dans le cadre de l'exception à des fins de conservation prévue par la présente directive, les institutions du patrimoine culturel devraient être autorisées à s'appuyer, pour la réalisation de copies, sur des tiers qui agissent en leur nom et sous leur responsabilité, y compris sur des tiers situés dans d'autres États membres.
+
+(29)
+
+Aux fins de la présente directive, les œuvres et autres objets protégés devraient être considérés comme se trouvant dans la collection d'une institution du patrimoine culturel à titre permanent lorsque les copies de ces œuvres ou autres objets protégés sont détenues à titre permanent par cette institution ou lui appartiennent, par exemple à la suite d'un transfert de propriété ou d'un accord de licence, au titre d'obligations de dépôt légal ou en vertu d'accords de prêt permanent.
+
+(30)
+
+Les institutions du patrimoine culturel devraient bénéficier d'un cadre clair pour la numérisation et la diffusion, y compris par-delà les frontières, d'œuvres ou autres objets protégés considérés comme indisponibles dans le commerce aux fins de la présente directive. Toutefois, les caractéristiques particulières des collections d'œuvres indisponibles dans le commerce ou autres objets protégés, ainsi que le nombre d'œuvres et autres objets protégés qui font l'objet de projets de numérisation de masse, font que l'obtention de l'autorisation préalable des titulaires de droits individuels peut s'avérer très difficile. Cela peut parfois tenir, par exemple, à l'ancienneté des œuvres ou autres objets protégés, à leur valeur commerciale limitée ou au fait qu'ils n'ont jamais été destinés à une utilisation commerciale ou qu'ils n'ont jamais été exploités à des fins commerciales. Aussi est-il nécessaire de prévoir des mesures pour faciliter certaines utilisations des œuvres ou autres objets protégés indisponibles dans le commerce qui se trouvent à titre permanent dans les collections des institutions du patrimoine culturel.
+
+(31)
+
+Tous les États membres devraient disposer de mécanismes juridiques qui permettent que les licences délivrées à des institutions du patrimoine culturel par des organismes de gestion collective concernés et suffisamment représentatifs, relativement à certaines utilisations d'œuvres ou autres objets protégés indisponibles dans le commerce, s'appliquent aux droits des titulaires de droits qui n'ont pas mandaté d'organisme de gestion collective représentatif à cet égard. Ces licences devraient pouvoir couvrir, en vertu de la présente directive, l'ensemble des États membres.
+
+(32)
+
+Les dispositions relatives à l'octroi de licences collectives sur des œuvres ou autres objets protégés indisponibles dans le commerce introduites par la présente directive pourraient ne pas offrir de solution pour tous les cas dans lesquels les institutions du patrimoine culturel éprouvent des difficultés à obtenir toutes les autorisations nécessaires de la part des titulaires de droits pour l'utilisation de ces œuvres ou autres objets protégés indisponibles dans le commerce. Cela pourrait être le cas, par exemple, lorsqu'il n'existe aucune pratique de gestion collective de droits pour un certain type d'œuvres ou autres objets protégés ou lorsque l'organisme de gestion collective concerné n'est pas suffisamment représentatif de la catégorie des titulaires de droits et des droits concernés. Dans ces situations spécifiques, les institutions du patrimoine culturel devraient avoir la possibilité de rendre disponibles en ligne, dans tous les États membres, les œuvres ou autres objets protégés indisponibles dans le commerce qui se trouvent à titre permanent dans leurs collections, dans le cadre d'une exception ou d'une limitation harmonisée applicable au droit d'auteur et aux droits voisins. Il importe que les utilisations qui relèvent de cette exception ou limitation interviennent uniquement lorsque certaines conditions sont remplies, notamment quant à la disponibilité de solutions d'octroi de licences. L'absence d'accord sur les conditions de la licence ne devrait pas être interprétée comme une absence de solutions d'octroi de licences.
+
+(33)
+
+Les États membres devraient, dans le cadre prévu par la présente directive, disposer d'une certaine latitude pour choisir le type spécifique de mécanisme d'octroi de licences, tels que l'octroi de licences collectives étendues ou les présomptions de représentation, qu'ils mettent en place pour l'utilisation d'œuvres ou autres objets protégés indisponibles dans le commerce par les institutions du patrimoine culturel, en fonction de leurs traditions, pratiques ou situations juridiques. Ils devraient également disposer d'une certaine latitude pour déterminer les exigences auxquelles les organismes de gestion collective doivent satisfaire pour être suffisamment représentatifs, à condition que cette détermination repose sur un nombre significatif de titulaires de droits pour le type d'œuvres ou autres objets protégés concerné qui ont donné un mandat permettant d'autoriser le type d'utilisation concerné. Les États membres devraient avoir la liberté de fixer des règles spécifiques applicables aux cas où plusieurs organismes de gestion collective sont représentatifs pour les œuvres ou autres objets protégés concernés, en exigeant par exemple des licences communes ou un accord entre les organismes en question.
+
+(34)
+
+Aux fins de ces mécanismes d'octroi de licences, un système rigoureux et performant de gestion collective a toute son importance. La directive 2014/26/UE prévoit un tel système et ce système comprend notamment des règles de bonne gouvernance, de transparence et de communication d'informations, ainsi que la distribution et le versement réguliers, avec diligence et exactitude, des sommes dues aux titulaires de droits individuels.
+
+(35)
+
+Des garanties appropriées devraient être mises en place pour tous les titulaires de droits, qui devraient avoir la possibilité d'exclure l'application des mécanismes d'octroi de licences et de l'exception ou de la limitation, introduits par la présente directive pour l'utilisation d'œuvres ou autres objets protégés indisponibles dans le commerce, par rapport à l'ensemble de leurs œuvres ou autres objets protégés, par rapport à l'ensemble des licences ou des utilisations concernées par l'exception ou la limitation, ou encore par rapport à certaines œuvres ou certains autres objets protégés, ou par rapport à certaines licences ou utilisations concernées par l'exception ou la limitation, et ce à n'importe quel moment avant ou pendant la période de validité de la licence ou avant ou pendant l'utilisation concernée par l'exception ou la limitation. Les conditions régissant ces mécanismes d'octroi de licences ne devraient pas en réduire l'utilité pratique pour les institutions du patrimoine culturel. Il importe que, lorsqu'un titulaire de droits exclut l'application desdits mécanismes ou de ladite exception ou limitation à l'égard d'un(e) ou de plusieurs œuvres ou autres objets protégés, toute utilisation en cours cesse dans un délai raisonnable et, lorsque cette utilisation s'inscrit dans le cadre d'une licence collective, l'organisme de gestion collective, une fois informé, cesse de délivrer des licences portant sur les utilisations concernées. L'application d'une telle exclusion par les titulaires de droits ne devrait pas avoir de conséquences sur leurs demandes de rémunération pour l'utilisation effective de l'œuvre ou autre objet protégé dans le cadre de la licence.
+
+(36)
+
+La présente directive n'affecte pas la capacité des États membres à décider à qui doit incomber la responsabilité de la conformité de l'octroi de licences pour des œuvres ou autres objets protégés indisponibles dans le commerce et de leur utilisation aux conditions énoncées dans la présente directive, ainsi que la responsabilité du respect des conditions de ces licences par les parties concernées.
+
+(37)
+
+Eu égard à la diversité des œuvres et autres objets protégés dans les collections des institutions du patrimoine culturel, il importe que les mécanismes d'octroi de licences et l'exception ou la limitation prévus par la présente directive soient disponibles et puissent être utilisés dans la pratique pour différents types d'œuvres et autres objets protégés, y compris les photographies, les logiciels, les phonogrammes, les œuvres audiovisuelles et les œuvres d'art uniques, y compris lorsque ceux-ci n'ont jamais été disponibles dans le commerce. Les œuvres qui n'ont jamais été disponibles dans le commerce peuvent inclure des affiches, des dépliants, des journaux de guerre ou des œuvres audiovisuelles d'amateurs, mais aussi des œuvres ou autres objets protégés non publiés, sans préjudice de l'application d'autres contraintes juridiques, telles que les règles nationales sur les droits moraux. Lorsqu'une œuvre ou autre objet protégé est disponible dans une quelconque de ses différentes versions, comme des éditions subséquentes d'œuvres littéraires et des versions alternatives d'œuvres cinématographiques, ou dans une quelconque de ses différentes manifestations, comme les formats numériques et imprimés de la même œuvre, cette œuvre ou cet autre objet protégé ne devrait pas être considéré comme étant indisponible dans le commerce. Inversement, la disponibilité commerciale d'adaptations, notamment d'autres versions linguistiques ou des adaptations audiovisuelles d'une œuvre littéraire, ne devrait pas empêcher une œuvre ou autre objet protégé d'être réputé(e) indisponible dans le commerce dans une langue donnée. Pour tenir compte des spécificités des divers types d'œuvres et autres objets protégés en ce qui concerne les modalités de publication et de distribution, et pour faciliter l'utilisation de ces mécanismes, des procédures et des exigences spécifiques pourraient devoir être définies pour l'application concrète de ces mécanismes d'octroi de licences, comme l'exigence qu'un certain laps de temps se soit écoulé depuis la première mise à disposition commerciale de l'œuvre ou autre objet protégé. Il convient que les États membres consultent les titulaires de droits, les institutions du patrimoine culturel et les organismes de gestion collective lorsqu'ils définissent de telles exigences et procédures.
+
+(38)
+
+Lors de la détermination de l'indisponibilité dans le commerce d'œuvres ou autres objets protégés, des efforts raisonnables devraient être exigés afin de vérifier leur disponibilité pour le public dans les circuits commerciaux habituels, en tenant compte des caractéristiques de l'œuvre ou autre objet protégé particulier ou de l'ensemble d'œuvres ou autres objets protégés particulier. Les États membres devraient avoir la liberté de déterminer à qui incombe la responsabilité d'entreprendre ces efforts raisonnables. Entreprendre des efforts raisonnables ne devrait pas signifier qu'il faille procéder à des actions répétées dans le temps, mais cela devrait cependant impliquer de tenir compte de toute preuve aisément accessible de la disponibilité future d'œuvres ou autres objets protégés dans les circuits commerciaux habituels. Une évaluation œuvre par œuvre ne devrait être requise que lorsque cela est jugé raisonnable au vu de la disponibilité des informations pertinentes, de la probabilité d'une disponibilité commerciale et du coût prévu de la transaction. La vérification de la disponibilité d'une œuvre ou autre objet protégé devrait normalement avoir lieu dans l'État membre dans lequel l'institution du patrimoine culturel est établie, à moins qu'une vérification transfrontière ne soit jugée raisonnable, par exemple dans les cas où il résulte d'informations aisément disponibles qu'une œuvre littéraire a été publiée pour la première fois dans une version linguistique donnée dans un autre État membre. Dans de nombreux cas, le statut d'indisponibilité dans le commerce d'un ensemble d'œuvres ou autres objets protégés pourrait être déterminé au moyen d'un mécanisme proportionné, tel qu'un échantillonnage. La disponibilité limitée d'une œuvre ou autre objet protégé, par exemple sa disponibilité dans des magasins de seconde main, ou la possibilité théorique d'obtenir une licence sur une œuvre ou autre objet protégé ne devrait pas être considérée comme une disponibilité pour le public de l'œuvre ou autre objet protégé dans les circuits commerciaux habituels.
+
+(39)
+
+Pour des raisons de courtoisie internationale, les mécanismes d'octroi de licences et l'exception ou la limitation prévus dans la présente directive concernant la numérisation et la diffusion des œuvres ou autres objets protégés indisponibles dans le commerce ne devraient pas s'appliquer aux ensembles d'œuvres ou autres objets protégés indisponibles dans le commerce lorsque des éléments de preuve disponibles permettent de supposer que ces ensembles sont essentiellement constitués d'œuvres ou autres objets protégés de pays tiers, sauf dans les cas où l'organisme de gestion collective concerné est suffisamment représentatif du pays tiers en question, par exemple par le biais d'un accord de représentation. Cette évaluation pourrait reposer sur les éléments de preuve disponibles à la suite des efforts raisonnables déployés pour déterminer si les œuvres ou autres objets protégés sont indisponibles dans le commerce, sans qu'il soit nécessaire de rechercher d'autres preuves. Une évaluation œuvre par œuvre de l'origine des œuvres ou autres objets protégés indisponibles dans le commerce ne devrait être requise que dans la mesure où elle est également nécessaire pour entreprendre des efforts raisonnables destinés à déterminer si ces œuvres sont disponibles dans le commerce.
+
+(40)
+
+Les institutions du patrimoine culturel et les organismes de gestion collective parties au contrat devraient rester libres de déterminer d'un commun accord le champ d'application territorial des licences, y compris la possibilité d'une extension à l'ensemble des États membres, la redevance de la licence et les utilisations autorisées. Les utilisations couvertes par de telles licences ne devraient pas avoir de visée lucrative, y compris lorsque des copies sont distribuées par l'institution du patrimoine culturel, par exemple comme matériel de promotion d'une exposition. Parallèlement, comme la numérisation des collections des institutions du patrimoine culturel peut donner lieu à des investissements importants, toute licence octroyée en vertu du mécanisme prévu dans la présente directive ne devrait pas empêcher les institutions du patrimoine culturel de couvrir les coûts de la licence et les coûts de numérisation et de diffusion des œuvres ou autres objets protégés couverts par la licence.
+
+(41)
+
+Les informations concernant l'utilisation actuelle et future des œuvres et autres objets protégés indisponibles dans le commerce par les institutions du patrimoine culturel sur la base de la présente directive et des modalités en vigueur permettant à tous les titulaires de droits d'exclure l'application de licences ou de l'exception ou de la limitation à leurs œuvres ou autres objets protégés devraient faire l'objet d'une publicité suffisante tant avant que pendant l'utilisation concernée par la licence ou par l'exception ou la limitation, selon le cas. Cette publicité est particulièrement importante lorsque les utilisations s'inscrivent dans un contexte transfrontière au sein du marché intérieur. Il y a donc lieu de prévoir la création d'un portail en ligne unique pour l'Union, accessible au public, afin que ces informations puissent être mises à la disposition du public suffisamment tôt avant que l'utilisation n'ait lieu. Ce portail devrait permettre aux titulaires de droits d'exclure plus facilement l'application de licences ou de l'exception ou de la limitation à leurs œuvres ou autres objets protégés. En vertu du règlement (UE) no 386/2012 du Parlement européen et du Conseil (11), l'Office de l'Union européenne pour la propriété intellectuelle (ci-après dénommé «Office») est chargé d'exercer certaines tâches et activités financées à l'aide de ses propres moyens budgétaires et visant à faciliter et soutenir les activités des autorités nationales, du secteur privé et des institutions de l'Union dans la lutte contre les violations de droits de propriété intellectuelle, y compris la prévention de ces violations. Il est donc approprié de confier à l'Office la mise en place et la gestion du portail qui met ces informations à disposition.
+
+En plus de la mise à disposition des informations disponibles sur ce portail, d'autres mesures de publicité appropriées pourraient devoir être prises au cas par cas afin d'améliorer la sensibilisation à cet égard des titulaires de droits concernés, par exemple en utilisant des canaux de communication supplémentaires pour toucher un public plus large. La nécessité, la nature et la portée géographique de ces mesures de publicité supplémentaires devraient dépendre des caractéristiques des œuvres ou autres objets protégés indisponibles dans le commerce concernés, des conditions de la licence ou du type d'utilisation concerné par l'exception ou la limitation, ainsi que des pratiques en usage dans les États membres. Les mesures de publicité devraient être effectives sans qu'il soit nécessaire d'informer chaque titulaire de droits individuellement.
+
+(42)
+
+Afin de garantir que les mécanismes d'octroi de licences établis par la présente directive pour les œuvres ou autres objets protégés indisponibles dans le commerce soient pertinents et fonctionnent correctement, que les titulaires de droits bénéficient d'une protection adéquate, que les licences fassent l'objet d'une publicité adéquate et que la clarté juridique soit assurée en ce qui concerne la représentativité des organismes de gestion collective et la catégorisation des œuvres, les États membres devraient encourager le dialogue sectoriel entre parties prenantes.
+
+(43)
+
+Les mesures prévues dans la présente directive afin de faciliter l'octroi de licences collectives de droits sur des œuvres ou autres objets protégés indisponibles dans le commerce qui se trouvent à titre permanent dans les collections des institutions du patrimoine culturel devraient s'entendre sans préjudice de l'utilisation de ces œuvres ou autres objets protégés au titre des exceptions ou limitations prévues par le droit de l'Union, ou au titre d'autres licences ayant un effet étendu, lorsque cet octroi de licences ne repose pas sur le statut d'indisponibilité dans le commerce des œuvres ou autres objets protégés concernés. Ces mesures devraient également s'entendre sans préjudice des mécanismes nationaux relatifs à l'utilisation d'œuvres ou autres objets protégés indisponibles dans le commerce sur la base de licences conclues entre des organismes de gestion collective et des utilisateurs autres que des institutions du patrimoine culturel.
+
+(44)
+
+Les mécanismes d'octroi de licences collectives ayant un effet étendu permettent à un organisme de gestion collective d'octroyer des licences en tant qu'organisme d'octroi de licences collectives, au nom des titulaires de droits, indépendamment du fait que ceux-ci aient autorisé cet organisme à agir dans ce sens. Les systèmes construits sur de tels mécanismes, tels que les licences collectives étendues, les mandats légaux ou les présomptions de représentation, sont des pratiques bien établies dans plusieurs États membres et peuvent être utilisés dans divers domaines. Le bon fonctionnement d'un cadre du droit d'auteur pour toutes les parties requiert l'existence de mécanismes légaux proportionnés d'octroi de licences sur les œuvres ou autres objets protégés. Les États membres devraient, dès lors, pouvoir s'appuyer sur des solutions qui permettent à des organismes de gestion collective de proposer des licences couvrant un nombre potentiellement élevé d'œuvres ou autres objets protégés, pour certains types d'utilisation, et de distribuer les revenus tirés de ces licences aux titulaires de droits, conformément à la directive 2014/26/UE.
+
+(45)
+
+Étant donné la nature de certaines utilisations ainsi que le nombre habituellement élevé d'œuvres ou autres objets protégés concernés, les coûts de transaction liés à l'acquisition des droits individuels auprès de chaque titulaire de droits concerné sont prohibitifs. Il en résulte qu'il est peu probable que, sans des mécanismes effectifs d'octroi de licences collectives, toutes les transactions dans les domaines concernés qui sont requises pour permettre l'utilisation de ces œuvres ou autres objets protégés se réaliseraient. L'octroi de licences collectives étendues par des organismes de gestion collective et des mécanismes similaires peuvent permettre la conclusion d'accords dans les domaines dans lesquels l'octroi de licences collectives qui repose sur une autorisation délivrée par les titulaires de droits ne constitue pas une solution exhaustive permettant de couvrir toutes les œuvres ou autres objets protégés qui seront utilisés. De tels mécanismes complètent la gestion collective des droits reposant sur les autorisations individuelles des titulaires de droits, en procurant une sécurité juridique totale aux utilisateurs dans certains cas. En même temps, ils donnent l'occasion aux titulaires de droits de bénéficier de l'utilisation légitime de leurs œuvres.
+
+(46)
+
+Face à l'importance grandissante, à l'ère du numérique, de la possibilité de proposer des dispositifs d'octroi de licences flexibles et face à l'utilisation accrue de tels dispositifs, les États membres devraient pouvoir proposer des mécanismes d'octroi de licences qui permettent aux organismes de gestion collective de conclure des licences sur une base volontaire, indépendamment du fait que l'ensemble des titulaires de droits aient autorisé l'organisme concerné à le faire. Les États membres devraient avoir la possibilité de continuer à utiliser ces mécanismes ou de les mettre en place, en fonction de leurs traditions, pratiques ou situations nationales, sous réserve des garanties prévues dans la présente directive et dans le respect du droit de l'Union et des obligations internationales de l'Union. Sauf disposition contraire du droit de l'Union, la validité de ces mécanismes devrait être limitée au territoire de l'État membre concerné. Les États membres devraient bénéficier d'une certaine souplesse dans le choix du type spécifique de mécanisme grâce auquel les licences octroyées pour les œuvres et autres objets protégés pourraient s'étendre aux droits des titulaires de droits qui n'ont pas donné d'autorisation à l'organisme de gestion collective qui conclut l'accord, à condition que ce mécanisme respecte le droit de l'Union, y compris les règles sur la gestion collective des droits prévues par la directive 2014/26/UE. Ainsi notamment, ces mécanismes devraient également garantir que l'article 7 de la directive 2014/26/UE s'applique aux titulaires de droits qui ne sont pas membres de l'organisme qui conclut l'accord. Ces mécanismes pourraient comprendre l'octroi de licences collectives étendues, des mandats légaux et des présomptions de représentation. Les dispositions de la présente directive relatives à l'octroi de licences collectives ne devraient pas affecter la capacité dont disposent les États membres d'appliquer des mécanismes obligatoires de gestion collective ou d'autres mécanismes d'octroi de licences collectives ayant un effet étendu, tel que le mécanisme visé à l'article 3 de la directive 93/83/CEE du Conseil (12).
+
+(47)
+
+Il importe que les mécanismes d'octroi de licences collectives ayant un effet étendu soient uniquement appliqués dans des domaines d'utilisation clairement définis, dans lesquels l'obtention d'une autorisation de la part des titulaires de droits sur une base individuelle est, habituellement, onéreuse et peu pratique, à un point tel qu'il est peu probable que la transaction nécessaire à l'octroi de licences, à savoir une transaction comprenant une licence qui couvre l'ensemble des titulaires de droits concernés, ait lieu en raison de la nature de l'utilisation ou des types d'œuvres ou autres objets protégés concernés. Ces mécanismes devraient reposer sur des critères objectifs, transparents et non discriminatoires quant au traitement des titulaires de droits, y compris des titulaires de droits qui ne sont pas membres de l'organisme de gestion collective. En particulier, le simple fait que les titulaires de droits concernés ne soient pas des ressortissants ou des résidents de l'État membre de l'utilisateur qui demande la licence, ou ne soient pas établis dans cet État membre, ne devrait pas constituer en soi une raison de considérer que l'acquisition des droits est onéreuse et peu pratique au point de justifier le recours à ces mécanismes. Il importe également que l'utilisation sous licence n'ait pas d'effets négatifs sur la valeur économique des droits concernés ni ne prive les titulaires de droits d'avantages commerciaux significatifs.
+
+(48)
+
+Les États membres devraient veiller à ce que des garanties appropriées soient en place pour protéger les intérêts légitimes des titulaires de droits qui n'ont pas mandaté l'organisme qui propose la licence et que ces garanties s'appliquent de manière non discriminatoire. Plus particulièrement, afin de justifier l'effet étendu des mécanismes, cet organisme de gestion collective devrait être, sur la base des autorisations données par les titulaires de droits, suffisamment représentatif des types d'œuvres ou autres objets protégés et des droits qui font l'objet de la licence. Les États membres devraient fixer les exigences auxquelles les organismes de gestion collective doivent satisfaire pour être considérés comme suffisamment représentatifs, compte tenu de la catégorie de droits que l'organisme gère, de la capacité de l'organisme à gérer efficacement les droits, du secteur de la création dans lequel l'organisme est actif et du fait que l'organisme couvre ou non un nombre significatif de titulaires de droits pour le type d'œuvres ou autres objets protégés concerné qui lui ont donné un mandat permettant d'octroyer une licence pour le type d'utilisation concerné conformément à la directive 2014/26/UE. Afin de garantir la sécurité juridique et la confiance dans lesdits mécanismes, les États membres devraient être autorisés à décider à qui incombe la responsabilité pour ce qui est des utilisations autorisées par l'accord de licence. L'égalité de traitement devrait être garantie à tous les titulaires de droits dont les œuvres sont exploitées dans le cadre de la licence, y compris, en particulier, quant à l'accès aux informations sur l'octroi de licence et la distribution des revenus. Des mesures de publicité devraient être en vigueur pendant toute la durée de la licence et ne devraient pas entraîner de charge administrative disproportionnée pour les utilisateurs, les organismes de gestion collective ou les titulaires de droits, et sans qu'il soit nécessaire d'informer chacun des titulaires de droit individuellement.
+
+Afin de garantir que les titulaires de droits puissent aisément reprendre le contrôle de leurs œuvres, et en empêcher toute utilisation qui porterait préjudice à leurs intérêts, il est essentiel que les titulaires de droits disposent d'une possibilité effective d'exclure l'application de ces mécanismes à leurs œuvres ou autres objets protégés, pour l'ensemble des utilisations et l'ensemble de leurs œuvres ou autres objets protégés ou pour des utilisations spécifiques et des œuvres ou autres objets protégés spécifiques, y compris avant la conclusion d'une licence et pendant la durée de celle-ci. En pareils cas, les utilisations en cours devraient cesser dans un délai raisonnable. L'application d'une telle exclusion par les titulaires de droits ne devrait pas avoir de conséquences sur leur demande de rémunération pour l'utilisation effective de l'œuvre ou autre objet protégé concerné par la licence. Les États membres devraient également pouvoir décider que des mesures supplémentaires sont appropriées pour protéger les titulaires de droits. Ces mesures supplémentaires pourraient, par exemple, consister à encourager les échanges d'informations entre les organismes de gestion collective et les autres parties intéressées dans l'Union, afin de faire connaître ces mécanismes et la possibilité qu'ont les titulaires de droits d'exclure l'application de ces mécanismes à leurs œuvres ou autres objets protégés.
+
+(49)
+
+Les États membres devraient veiller à ce que l'objet et le champ d'application de toute licence octroyée à la suite de l'application de mécanismes d'octroi de licences collectives ayant un effet étendu, ainsi que les utilisations possibles, soient toujours soigneusement et clairement définis dans la législation ou, si la législation sous-jacente est une disposition générale, dans les pratiques d'octroi de licences dont l'application découle de ladite disposition générale, ou dans les licences octroyées. La possibilité d'exploiter une licence dans le cadre de tels mécanismes devrait également être limitée aux organismes de gestion collective qui sont soumis à la législation nationale mettant en œuvre la directive 2014/26/UE.
+
+(50)
+
+Compte tenu de la diversité des traditions et expériences pour ce qui est des mécanismes d'octroi de licences collectives ayant un effet étendu dans les États membres, et de leur applicabilité aux titulaires de droits indépendamment de leur nationalité ou de leur État membre de résidence, il importe de garantir la transparence et le dialogue au niveau de l'Union quant au fonctionnement concret de ces mécanismes, notamment quant à l'efficacité des garanties pour les titulaires de droits, à l'utilité de ces mécanismes, à leurs effets sur les titulaires de droits qui ne sont pas membres de l'organisme de gestion collective ou sur les titulaires de droits qui sont des ressortissants d'un autre État membre ou qui résident dans un autre État membre, et quant aux effets sur la prestation transfrontière de services, notamment quant à la nécessité éventuelle d'élaborer des règles qui confèrent à ces mécanismes un effet transfrontière dans le marché intérieur. Afin de garantir la transparence, la Commission devrait publier régulièrement des informations sur l'utilisation de ces mécanismes dans le cadre de la présente directive. Par conséquent, les États membres qui ont mis en place de tels mécanismes devraient informer la Commission au sujet des dispositions de droit national concernées et de leur application concrète, notamment le champ d'application et les types d'octroi de licences mis en place en vertu des dispositions générales, l'étendue de l'octroi de licences et les organismes de gestion collective concernés. Ces informations devraient être débattues avec les États membres au sein du comité de contact établi par l'article 12, paragraphe 3, de la directive 2001/29/CE. La Commission devrait publier un rapport sur l'utilisation de ces mécanismes dans l'Union et sur leurs effets sur l'octroi de licences et sur les titulaires de droits, sur la diffusion de contenus culturels et sur la prestation transfrontière de services dans le domaine de la gestion collective du droit d'auteur et des droits voisins, ainsi que sur leurs effets sur la concurrence.
+
+(51)
+
+Les services de vidéo à la demande peuvent jouer un rôle déterminant dans la diffusion d'œuvres audiovisuelles dans l'ensemble de l'Union. Cependant, la disponibilité de ces œuvres, en particulier d'œuvres européennes, sur les services de vidéo à la demande demeure limitée. La conclusion de contrats relatifs à l'exploitation en ligne de ces œuvres peut être difficile en raison de difficultés liées à l'octroi de licences de droits. Ces difficultés pourraient, par exemple, survenir lorsque le titulaire des droits relatifs à un territoire donné a peu d'incitations économiques à exploiter une œuvre en ligne et n'octroie pas de licence ou retient les droits en ligne, ce qui peut avoir pour conséquence que les œuvres audiovisuelles sont indisponibles sur les services de vidéo à la demande. D'autres difficultés pourraient être liées aux fenêtres d'exploitation.
+
+(52)
+
+Pour faciliter l'octroi de licences de droits sur des œuvres audiovisuelles à des services de vidéo à la demande, les États membres devraient être tenus de prévoir un mécanisme de négociation permettant aux parties désireuses de conclure un contrat de compter sur l'assistance d'un organisme impartial ou d'un ou de plusieurs médiateurs. À cette fin, les États membres devraient pouvoir soit mettre en place un nouvel organisme, soit s'appuyer sur un organisme existant qui remplit les conditions fixées par la présente directive. Les États membres devraient pouvoir désigner un ou plusieurs organismes ou médiateurs compétents. L'organisme ou les médiateurs devraient se réunir avec les parties et faciliter les négociations en fournissant des conseils professionnels, impartiaux et extérieurs. Lorsqu'une négociation implique des parties issues de différents États membres et lorsque ces parties décident de faire appel au mécanisme de négociation, les parties devraient s'entendre au préalable sur l'État membre compétent. L'organisme ou les médiateurs pourraient rencontrer les parties afin de faciliter l'amorce des négociations ou les rencontrer au cours des négociations afin de faciliter la conclusion d'un accord. La participation à ce mécanisme de négociation et la conclusion ultérieure d'accords devraient présenter un caractère volontaire et ne pas affecter la liberté contractuelle des parties. Les États membres devraient être libres de définir le fonctionnement concret du mécanisme de négociation, y compris le calendrier et la durée de l'assistance aux négociations, et la prise en charge des coûts. Les États membres devraient veiller à ce que les charges administratives et financières restent proportionnées pour garantir l'efficacité du mécanisme de négociation. Sans que cela constitue pour autant une obligation, les États membres devraient encourager le dialogue entre les organismes représentatifs.
+
+(53)
+
+L'expiration de la période de protection d'une œuvre implique l'entrée de cette œuvre dans le domaine public et l'expiration des droits que le droit de l'Union en matière de droit d'auteur confère par rapport à cette œuvre. En matière d'arts visuels, la circulation de reproductions fidèles d'œuvres dans le domaine public contribue à l'accès à la culture et à sa promotion et à l'accès au patrimoine culturel. Dans l'environnement numérique, la protection de ces reproductions par le droit d'auteur ou les droits voisins n'est pas cohérente avec l'expiration de la protection des œuvres par le droit d'auteur. En outre, les différences entre les législations nationales en matière de droit d'auteur qui régissent la protection de ces reproductions créent de l'insécurité juridique et affectent la diffusion transfrontière d'œuvres d'art visuel dans le domaine public. Certaines reproductions d'œuvres d'art visuel dans le domaine public ne devraient, dès lors, pas être protégées par le droit d'auteur et les droits voisins. Tout ceci ne devrait pas empêcher les institutions du patrimoine culturel de vendre des reproductions, telles que des cartes postales.
+
+(54)
+
+Une presse libre et pluraliste est indispensable pour garantir un journalisme de qualité et l'accès des citoyens à l'information. Elle apporte une contribution fondamentale au débat public et au bon fonctionnement d'une société démocratique. La large disponibilité de publications de presse en ligne a fait émerger de nouveaux services en ligne, tels que les agrégateurs d'informations ou les services de veille médiatique, pour lesquels la réutilisation de publications de presse constitue une partie importante de leurs modèles économiques et une source de revenus. Les éditeurs de publications de presse sont confrontés à des difficultés pour l'octroi de licences relatives à l'utilisation en ligne de leurs publications aux fournisseurs de ces types de services, ce qui complique l'amortissement de leurs investissements. Les éditeurs de publications de presse n'étant pas reconnus comme des titulaires de droits, l'octroi de licences de droits et le respect de ces droits dans les publications de presse en ce qui concerne les utilisations en ligne par des prestataires de services de la société de l'information dans l'environnement numérique sont souvent complexes et inefficients.
+
+(55)
+
+La contribution organisationnelle et financière des éditeurs dans la production de publications de presse doit être reconnue et davantage encouragée pour assurer la pérennité du secteur de l'édition et, partant, promouvoir la disponibilité d'informations fiables. Il est donc nécessaire d'assurer au niveau de l'Union une protection juridique harmonisée des publications de presse en ce qui concerne les utilisations en ligne par des prestataires de services de la société de l'information, sans porter atteinte aux règles existantes du droit de l'Union en matière de droit d'auteur applicables aux utilisations privées ou non commerciales des publications de presse par des utilisateurs individuels, y compris lorsque ces utilisateurs partagent des publications de presse en ligne. Cette protection devrait être assurée de manière efficace par l'introduction, dans le droit de l'Union, de droits voisins du droit d'auteur pour la reproduction et la mise à disposition du public de publications de presse d'éditeurs établis dans un État membre en ce qui concerne les utilisations en ligne par des prestataires de services de la société de l'information au sens de la directive (UE) 2015/1535 du Parlement européen et du Conseil (13). La protection juridique des publications de presse prévue par la présente directive devrait bénéficier aux éditeurs qui sont établis dans un État membre et qui ont leur siège statutaire, leur administration centrale ou leur établissement principal à l'intérieur de l'Union.
+
+Par la notion d'éditeur de publications de presse, il convient d'entendre les prestataires de services, tels que les éditeurs de presse ou les agences de presse, lorsqu'ils publient des publications de presse au sens de la présente directive.
+
+(56)
+
+Aux fins de la présente directive, il est nécessaire de définir la notion de publications de presse de manière que cette notion ne couvre que les publications journalistiques, publiées dans les médias quels qu'ils soient, y compris sur papier, dans le contexte d'une activité économique qui constitue une fourniture de services en vertu du droit de l'Union. Les publications de presse qui devraient être couvertes comprennent, par exemple, des journaux quotidiens, des magazines hebdomadaires ou mensuels généralistes ou spécialisés, y compris les magazines vendus sur abonnement, et des sites internet d'information. Les publications de presse contiennent principalement des œuvres littéraires, mais également, et de plus en plus, d'autres types d'œuvres et autres objets protégés, notamment des photos et des vidéos. Les publications périodiques, publiées à des fins scientifiques ou universitaires, telles que les revues scientifiques, ne devraient pas être couvertes par la protection accordée aux publications de presse en vertu de la présente directive. Cette protection ne devrait pas s'appliquer non plus aux sites internet, tels que les blogs, qui fournissent des informations dans le cadre d'une activité qui n'est pas effectuée à l'initiative, et sous la responsabilité et le contrôle éditorial, d'un fournisseur de services tel que l'éditeur de presse.
+
+(57)
+
+Les droits octroyés aux éditeurs de publications de presse en vertu de la présente directive devraient avoir la même portée que les droits de reproduction et de mise à disposition du public prévus dans la directive 2001/29/CE, dans la mesure où les utilisations en ligne par des prestataires de services de la société de l'information sont concernées. Les droits octroyés aux éditeurs de publications de presse ne devraient pas s'étendre aux actes d'hyperliens. Ils ne devraient pas non plus s'étendre aux simples faits rapportés dans les publications de presse. Les droits octroyés aux éditeurs de publications de presse en vertu de la présente directive devraient en outre être soumis aux mêmes dispositions en matière d'exceptions et de limitations que celles applicables aux droits prévus par la directive 2001/29/CE, y compris l'exception dans le cas de citations faites à des fins de critique ou de revue prévue à l'article 5, paragraphe 3, point d), de ladite directive.
+
+(58)
+
+Les utilisations de publications de presse par des prestataires de services de la société de l'information peuvent consister en l'utilisation de publications ou d'articles intégraux, mais aussi en l'utilisation de parties de publications de presse. Ces utilisations de parties de publications ont également gagné en importance économique. Dans le même temps, il se peut que l'utilisation de mots isolés ou de très courts extraits de publications de presse par des prestataires de services de la société de l'information ne fragilise pas les investissements effectués par les éditeurs de publications de presse dans la production de contenus. Il est dès lors approprié de prévoir que l'utilisation de mots isolés ou de très courts extraits de publications de presse ne devrait pas entrer dans le champ des droits prévus dans la présente directive. Compte tenu de l'agrégation et de l'utilisation massives de publications de presse par les prestataires de services de la société de l'information, il importe que l'exclusion des très courts extraits soit interprétée de manière à ne pas affecter l'efficacité des droits prévus dans la présente directive.
+
+(59)
+
+La protection accordée aux éditeurs de publications de presse en vertu de la présente directive ne devrait pas porter atteinte aux droits des auteurs et autres titulaires de droits à l'égard des œuvres et autres objets protégés intégrés dans ces publications, y compris en ce qui concerne la mesure dans laquelle les auteurs et autres titulaires de droits peuvent exploiter leurs œuvres ou autres objets protégés indépendamment de la publication de presse dans laquelle ils sont intégrés. Les éditeurs de publications de presse ne devraient, par conséquent, pas pouvoir invoquer la protection qui leur est accordée au titre de la présente directive à l'encontre des auteurs et autres titulaires de droits, ni à l'encontre d'autres utilisateurs des mêmes œuvres ou autres objets protégés bénéficiant d'une autorisation. Ceci devrait s'entendre sans préjudice des accords contractuels conclus entre les éditeurs de publications de presse, d'une part, et les auteurs et autres titulaires de droits, d'autre part. Les auteurs dont les œuvres sont intégrées dans une publication de presse devraient avoir droit à une part appropriée des revenus que les éditeurs de presse perçoivent des prestataires de services de la société de l'information pour l'utilisation de leurs publications de presse. Ceci devrait s'entendre sans préjudice des législations nationales relatives à la qualité de titulaire de droits ou à l'exercice des droits dans le cadre de contrats de travail, à condition que ces législations respectent le droit de l'Union.
+
+(60)
+
+Les éditeurs, y compris les éditeurs de publications de presse, de livres, de publications scientifiques et d'éditions musicales, s'appuient souvent sur le transfert de droits d'auteur dans le cadre d'accords contractuels ou de dispositions statutaires. Dans ce contexte, ils réalisent un investissement en vue d'exploiter les œuvres contenues dans leurs publications et peuvent, dans certains cas, être privés de revenus lorsque ces œuvres sont utilisées dans le cadre d'exceptions ou de limitations comme celles relatives à la copie privée et à la reprographie, y compris les régimes nationaux correspondants en vigueur pour la reprographie dans les États membres, ou dans le cadre de régimes de prêts publics. Dans plusieurs États membres, la compensation prévue pour les utilisations relevant de ces exceptions ou limitations est partagée entre auteurs et éditeurs. Afin de tenir compte de cette situation et d'améliorer la sécurité juridique pour toutes les parties concernées, la présente directive permet aux États membres qui disposent de mécanismes de partage des compensations entre les auteurs et les éditeurs en vigueur de maintenir ces mécanismes en place. Cela est particulièrement important pour les États membres qui disposaient de tels mécanismes de partage des compensations avant le 12 novembre 2015, bien que, dans d'autres États membres, la compensation n'est pas partagée et elle est seulement due aux auteurs, conformément aux politiques culturelles nationales. La présente directive devrait certes s'appliquer de manière non discriminatoire dans tous les États membres, mais elle devrait en même temps respecter les traditions qui existent dans ce domaine et ne devrait pas obliger les États membres qui n'ont actuellement pas de tels mécanismes de partage des compensations à en introduire. Elle ne devrait pas affecter les dispositifs existants ou futurs dans les États membres concernant la rémunération dans le cadre des prêts publics.
+
+Elle ne devrait pas affecter non plus les dispositifs nationaux relatifs à la gestion des droits et aux droits à la rémunération, à condition qu'ils respectent le droit de l'Union. Tous les États membres devraient être autorisés à prévoir que, lorsque des auteurs ont transféré ou octroyé sous licence leurs droits à un éditeur ou contribuent autrement par leurs œuvres à une publication et qu'il existe des systèmes en place pour compenser le dommage qui leur est causé par une exception ou une limitation, y compris par l'intermédiaire d'organismes de gestion collective qui représentent conjointement les auteurs et les éditeurs, ces éditeurs ont droit à une part de cette compensation. Les États membres devraient rester libres de déterminer la manière dont les éditeurs doivent justifier leurs demandes de compensation ou de rémunération, et de fixer les conditions du partage de cette compensation ou de cette rémunération entre les auteurs et les éditeurs conformément à leurs systèmes nationaux.
+
+(61)
+
+Au cours des dernières années, le fonctionnement du marché des contenus en ligne a gagné en complexité. Les services de partage de contenus en ligne qui donnent accès à une quantité importante de contenus protégés par le droit d'auteur téléversés par leurs utilisateurs sont devenus une source principale d'accès aux contenus en ligne. Les services en ligne constituent un moyen d'élargir l'accès aux œuvres culturelles et créatives et offrent aux secteurs de la culture et de la création d'excellentes possibilités d'élaborer de nouveaux modèles économiques. Même s'ils sont un gage de diversité et facilitent l'accès aux contenus, ces services sont néanmoins source de difficultés quand un contenu protégé par le droit d'auteur est téléversé sans l'autorisation préalable des titulaires de droits. Il existe une insécurité juridique quant à la question de savoir si les fournisseurs de ces services procèdent à des actes relevant du droit d'auteur et doivent obtenir l'autorisation des titulaires de droits pour les contenus téléversés par leurs utilisateurs qui ne détiennent pas les droits en question sur ces contenus téléversés, sans préjudice de l'application des exceptions et limitations prévues par le droit de l'Union. Cette insécurité affecte la capacité des titulaires de droits à déterminer si leurs œuvres et autres objets protégés sont utilisés, et dans quelles conditions, et leur capacité à obtenir une rémunération appropriée en contrepartie d'une telle utilisation. Il est donc important d'encourager le développement du marché de l'octroi de licences entre les titulaires de droits et les fournisseurs de services de partage de contenus en ligne. Ces accords de licence devraient être équitables et maintenir un équilibre raisonnable entre les deux parties. Les titulaires de droits devraient percevoir une rémunération appropriée pour l'utilisation de leurs œuvres et autres objets protégés. Cependant, dès lors que ces dispositions ne devraient pas porter atteinte à la liberté contractuelle, les titulaires de droits ne devraient pas être tenus de donner leur autorisation ni de conclure des accords de licence.
+
+(62)
+
+Certains services de la société de l'information sont, dans le cadre de leur utilisation normale, conçus pour donner au public l'accès aux contenus ou autres objets protégés par le droit d'auteur que leurs utilisateurs ont téléversés. La définition de fournisseur de services de partage de contenus en ligne prévue par la présente directive ne devrait cibler que les services en ligne qui jouent un rôle important sur le marché des contenus en ligne en étant en concurrence pour les mêmes publics avec d'autres services de contenus en ligne, comme les services de diffusion audio et vidéo en flux continu. Les services couverts par la présente directive sont les services dont l'objectif principal ou l'un des objectifs principaux est de stocker et de permettre aux utilisateurs de téléverser et de partager une quantité importante de contenus protégés par le droit d'auteur en vue d'en tirer un profit, directement ou indirectement, en organisant et en promouvant ces contenus afin d'attirer un public plus large, y compris en les classant et en faisant une promotion ciblée parmi ceux-ci. Ces services ne devraient pas inclure les services qui ont un objectif principal autre que celui de permettre aux utilisateurs de téléverser et de partager une grande quantité de contenus protégés par le droit d'auteur en vue de tirer profit de cette activité. Ces services englobent, par exemple, les services de communications électroniques au sens de la directive (UE) 2018/1972 du Parlement européen et du Conseil (14), ainsi que les prestataires de services en nuage entre entreprises et les services en nuage qui permettent aux utilisateurs de téléverser des contenus pour leur propre usage, comme les sites de stockage de fichiers en ligne de type «cyberlocker», ou les places de marchés en ligne dont l'activité principale consiste en la vente au détail en ligne, et qui ne donnent pas accès à des contenus protégés par le droit d'auteur.
+
+Les fournisseurs de services tels que les plateformes de développement et de partage de logiciels libres, les répertoires scientifiques ou éducatifs à but non lucratif, ainsi que les encyclopédies en ligne à but non lucratif devraient également être exclus de la définition de fournisseur de services de partage de contenus en ligne. Enfin, afin d'assurer un niveau élevé de protection par le droit d'auteur, le mécanisme d'exonération de responsabilité prévu dans la présente directive ne devrait pas s'appliquer aux fournisseurs de services dont l'objectif principal est de se livrer à du piratage de droit d'auteur ou de le faciliter.
+
+(63)
+
+L'évaluation visant à déterminer si un fournisseur de services de partage de contenus en ligne stocke et donne accès à une quantité importante de contenus protégés par le droit d'auteur devrait être effectuée au cas par cas et tenir compte d'une combinaison d'éléments, tels que l'audience du service et le nombre de fichiers de contenus protégés par le droit d'auteur téléversés par les utilisateurs du service.
+
+(64)
+
+Il convient de clarifier dans la présente directive que les fournisseurs de services de partage de contenus en ligne effectuent un acte de communication au public ou un acte de mise à la disposition du public lorsqu'ils donnent au public l'accès à des œuvres protégées par le droit d'auteur ou à d'autres objets protégés que leurs utilisateurs ont téléversés. Par conséquent, les fournisseurs de services de partage de contenus en ligne devraient obtenir une autorisation, notamment par le biais d'un accord de licence, de la part des titulaires de droits concernés. Cela n'affecte pas la notion de communication au public ni celle de mise à la disposition du public ailleurs au titre du droit de l'Union et elle est également sans conséquence sur l'application éventuelle de l'article 3, paragraphes 1 et 2, de la directive 2001/29/CE à d'autres fournisseurs de services qui utilisent des contenus protégés par le droit d'auteur.
+
+(65)
+
+Quand des fournisseurs de services de partage de contenus en ligne sont responsables d'actes de communication au public ou d'actes de mise à la disposition du public, dans les conditions fixées par la présente directive, l'article 14, paragraphe 1, de la directive 2000/31/CE ne devrait pas s'appliquer à la responsabilité découlant de la disposition de la présente directive sur l'utilisation de contenus protégés par les fournisseurs de services de partage de contenus en ligne. Ceci ne devrait pas affecter l'application de l'article 14, paragraphe 1, de la directive 2000/31/CE à ces fournisseurs de services pour des finalités qui ne relèvent pas du champ d'application de la présente directive.
+
+(66)
+
+Compte tenu du fait que les fournisseurs de services de partage de contenus en ligne donnent accès à des contenus qui ne sont pas téléversés par eux-mêmes, mais par leurs utilisateurs, il convient de prévoir un mécanisme de responsabilité spécifique aux fins de la présente directive pour les cas dans lesquels aucune autorisation n'a été accordée. Ceci devrait être sans préjudice des recours prévus par le droit national pour des cas autres que la responsabilité au titre de violations du droit d'auteur et de la possibilité, pour les juridictions ou les autorités administratives nationales, de délivrer des injonctions dans le respect du droit de l'Union. En particulier, le régime spécifique applicable aux nouveaux fournisseurs de services de partage de contenus en ligne dont le chiffre d'affaires annuel est inférieur à 10 millions d'euros et dont le nombre moyen de visiteurs uniques mensuels dans l'Union n'excède pas 5 millions ne devrait pas remettre en cause la disponibilité de recours en vertu du droit de l'Union et du droit national. Lorsque aucune autorisation n'a été accordée aux prestataires de services, ils devraient fournir leurs meilleurs efforts, conformément aux normes élevées du secteur en matière de diligence professionnelle, pour éviter que des œuvres et autres objets protégés non autorisés, tels qu'ils sont identifiés par les titulaires de droits concernés, ne soient disponibles sur leurs services. À cette fin, les titulaires de droits devraient fournir les informations pertinentes et nécessaires aux fournisseurs de services en tenant compte, entre autres facteurs, de la taille des titulaires de droits et de leurs types d'œuvres et autres objets protégés. Les mesures prises par les fournisseurs de services de partage de contenus en ligne en coopération avec les titulaires de droits ne devraient pas avoir pour conséquence d'empêcher la disponibilité de contenus qui ne portent pas atteinte au droit d'auteur, y compris d'œuvres ou d'autres objets protégés dont l'utilisation est couverte par un accord de licence, ou par une exception ou une limitation au droit d'auteur ou aux droits voisins. Les mesures prises par ces fournisseurs de services ne devraient, dès lors, pas affecter les utilisateurs qui utilisent les services de partage de contenus en ligne afin de téléverser de manière licite des informations sur ces services et d'y accéder de manière licite.
+
+En outre, les obligations établies dans la présente directive ne devraient pas avoir pour conséquence que les États membres imposent une obligation générale de surveillance. Lors de l'évaluation visant à déterminer si un fournisseur de services de partage de contenus en ligne a fourni ses meilleurs efforts conformément aux normes élevées du secteur en matière de diligence professionnelle, il y a lieu de prendre en considération le fait que le fournisseur de services a pris ou non toutes les mesures qu'un opérateur diligent prendrait en vue d'empêcher la disponibilité d'œuvres ou autres objets protégés non autorisés sur son site internet, en tenant compte des meilleures pratiques du secteur et de l'efficacité des mesures prises à la lumière de tous les facteurs et évolutions pertinents, ainsi que du principe de proportionnalité. Plusieurs éléments devraient être pris en considération aux fins de cette évaluation, tels que la taille du service, l'évolution de l'état de l'art en ce qui concerne les moyens existants, y compris leurs évolutions futures potentielles, pour éviter la disponibilité des différents types de contenus et le coût de tels moyens pour les services. Différents moyens pourraient être appropriés et proportionnés, en fonction du type de contenu, et il ne peut dès lors être exclu que dans certains cas, la disponibilité de contenus non autorisés protégés par le droit d'auteur ne puisse être évitée que sur notification des titulaires de droits. Toute mesure prise par les fournisseurs de services devrait être effective au regard des objectifs poursuivis, mais ne devrait pas aller au-delà de ce qui est nécessaire pour atteindre l'objectif qui est d'éviter la disponibilité d'œuvres et autres objets protégés non autorisés et d'y mettre fin.
+
+Si, malgré les meilleurs efforts déployés en coopération avec les titulaires de droits comme l'exige la présente directive, des œuvres et autres objets protégés non autorisés deviennent disponibles, les fournisseurs de services de partage de contenus en ligne devraient être responsables en ce qui concerne les œuvres et autres objets protégés pour lesquels ils ont reçu les informations pertinentes et nécessaires de la part des titulaires de droits, à moins que ces prestataires ne démontrent qu'ils ont tout mis en œuvre pour éviter cette situation, conformément aux normes élevées du secteur en matière de diligence professionnelle.
+
+En outre, lorsque des œuvres ou autres objets protégés non autorisés spécifiques sont rendus disponibles sur des services de partage de contenus, y compris et indépendamment du fait que les meilleurs efforts ont été fournis ou non pour éviter cette situation et indépendamment du fait que les titulaires de droits ont ou non fourni les informations pertinentes et nécessaires au préalable, les fournisseurs de services de partage de contenus en ligne devraient être responsables des actes non autorisés de communication au public d'œuvres ou autres objets protégés si, après avoir reçu une notification suffisamment motivée, ils ne prennent pas promptement les mesures nécessaires pour bloquer l'accès aux œuvres ou autres objets protégés concernés par la notification ou pour retirer ceux-ci de leurs sites internet. En outre, ces fournisseurs de services de partage de contenus en ligne devraient également être tenus pour responsables s'ils ne parviennent pas à démontrer qu'ils ont fourni leurs meilleurs efforts pour empêcher la mise en ligne future d'œuvres non autorisées spécifiques, sur la base des informations pertinentes et nécessaires fournies à cette fin par les titulaires de droits.
+
+Lorsque les titulaires de droits ne fournissent pas aux fournisseurs de services de partage de contenus en ligne les informations pertinentes et nécessaires concernant leurs œuvres ou autres objets protégés spécifiques ou lorsqu'ils n'adressent pas de notification ayant pour objet de bloquer l'accès à ces œuvres ou objets protégés ou d'obtenir le retrait de ces œuvres ou autres objets protégés et qu'en conséquence, ces fournisseurs de services ne peuvent fournir leurs meilleurs efforts pour éviter la disponibilité de contenus non autorisés sur leurs services, conformément aux normes élevées du secteur en matière de diligence professionnelle, ces prestataires de services ne devraient pas être responsables des actes non autorisés de communication au public ou de mise à disposition du public de ces œuvres ou autres objets protégés non identifiés.
+
+(67)
+
+De manière similaire à ce que prévoit l'article 16, paragraphe 2, de la directive 2014/26/UE, la présente directive prévoit des règles en ce qui concerne les nouveaux services en ligne. Les règles prévues dans la présente directive visent à tenir compte de la situation spécifique des start-ups qui travaillent avec des contenus téléversés par les utilisateurs pour développer de nouveaux modèles d'entreprises. Le régime spécifique applicable aux nouveaux fournisseurs de services ayant un faible chiffre d'affaires et une audience restreinte devrait bénéficier à des entreprises véritablement nouvelles et devrait dès lors cesser de s'appliquer trois ans après la première mise à disposition de ces services en ligne dans l'Union. Ce régime ne devrait pas être utilisé abusivement par l'application de dispositifs visant à en étendre le bénéfice au-delà de ces trois premières années. En particulier, il ne devrait pas s'appliquer aux services nouvellement créés ni aux services fournis sous un nouveau nom, mais qui s'inscrivent dans la continuité de l'activité d'un fournisseur de services de partage de contenus en ligne déjà existant qui ne pouvait pas bénéficier de ce régime ou qui n'en bénéficie plus.
+
+(68)
+
+Les fournisseurs de services de partage de contenus en ligne devraient faire preuve de transparence vis-à-vis des titulaires de droits quant aux mesures prises dans le cadre de leur coopération. Dès lors qu'ils sont susceptibles d'entreprendre diverses actions, les fournisseurs de services de partage de contenus en ligne devraient fournir aux titulaires de droits, à leur demande, des informations utiles sur le type d'actions entreprises et sur la manière dont elles sont entreprises. Ces informations devraient être suffisamment précises pour offrir une transparence suffisante aux titulaires de droits, sans porter atteinte aux secrets d'affaires des fournisseurs de services de partage de contenus en ligne. Les fournisseurs de services ne devraient cependant pas être tenus de communiquer aux titulaires de droits des informations détaillées et individualisées concernant chaque œuvre ou autre objet protégé identifié. Ceci devrait s'entendre sans préjudice des accords contractuels qui pourraient contenir des dispositions plus spécifiques sur les informations à fournir lorsque des accords sont conclus entre des fournisseurs de services et des titulaires de droits.
+
+(69)
+
+Lorsque les fournisseurs de services de partage de contenus en ligne obtiennent des autorisations, notamment par le biais d'accords de licence, concernant l'utilisation, sur leurs services, de contenus téléversés par les utilisateurs des services, ces autorisations devraient également couvrir les actes relevant du droit d'auteur en ce qui concerne les contenus téléversés par les utilisateurs dans les limites des autorisations octroyées aux fournisseurs de services, mais uniquement dans les cas où ces utilisateurs agissent à des fins non commerciales, comme lorsqu'ils partagent leurs contenus sans but lucratif, ou dans les cas où les revenus générés par leurs contenus téléversés ne sont pas significatifs par rapport aux actes relevant du droit d'auteur réalisés par les utilisateurs couverts par de telles autorisations. Lorsque les titulaires de droits ont autorisé expressément des utilisateurs à téléverser et à mettre à disposition des œuvres ou autres objets protégés sur un service de partage de contenus en ligne, l'acte de communication au public du fournisseur de services est autorisé dans les limites de l'autorisation octroyée par le titulaire de droits. Cependant, les fournisseurs de services de partage de contenus en ligne ne devraient bénéficier d'aucune présomption selon laquelle leurs utilisateurs auraient acquis l'ensemble des droits concernés.
+
+(70)
+
+Les mesures prises par les fournisseurs de services de partage de contenus en ligne devraient s'entendre sans préjudice de l'application des exceptions ou limitations au droit d'auteur, notamment celles qui garantissent la liberté d'expression des utilisateurs. Les utilisateurs devraient être autorisés à téléverser et à mettre à disposition les contenus générés par les utilisateurs aux fins spécifiques de la citation, de la critique, de la revue, de la caricature, de la parodie ou du pastiche. Cet aspect est particulièrement important aux fins d'assurer un équilibre entre, d'une part les droits fondamentaux inscrits dans la Charte des droits fondamentaux de l'Union européenne (ci-après dénommée «Charte»), notamment la liberté d'expression et la liberté des arts, et d'autre part le droit de propriété, y compris la propriété intellectuelle. Ces exceptions et limitations devraient dès lors être rendues obligatoires afin de garantir que les utilisateurs bénéficient d'une protection uniforme dans l'ensemble de l'Union. Il est important de veiller à ce que les fournisseurs de services de partage de contenus en ligne mettent en place un mécanisme efficace de traitement des plaintes et de recours pour soutenir une utilisation à de telles fin spécifiques.
+
+Les fournisseurs de services de partage de contenus en ligne devraient également mettre en place des dispositifs de traitement des plaintes et de recours rapides et efficaces permettant aux utilisateurs d'introduire une plainte concernant les mesures prises en ce qui concerne leurs contenus téléversés, en particulier lorsqu'ils pourraient bénéficier d'une exception ou d'une limitation au droit d'auteur en ce qui concerne un contenu téléversé auquel l'accès a été bloqué ou qui a été retiré. Toute plainte déposée dans le cadre de ces dispositifs devrait être examinée sans retard indu et faire l'objet d'un contrôle exercé par une personne physique. Lorsque des titulaires de droits demandent aux fournisseurs de services de prendre des mesures en ce qui concerne des contenus téléversés par des utilisateurs, telles que le blocage de l'accès à ces contenus en ligne ou le retrait de ces contenus, leurs demandes devraient être dûment motivées. En outre, la coopération ne devrait pas conduire à une quelconque identification des utilisateurs individuels ni au traitement de données à caractère personnel, excepté lorsque cela est en conformité avec la directive 2002/58/CE du Parlement européen et du Conseil (15) et le règlement (UE) 2016/679 du Parlement européen et du Conseil (16). Les États membres devraient également veiller à ce que les utilisateurs aient accès à des mécanismes de recours extrajudiciaires pour le règlement des litiges. Ces mécanismes devraient permettre un règlement impartial des litiges. Les utilisateurs devraient également avoir accès à un tribunal ou à une autre autorité judiciaire compétente pour faire valoir le recours à une limitation ou à une exception au droit d'auteur et aux droits voisins.
+
+(71)
+
+Dans les meilleurs délais après la date d'entrée en vigueur de la présente directive, la Commission, en collaboration avec les États membres, devrait organiser des dialogues entre les parties prenantes pour garantir l'application uniforme de l'obligation de coopération entre les fournisseurs de services de partage de contenus en ligne et les titulaires de droits et établir les bonnes pratiques conformément aux normes appropriées du secteur en matière de diligence professionnelle. À cette fin, la Commission devrait consulter les parties prenantes concernées, y compris les organisations d'utilisateurs et les fournisseurs de technologie, et tenir compte de l'évolution du marché. Les organisations d'utilisateurs devraient également avoir accès aux informations sur les actions menées par les fournisseurs de services de partage de contenus en ligne pour gérer les contenus en ligne.
+
+(72)
+
+Les auteurs et artistes interprètes ou exécutants ont tendance à se trouver dans une position contractuelle moins favorable lorsqu'ils octroient une licence ou transfèrent leurs droits, y compris par l'intermédiaire de leurs propres sociétés, aux fins de l'exploitation en contrepartie d'une rémunération, et ces personnes physiques ont besoin de la protection prévue par la présente directive pour pouvoir jouir pleinement des droits harmonisés en vertu du droit de l'Union. Ce besoin de protection n'existe pas lorsque l'autre partie au contrat agit en tant qu'utilisateur final et n'exploite pas l'œuvre ou l'exécution elle-même, ce qui pourrait, par exemple, être le cas dans certains contrats de travail.
+
+(73)
+
+La rémunération des auteurs et artistes interprètes ou exécutants devrait être appropriée et proportionnelle à la valeur économique réelle ou potentielle des droits octroyés sous licence ou transférés, compte tenu de la contribution de l'auteur ou de l'artiste interprète ou exécutant à l'ensemble de l'œuvre ou autre objet protégé et de toutes les autres circonstances de l'espèce, telles que les pratiques de marché ou l'exploitation réelle de l'œuvre. Un montant forfaitaire peut également constituer une rémunération proportionnelle, mais cela ne devrait pas être la règle. Les États membres devraient avoir la liberté de définir des cas précis pour lesquels un montant forfaitaire peut être versé en tenant compte des spécificités de chaque secteur. Les États membres devraient être libres de mettre en œuvre le principe de rémunération appropriée et proportionnelle en recourant à divers mécanismes existants ou nouvellement introduits, qui pourraient inclure la négociation collective et d'autres mécanismes, pour autant que de tels mécanismes soient conformes au droit de l'Union applicable.
+
+(74)
+
+Les auteurs et artistes interprètes ou exécutants ont besoin d'informations pour apprécier la valeur économique de leurs droits qui sont harmonisés en vertu du droit de l'Union. C'est en particulier le cas lorsque des personnes physiques octroient une licence ou transfèrent des droits à des fins d'exploitation en contrepartie d'une rémunération. Ce besoin n'existe pas lorsque l'exploitation a cessé ou lorsque l'auteur ou l'artiste interprète ou exécutant a octroyé une licence au public en général sans rémunération en contrepartie.
+
+(75)
+
+Comme les auteurs et les artistes interprètes ou exécutants sont généralement dans une position contractuelle moins favorable lorsqu'ils octroient des licences ou transfèrent leurs droits, ils ont besoin d'informations pour déterminer la valeur économique sur la durée de leurs droits par rapport à la rémunération perçue en contrepartie de leur licence ou du transfert, mais ils sont souvent confrontés à un manque de transparence. Par conséquent, le partage d'informations suffisantes et précises par leurs partenaires contractuels ou les ayants droit de ceux-ci est importante pour la transparence et l'équilibre du système qui régit la rémunération des auteurs, et des artistes interprètes ou exécutants. Ces informations devraient être actualisées afin de permettre l'accès à des données récentes, pertinentes pour l'exploitation de l'œuvre ou de l'exécution, et complètes de manière à couvrir toutes les sources de revenus pertinentes pour le cas d'espèce, y compris, le cas échéant, ceux tirés des produits dérivés. Tant que l'exploitation est en cours, les partenaires contractuels des auteurs et des artistes interprètes ou exécutants devraient fournir les informations dont ils disposent sur tous les modes d'exploitation et sur tous les revenus tirés de l'exploitation dans le monde entier, avec une régularité qui est appropriée pour le secteur concerné, mais au moins une fois par an. Les informations devraient être fournies d'une manière compréhensible pour l'auteur ou l'artiste interprète ou l'exécutant et devraient permettre une évaluation efficace de la valeur économique des droits en question. Néanmoins, l'obligation de transparence ne devrait s'appliquer que lorsque des droits relevant du droit d'auteur sont concernés. Le traitement des données à caractère personnel, telles que les coordonnées et les informations sur la rémunération, qui sont nécessaires pour que les auteurs et les artistes interprètes ou exécutants restent informés en ce qui concerne l'exploitation de leurs œuvres et de leurs exécutions, devrait être effectué conformément à l'article 6, paragraphe 1, point c), du règlement (UE) 2016/679.
+
+(76)
+
+Afin de garantir que les informations liées à l'exploitation soient dûment fournies aux auteurs et aux artistes interprètes ou exécutants également dans les cas où les droits ont été concédés en sous-licence à d'autres parties qui exploitent les droits, la présente directive autorise les auteurs et les artistes interprètes ou exécutants à demander que des informations supplémentaires pertinentes concernant l'exploitation des droits leur soient fournies, dans les cas où le partenaire contractuel direct a fourni les informations dont il dispose, mais que ces informations ne sont pas suffisantes pour apprécier la valeur économique de leurs droits. Cette demande devrait être introduite soit directement auprès des bénéficiaires de sous-licences, soit par l'intermédiaire des partenaires contractuels des auteurs et des artistes interprètes ou exécutants. Les auteurs et les artistes interprètes ou exécutants et leurs partenaires contractuels devraient pouvoir convenir de garder la confidentialité des informations partagées, mais les auteurs et les artistes interprètes ou exécutants devraient toujours pouvoir utiliser les informations partagées dans le but d'exercer les droits que leur confère la présente directive. Les États membres devraient avoir la possibilité, dans le respect du droit de l'Union, de prévoir des mesures supplémentaires afin de garantir la transparence aux auteurs et aux artistes interprètes ou exécutants.
+
+(77)
+
+Lors de la mise en œuvre de l'obligation en matière de transparence prévue par la présente directive, les États membres devraient tenir compte des spécificités des différents secteurs de contenus, tels que les secteurs de la musique, de l'audiovisuel et de l'édition et toutes les parties prenantes concernées devraient être impliquées lorsqu'il s'agit de décider des obligations propres aux différents secteurs. Le cas échéant, l'importance de la contribution des auteurs et des artistes interprètes ou exécutants à l'ensemble de l'œuvre ou de l'exécution devrait également être prise en considération. La négociation collective devrait être considérée comme une possibilité pour les parties prenantes concernées de parvenir à un accord concernant la transparence. Ces accords devraient garantir aux auteurs et aux artistes interprètes ou exécutants au moins le même niveau de transparence, ou un niveau de transparence plus élevé, que celui correspondant aux exigences minimales prévues par la présente directive. Afin de permettre l'adaptation aux obligations de transparence des pratiques existantes en matière d'établissement de rapports, il convient de prévoir une période transitoire. Il ne devrait pas être nécessaire d'appliquer les obligations de transparence aux contrats conclus entre des titulaires de droits et des organismes de gestion collective, des entités de gestion indépendantes ou d'autres entités soumises aux règles nationales transposant la directive 2014/26/UE, étant donné que ces organismes ou entités sont déjà soumis à des obligations de transparence en vertu de l'article 18 de la directive 2014/26/UE. L'article 18 de la directive 2014/26/UE s'applique aux organismes qui gèrent le droit d'auteur ou les droits voisins pour le compte de plusieurs titulaires de droits, au profit collectif de ces derniers. Toutefois, les accords négociés individuellement conclus entre les titulaires de droits et ceux parmi leurs partenaires contractuels qui agissent dans leur propre intérêt devraient être soumis à l'obligation de transparence prévue par la présente directive.
+
+(78)
+
+Certains contrats d'exploitation de droits harmonisés au niveau de l'Union sont de longue durée et offrent peu de possibilités aux auteurs et aux artistes interprètes ou exécutants de les renégocier avec leurs partenaires contractuels ou leurs ayants droit, dans le cas où la valeur économique des droits se révèle considérablement plus élevée que l'estimation initiale qui en a été faite. Par conséquent, sans préjudice du droit applicable aux contrats dans les États membres, il convient de prévoir un mécanisme d'adaptation des rémunérations pour les cas où la rémunération initialement convenue dans le cadre d'une licence ou d'un transfert de droits se révèle clairement être exagérément faible par rapport aux revenus pertinents tirés de l'exploitation ultérieure de l'œuvre ou de la fixation de l'exécution par le partenaire contractuel de l'auteur ou de l'artiste interprète ou exécutant. Tous les revenus pertinents pour le cas d'espèce, y compris, le cas échéant, ceux tirés des produits dérivés devraient être pris en compte pour évaluer si la rémunération est exagérément faible. L'évaluation de la situation devrait tenir compte des circonstances particulières de chaque cas, y compris la contribution de l'auteur ou de l'artiste interprète ou exécutant, ainsi que des spécificités et des pratiques en matière de rémunération dans les différents secteurs de contenus et du fait de savoir si le contrat repose ou non sur un accord collectif. Les représentants des auteurs et des artistes interprètes ou exécutants dûment mandatés conformément au droit national, dans le respect du droit de l'Union, devraient pouvoir fournir une assistance à un ou plusieurs auteurs ou artistes interprètes ou exécutants en ce qui concerne les demandes d'adaptation des contrats, en tenant compte également, le cas échéant, des intérêts d'autres auteurs ou artistes interprètes ou exécutants.
+
+Ces représentants devraient protéger l'identité des auteurs et des artistes interprètes ou exécutants représentés aussi longtemps que possible. Lorsque les parties ne parviennent pas à se mettre d'accord sur l'adaptation des rémunérations, l'auteur ou l'artiste interprète ou exécutant devrait avoir le droit d'introduire un recours devant un tribunal ou une autre autorité compétente. Ce mécanisme ne devrait pas s'appliquer aux contrats conclus par les entités définies à l'article 3, points a) et b), de la directive 2014/26/UE ou par d'autres entités soumises aux règles nationales mettant en œuvre la directive 2014/26/UE.
+
+(79)
+
+Les auteurs et les artistes interprètes ou exécutants sont souvent réticents à faire valoir leurs droits en justice à l'encontre de leurs partenaires contractuels. Il convient donc que les États membres prévoient une procédure alternative de règlement des litiges pour traiter les demandes des auteurs, et des artistes interprètes ou exécutants ou des représentants agissant en leur nom, liées aux obligations de transparence et au mécanisme d'adaptation des contrats. À cette fin, les États membres devraient pouvoir soit créer un nouvel organisme ou un nouveau mécanisme, soit s'appuyer sur un organisme ou un mécanisme existant qui remplit les conditions fixées par la présente directive, que ces organismes ou mécanismes émanent de l'industrie ou du secteur public, y compris lorsqu'ils font partie du système judiciaire national. Les États membres devraient avoir toute latitude pour décider de la répartition des coûts de la procédure de règlement des litiges. Cette procédure alternative de règlement des litiges devrait s'entendre sans préjudice du droit des parties de faire valoir et de défendre leurs droits en agissant en justice devant un tribunal.
+
+(80)
+
+Lorsque des auteurs et des artistes interprètes ou exécutants octroient sous licence leurs droits ou transfèrent leurs droits, ils s'attendent à ce que leurs œuvres ou leurs exécutions soient exploitées. Cependant, il peut arriver que des œuvres ou des exécutions dont les droits ont été octroyés sous licence ou transférés ne soient pas du tout exploitées. Lorsque ces droits ont été transférés à titre exclusif, les auteurs et les artistes interprètes ou exécutants ne peuvent pas s'adresser à un autre partenaire pour l'exploitation de leurs œuvres ou de leurs exécutions. Dans ce cas, et au terme d'un délai raisonnable, les auteurs et les artistes interprètes ou exécutants devraient pouvoir bénéficier d'un mécanisme de révocation des droits leur permettant d'octroyer leurs droits sous licence ou de les transférer à une autre personne. Comme l'exploitation des œuvres ou les exécutions peuvent varier en fonction des secteurs, des dispositions spécifiques pourraient être fixées à l'échelon national pour tenir compte des spécificités des secteurs, tels que le secteur audiovisuel, ou des œuvres ou exécutions, notamment en fixant un délai pour l'exercice du droit de révocation. Afin de protéger les intérêts légitimes des bénéficiaires de licences ou d'un transfert de droits, d'éviter les abus et de tenir compte du fait qu'un certain délai est nécessaire avant l'exploitation effective d'une œuvre ou d'une exécution, les auteurs et les artistes interprètes ou exécutants devraient pouvoir exercer le droit de révocation conformément à certaines exigences de procédure, et seulement après un certain délai suivant la conclusion du contrat de licence ou de transfert. Les États membres devraient être autorisés à réglementer l'exercice du droit de révocation dans le cas d'œuvres ou d'exécutions impliquant plus d'un auteur, artiste interprète ou exécutant, en tenant compte de l'importance relative des contributions individuelles.
+
+(81)
+
+Les dispositions concernant la transparence, les mécanismes d'adaptation du contrat et les procédures extra-judiciaires de règlement des litiges figurant dans la présente directive devraient revêtir un caractère obligatoire et les parties ne devraient pas pouvoir déroger à ces dispositions, que ce soit dans les contrats entre les auteurs, artistes interprètes ou exécutants et leurs partenaires contractuels ou dans des accords conclus entre ces derniers et des tiers, tels que les accords de confidentialité. Par conséquent, l'article 3, paragraphe 4, du règlement (CE) no 593/2008 du Parlement européen et du Conseil (17) devrait s'appliquer en ce sens que, lorsque tous les autres éléments pertinents pour la situation sont localisés, au moment du choix de la loi applicable, dans un ou plusieurs États membres, le choix par les parties d'une autre loi applicable que celle d'un État membre ne porte pas atteinte à l'application des dispositions concernant la transparence, les mécanismes d'adaptation du contrat et les procédures extra-judiciaires de règlement des litiges figurant dans la présente directive, telles que transposées par l'État membre du for.
+
+(82)
+
+Aucune disposition de la présente directive ne devrait être interprétée comme faisant obstacle à ce que les titulaires de droits exclusifs en vertu du droit de l'Union en matière de droit d'auteur autorisent l'utilisation, à titre gracieux, de leurs œuvres ou autres objets protégés, y compris au moyen de licences gratuites non exclusives, au bénéfice de tout utilisateur.
+
+(83)
+
+Étant donné que l'objectif de la présente directive, à savoir la modernisation de certains aspects du cadre de l'Union en matière de droit d'auteur afin de tenir compte des progrès technologiques et des nouveaux canaux de distribution des contenus protégés au sein du marché intérieur, ne peut pas être atteint de manière suffisante par les États membres mais peut, en raison de sa portée, de ses effets et de sa dimension transfrontière, l'être mieux au niveau de l'Union, celle-ci peut prendre des mesures, conformément au principe de subsidiarité consacré à l'article 5 du traité sur l'Union européenne. Conformément au principe de proportionnalité tel qu'énoncé audit article, la présente directive n'excède pas ce qui est nécessaire pour atteindre cet objectif.
+
+(84)
+
+La présente directive respecte les droits fondamentaux et observe les principes reconnus en particulier par la Charte. En conséquence, il y a lieu d'interpréter et d'appliquer la présente directive conformément à ces droits et principes.
+
+(85)
+
+Tout traitement de données à caractère personnel en vertu de la présente directive devrait respecter les droits fondamentaux, notamment le droit au respect de la vie privée et familiale et le droit à la protection des données à caractère personnel énoncé aux articles 7 et 8, respectivement, de la Charte et doit respecter la directive 2002/58/CE et le règlement (UE) 2016/679.
+
+(86)
+
+Conformément à la déclaration politique commune des États membres et de la Commission du 28 septembre 2011 sur les documents explicatifs (18), les États membres se sont engagés à joindre à la notification de leurs mesures de transposition, dans les cas où cela se justifie, un ou plusieurs documents expliquant le lien entre les éléments d'une directive et les parties correspondantes des instruments nationaux de transposition. En ce qui concerne la présente directive, le législateur estime que la transmission de ces documents est justifiée,
+
+ONT ADOPTÉ LA PRÉSENTE DIRECTIVE:
+
+TITRE I
+
+DISPOSITIONS GÉNÉRALES
+
+Article premier
+
+Objet et champ d'application
+
+1.   La présente directive fixe des règles visant à poursuivre l'harmonisation du droit de l'Union applicable au droit d'auteur et aux droits voisins dans le cadre du marché intérieur, en tenant compte, en particulier, des utilisations numériques et transfrontières des contenus protégés. Elle fixe également des règles relatives aux exceptions et limitations au droit d'auteur et aux droits voisins, à la facilitation des licences, ainsi que des règles destinées à assurer le bon fonctionnement du marché pour l'exploitation des œuvres et autres objets protégés.
+
+2.   Sauf dans les cas mentionnés à l'article 24, la présente directive laisse intactes et n'affecte en aucune façon les règles existantes fixées dans les directives actuellement en vigueur dans ce domaine, en particulier les directives 96/9/CE, 2000/31/CE, 2001/29/CE, 2006/115/CE, 2009/24/CE, 2012/28/UE et 2014/26/UE.
+
+Article 2
+
+Définitions
+
+Aux fins de la présente directive, on entend par:
+
+1)
+
+«organisme de recherche», une université, y compris ses bibliothèques, un institut de recherche ou toute autre entité, ayant pour objectif premier de mener des recherches scientifiques, ou d'exercer des activités éducatives comprenant également des travaux de recherche scientifique:
+
+a)
+
+à titre non lucratif ou en réinvestissant tous les bénéfices dans ses recherches scientifiques; ou
+
+b)
+
+dans le cadre d'une mission d'intérêt public reconnue par un État membre;
+
+de telle manière qu'il ne soit pas possible pour une entreprise exerçant une influence déterminante sur cet organisme de bénéficier d'un accès privilégié aux résultats produits par ces recherches scientifiques;
+
+2)
+
+«fouille de textes et de données», toute technique d'analyse automatisée visant à analyser des textes et des données sous une forme numérique afin d'en dégager des informations, ce qui comprend, à titre non exhaustif, des constantes, des tendances et des corrélations;
+
+3)
+
+«institution du patrimoine culturel», une bibliothèque accessible au public, un musée, des archives ou une institution dépositaire d'un patrimoine cinématographique ou sonore;
+
+4)
+
+«publication de presse», une collection composée principalement d'œuvres littéraires de nature journalistique, mais qui peut également comprendre d'autres œuvres ou objets protégés, et qui:
+
+a)
+
+constitue une unité au sein d'une publication périodique ou régulièrement actualisée sous un titre unique, telle qu'un journal ou un magazine généraliste ou spécialisé;
+
+b)
+
+a pour but de fournir au public en général des informations liées à l'actualité ou d'autres sujets; et
+
+c)
+
+est publiée sur tout support à l'initiative, sous la responsabilité éditoriale et sous le contrôle d'un fournisseur de services.
+
+Les périodiques qui sont publiés à des fins scientifiques ou universitaires, tels que les revues scientifiques, ne sont pas des publications de presse aux fins de la présente directive;
+
+5)
+
+«service de la société de l'information», un service au sens de l'article 1er, paragraphe 1, point b), de la directive (UE) 2015/1535;
+
+6)
+
+«fournisseur de services de partage de contenus en ligne», le fournisseur d'un service de la société de l'information dont l'objectif principal ou l'un des objectifs principaux est de stocker et de donner au public l'accès à une quantité importante d'œuvres protégées par le droit d'auteur ou d'autres objets protégés qui ont été téléversés par ses utilisateurs, qu'il organise et promeut à des fins lucratives.
+
+Ne sont pas des fournisseurs de services de partage de contenus en ligne au sens de la présente directive les prestataires de services tels que les encyclopédies en ligne à but non lucratif, les répertoires éducatifs et scientifiques à but non lucratif, les plateformes de développement et de partage de logiciels libres, les fournisseurs de services de communications électroniques au sens de la directive (UE) 2018/1972, les places de marché en ligne, les services en nuage entre entreprises et les services en nuage qui permettent aux utilisateurs de téléverser des contenus pour leur propre usage.
+
+TITRE II
+
+MESURES VISANT À ADAPTER LES EXCEPTIONS ET LIMITATIONS À L'ENVIRONNEMENT NUMÉRIQUE ET TRANSFRONTIÈRE
+
+Article 3
+
+Fouille de textes et de données à des fins de recherche scientifique
+
+1.   Les États membres prévoient une exception aux droits prévus à l'article 5, point a), et à l'article 7, paragraphe 1, de la directive 96/9/CE, à l'article 2 de la directive 2001/29/CE et à l'article 15, paragraphe 1, de la présente directive pour les reproductions et les extractions effectuées par des organismes de recherche et des institutions du patrimoine culturel, en vue de procéder, à des fins de recherche scientifique, à une fouille de textes et de données sur des œuvres ou autres objets protégés auxquels ils ont accès de manière licite.
+
+2.   Les copies des œuvres ou autres objets protégés effectuées dans le respect du paragraphe 1 sont stockées avec un niveau de sécurité approprié et peuvent être conservées à des fins de recherche scientifique, y compris pour la vérification des résultats de la recherche.
+
+3.   Les titulaires de droits sont autorisés à appliquer des mesures destinées à assurer la sécurité et l'intégrité des réseaux et des bases de données où les œuvres ou autres objets protégés sont hébergés. Ces mesures n'excèdent pas ce qui est nécessaire pour atteindre cet objectif.
+
+4.   Les États membres encouragent les titulaires de droits, les organismes de recherche et les institutions du patrimoine culturel à définir d'un commun accord des bonnes pratiques concernant l'application de l'obligation et des mesures visées aux paragraphes 2 et 3, respectivement.
+
+Article 4
+
+Exception ou limitation pour la fouille de textes et de données
+
+1.   Les États membres prévoient une exception ou une limitation aux droits prévus à l'article 5, point a), et à l'article 7, paragraphe 1, de la directive 96/9/CE, à l'article 2 de la directive 2001/29/CE, à l'article 4, paragraphe 1, points a) et b), de la directive 2009/24/CE et à l'article 15, paragraphe 1, de la présente directive pour les reproductions et les extractions d'œuvres et d'autres objets protégés accessibles de manière licite aux fins de la fouille de textes et de données.
+
+2.   Les reproductions et extractions effectuées en vertu du paragraphe 1 peuvent être conservées aussi longtemps que nécessaire aux fins de la fouille de textes et de données.
+
+3.   L'exception ou la limitation prévue au paragraphe 1 s'applique à condition que l'utilisation des œuvres et autres objets protégés visés audit paragraphe n'ait pas été expressément réservée par leurs titulaires de droits de manière appropriée, notamment par des procédés lisibles par machine pour les contenus mis à la disposition du public en ligne.
+
+4.   Le présent article n'affecte pas l'application de l'article 3 de la présente directive.
+
+Article 5
+
+Utilisation d'œuvres et autres objets protégés dans le cadre d'activités d'enseignement numériques et transfrontières
+
+1.   Les États membres prévoient une exception ou une limitation aux droits prévus à l'article 5, points a), b), d) et e), et à l'article 7, paragraphe 1, de la directive 96/9/CE, aux articles 2 et 3 de la directive 2001/29/CE, à l'article 4, paragraphe 1, de la directive 2009/24/CE et à l'article 15, paragraphe 1, de la présente directive afin de permettre l'utilisation numérique des œuvres et autres objets protégés à des fins exclusives d'illustration dans le cadre de l'enseignement, dans la mesure justifiée par le but non commercial poursuivi, à condition que cette utilisation:
+
+a)
+
+ait lieu sous la responsabilité d'un établissement d'enseignement, dans ses locaux ou dans d'autres lieux, ou au moyen d'un environnement électronique sécurisé accessible uniquement aux élèves, aux étudiants et au personnel enseignant de cet établissement; et
+
+b)
+
+s'accompagne d'une indication de la source, y compris le nom de l'auteur, à moins que cela ne s'avère impossible.
+
+2.   Nonobstant l'article 7, paragraphe 1, les États membres peuvent prévoir que l'exception ou la limitation adoptée en vertu du paragraphe 1 ne s'applique pas, ou ne s'applique pas en ce qui concerne certaines utilisations ou types d'œuvres ou autres objets protégés, comme le matériel qui est principalement destiné au marché éducatif ou les partitions musicales, pour autant que des licences adéquates autorisant les actes visés au paragraphe 1 du présent article et répondant aux besoins et aux spécificités des établissements d'enseignement puissent facilement être obtenues sur le marché.
+
+Les États membres qui décident de se prévaloir du premier alinéa du présent paragraphe prennent les mesures nécessaires pour garantir que les licences autorisant les actes visés au paragraphe 1 du présent article sont disponibles et visibles de manière appropriée pour les établissements d'enseignement.
+
+3.   L'utilisation des œuvres et autres objets protégés à des fins exclusives d'illustration dans le cadre de l'enseignement réalisé au moyen d'environnements électroniques sécurisés qui a lieu dans le respect des dispositions de droit national adoptées en application du présent article, est réputée avoir lieu uniquement dans l'État membre dans lequel l'établissement d'enseignement est établi.
+
+4.   Les États membres peuvent prévoir une compensation équitable pour les titulaires de droits pour l'utilisation de leurs œuvres ou autres objets protégés en vertu du paragraphe 1.
+
+Article 6
+
+Conservation du patrimoine culturel
+
+Les États membres prévoient une exception aux droits prévus à l'article 5, point a), et à l'article 7, paragraphe 1, de la directive 96/9/CE, à l'article 2 de la directive 2001/29/CE, à l'article 4, paragraphe 1, point a), de la directive 2009/24/CE et à l'article 15, paragraphe 1, de la présente directive, afin de permettre aux institutions du patrimoine culturel de réaliser des copies de toute œuvre ou tout autre objet protégé qui se trouve à titre permanent dans leurs collections, sous quelque forme ou sur quelque support que ce soit, à des fins de conservation de ces œuvres et autres objets protégés et dans la mesure nécessaire à cette conservation.
+
+Article 7
+
+Dispositions communes
+
+1.   Toute disposition contractuelle contraire aux exceptions prévues aux articles 3, 5 et 6 est non exécutoire.
+
+2.   L'article 5, paragraphe 5, de la directive 2001/29/CE s'applique aux exceptions et aux limitations prévues dans le présent titre. L'article 6, paragraphe 4, premier, troisième et cinquième alinéas, de la directive 2001/29/CE, s'applique aux articles 3 à 6 de la présente directive.
+
+TITRE III
+
+MESURES VISANT À AMÉLIORER LES PRATIQUES EN MATIÈRE D'OCTROI DE LICENCES ET À ASSURER UN ACCÈS PLUS LARGE AUX CONTENUS
+
+CHAPITRE 1
+
+Œuvres et autres objets protégés indisponibles dans le commerce
+
+Article 8
+
+Utilisation d'œuvres et autres objets protégés indisponibles dans le commerce par les institutions du patrimoine culturel
+
+1.   Les États membres prévoient qu'un organisme de gestion collective, conformément aux mandats donnés par les titulaires de droits, peut conclure un contrat de licence non exclusive à des fins non commerciales avec une institution du patrimoine culturel, en vue de la reproduction, la distribution, la communication au public ou la mise à disposition du public d'œuvres ou d'autres objets protégés indisponibles dans le commerce qui se trouvent à titre permanent dans la collection de l'institution, indépendamment du fait que tous les titulaires de droits couverts par la licence aient ou non mandaté l'organisme de gestion collective à cet égard, à condition:
+
+a)
+
+que l'organisme de gestion collective soit, en vertu de ses mandats, suffisamment représentatif des titulaires de droits en ce qui concerne le type d'œuvres ou autres objets protégés concerné, d'une part, et le type de droits qui font l'objet de la licence, d'autre part; et
+
+b)
+
+qu'une égalité de traitement soit garantie à tous les titulaires de droits en ce qui concerne les conditions de la licence.
+
+2.   Les États membres prévoient une exception ou une limitation aux droits prévus à l'article 5, points a), b), d) et e), et à l'article 7, paragraphe 1, de la directive 96/9/CE, aux articles 2 et 3 de la directive 2001/29/CE, à l'article 4, paragraphe 1, de la directive 2009/24/CE et à l'article 15, paragraphe 1, de la présente directive, afin de permettre aux institutions du patrimoine culturel de mettre à disposition, à des fins non commerciales, des œuvres ou d'autres objets protégés indisponibles dans le commerce qui se trouvent à titre permanent dans leurs collections, à condition que:
+
+a)
+
+le nom de l'auteur ou de tout autre titulaire de droits identifiable soit indiqué, à moins que cela ne s'avère impossible; et
+
+b)
+
+ces œuvres ou autres objets protégés soient mis à disposition sur des sites internet non commerciaux.
+
+3.   Les États membres prévoient que l'exception ou la limitation prévue au paragraphe 2 ne s'applique qu'aux types d'œuvres ou autres objets protégés pour lesquels il n'existe pas d'organisme de gestion collective qui remplisse les conditions énoncées au paragraphe 1, point a).
+
+4.   Les États membres prévoient que tous les titulaires de droits peuvent à tout moment, facilement et de manière effective, exclure leurs œuvres ou autres objets protégés du mécanisme d'octroi de licences énoncé au paragraphe 1 ou de l'application de l'exception ou de la limitation prévue au paragraphe 2, soit de manière générale, soit dans des cas spécifiques, y compris après la conclusion d'un contrat de licence ou après le début de l'utilisation concernée.
+
+5.   Une œuvre ou autre objet protégé est réputé(e) indisponible dans le commerce lorsque l'on peut présumer de bonne foi que l'œuvre ou autre objet protégé dans son ensemble n'est pas disponible pour le public par le biais des circuits commerciaux habituels, après que des efforts raisonnables ont été entrepris pour déterminer si cette œuvre ou autre objet protégé est disponible pour le public.
+
+Les États membres peuvent prévoir des exigences spécifiques, comme une date butoir, pour déterminer si des œuvres et autres objets protégés peuvent faire l'objet d'une licence conformément au paragraphe 1 ou être utilisés dans le cadre de l'exception ou de la limitation prévue au paragraphe 2. Ces exigences n'excèdent pas ce qui est nécessaire et raisonnable et n'excluent pas la possibilité de déclarer indisponible dans le commerce un ensemble d'œuvres ou d'autres objets protégés, lorsque l'on peut raisonnablement présumer que toutes les œuvres ou tous les autres objets protégés sont indisponibles dans le commerce.
+
+6.   Les États membres prévoient que les licences visées au paragraphe 1 doivent être demandées auprès d'un organisme de gestion collective qui est représentatif dans l'État membre dans lequel l'institution du patrimoine culturel est établie.
+
+7.   Le présent article ne s'applique pas aux ensembles d'œuvres ou d'autres objets protégés indisponibles dans le commerce si, sur la base des efforts raisonnables visés au paragraphe 5, il est prouvé que ces ensembles sont principalement constitués:
+
+a)
+
+d'œuvres ou autres objets protégés, autres que des œuvres cinématographiques ou audiovisuelles, ayant été publiés pour la première fois ou, en l'absence de publication, radiodiffusés pour la première fois dans un pays tiers;
+
+b)
+
+d'œuvres cinématographiques ou audiovisuelles dont les producteurs ont leur siège ou leur résidence habituelle dans un pays tiers; ou
+
+c)
+
+d'œuvres ou autres objets protégés de ressortissants de pays tiers, lorsque, après avoir entrepris des efforts raisonnables, aucun État membre ou pays tiers n'a pu être déterminé en vertu des points a) et b).
+
+Par dérogation au premier alinéa, le présent article s'applique lorsque l'organisme de gestion collective est suffisamment représentatif, au sens du paragraphe 1, point a), des titulaires de droits du pays tiers concerné.
+
+Article 9
+
+Utilisations transfrontières
+
+1.   Les États membres veillent à ce que des licences octroyées conformément à l'article 8 puissent permettre l'utilisation d'œuvres ou autres objets protégés indisponibles dans le commerce par les institutions du patrimoine culturel dans tout État membre.
+
+2.   Les utilisations d'œuvres et autres objets protégés dans le cadre de l'exception ou de la limitation prévue à l'article 8, paragraphe 2, sont réputées avoir lieu uniquement dans l'État membre où l'institution du patrimoine culturel qui procède à l'utilisation en question est établie.
+
+Article 10
+
+Mesures de publicité
+
+1.   Les États membres veillent à ce que des informations provenant des institutions du patrimoine culturel, des organismes de gestion collective ou des autorités publiques concernées aux fins de l'identification des œuvres ou autres objets protégés indisponibles dans le commerce faisant l'objet d'une licence octroyée conformément à l'article 8, paragraphe 1, ou utilisés dans le cadre de l'exception ou de la limitation prévue à l'article 8, paragraphe 2, ainsi que des informations sur les options à la disposition des titulaires de droits visées à l'article 8, paragraphe 4, et, le cas échéant, dès qu'elles sont disponibles, des informations sur les parties au contrat de licence, les territoires couverts et les utilisations réalisées, soient rendues accessibles de façon permanente, aisée et effective sur un portail internet public unique au moins six mois avant que ces œuvres ou autres objets protégés soient distribués, communiqués au public ou mis à la disposition du public conformément à la licence ou dans le cadre de l'exception ou de la limitation.
+
+Le portail est mis en place et géré par l'Office de l'Union européenne pour la propriété intellectuelle conformément au règlement (UE) no 386/2012.
+
+2.   Les États membres prévoient que, si cela est nécessaire pour sensibiliser les titulaires de droits, des mesures de publicité supplémentaires appropriées sont prises en ce qui concerne la capacité des organismes de gestion collective à octroyer des licences sur des œuvres ou autres objets protégés, conformément à l'article 8, les licences octroyées, les utilisations relevant de l'exception ou de la limitation prévue à l'article 8, paragraphe 2, et les options à la disposition des titulaires de droits visées à l'article 8, paragraphe 4.
+
+Les mesures de publicité supplémentaires appropriées visées au premier alinéa du présent paragraphe sont prises dans l'État membre où la licence est demandée conformément à l'article 8, paragraphe 1, ou, en ce qui concerne les utilisations relevant de l'exception ou de la limitation prévue à l'article 8, paragraphe 2, dans l'État membre où l'institution du patrimoine culturel est établie. S'il existe des éléments de preuve, comme l'origine des œuvres ou autres objets protégés, suggérant que la sensibilisation des titulaires de droits pourrait être renforcée de manière plus efficace dans d'autres États membres ou pays tiers, les mesures de publicité en question couvrent également ces États membres et pays tiers.
+
+Article 11
+
+Dialogue entre les parties intéressées
+
+Les États membres consultent les titulaires de droits, les organismes de gestion collective et les institutions du patrimoine culturel de chaque secteur avant d'établir les exigences spécifiques en vertu de l'article 8, paragraphe 5, et encouragent un dialogue régulier entre des organisations représentant les utilisateurs et les titulaires de droits, y compris les organismes de gestion collective, et toutes autres organisations de parties intéressées sur une base sectorielle, afin d'accroître la pertinence et l'utilité des mécanismes d'octroi de licences énoncés à l'article 8, paragraphe 1, et d'assurer que les garanties pour les titulaires de droits visées dans le présent chapitre sont efficaces.
+
+CHAPITRE 2
+
+Mesures visant à faciliter l'octroi de licences collectives
+
+Article 12
+
+Octroi de licences collectives ayant un effet étendu
+
+1.   En ce qui concerne l'utilisation sur leur territoire et sous réserve des garanties prévues au présent article, les États membres peuvent prévoir que, lorsqu'un organisme de gestion collective qui est soumis aux règles nationales transposant la directive 2014/26/UE, conformément aux mandats donnés par les titulaires de droits, conclut un accord de licence pour l'exploitation d'œuvres ou d'autres objets protégés:
+
+a)
+
+un tel accord peut être étendu pour s'appliquer aux droits des titulaires de droits qui n'ont pas autorisé l'organisme de gestion collective à les représenter par voie de cession, de licence ou de tout autre accord contractuel; ou
+
+b)
+
+en ce qui concerne un tel accord, l'organisme dispose d'un mandat légal ou est présumé représenter les titulaires de droits qui ne l'ont pas autorisé à agir de la sorte.
+
+2.   Les États membres veillent à ce que le mécanisme d'octroi de licences visé au paragraphe 1 ne s'applique que dans des domaines d'utilisation bien définis, lorsque l'obtention d'autorisations auprès des titulaires de droits sur une base individuelle s'avère habituellement onéreuse et difficile à mettre en œuvre dans une mesure qui rend improbable la transaction nécessaire à l'octroi d'une licence, en raison de la nature de l'utilisation ou des types d'œuvres ou d'autres objets protégés concernés, et veillent à ce que ce mécanisme d'octroi de licences préserve les intérêts légitimes des titulaires de droits.
+
+3.   Aux fins du paragraphe 1, les États membres prévoient les garanties suivantes:
+
+a)
+
+l'organisme de gestion collective est, sur la base de ses mandats, suffisamment représentatif des titulaires de droits pour le type d'œuvres ou autres objets protégés concernés, d'une part, et le type de droits qui font l'objet de la licence d'autre part, dans l'État membre concerné;
+
+b)
+
+une égalité de traitement est garantie à tous les titulaires de droits, y compris en ce qui concerne les conditions de la licence;
+
+c)
+
+les titulaires de droits qui n'ont pas autorisé l'organisme à octroyer la licence peuvent à tout moment, facilement et de manière effective, exclure leurs œuvres ou autres objets protégés du mécanisme d'octroi de licences établi conformément au présent article; et
+
+d)
+
+des mesures de publicité appropriées sont prises, dans un délai raisonnable précédant l'utilisation sous licence des œuvres ou autres objets protégés, pour informer les titulaires de droits quant à la capacité de l'organisme de gestion collective à octroyer des licences pour des œuvres ou autres objets protégés, quant à l'octroi de licences conformément au présent article et quant aux options à la disposition des titulaires de droits visées au point c). Les mesures de publicité sont effectives sans qu'il soit nécessaire d'informer chaque titulaire de droits individuellement.
+
+4.   Le présent article n'affecte pas l'application de mécanismes d'octroi de licences collectives ayant un effet étendu conformément à d'autres dispositions du droit de l'Union, y compris des dispositions qui permettent des exceptions ou des limitations.
+
+Le présent article ne s'applique pas à la gestion collective obligatoire des droits.
+
+L'article 7 de la directive 2014/26/UE s'applique au mécanisme d'octroi de licences prévu par le présent article.
+
+5.   Lorsqu'un État membre prévoit, dans son droit national, un mécanisme d'octroi de licences conformément au présent article, cet État membre informe la Commission du champ d'application des dispositions nationales correspondantes, des finalités et des types de licences qui peuvent être introduites en vertu de de ces dispositions, des coordonnées des organismes délivrant des licences conformément à ce mécanisme d'octroi de licences, et des moyens d'obtenir les informations sur l'octroi de licences et les options à la disposition des titulaires de droits visées au paragraphe 3, point c). La Commission publie ces informations.
+
+6.   Sur la base des informations reçues en application du paragraphe 5 du présent article et des discussions menées au sein du comité de contact établi par l'article 12, paragraphe 3, de la directive 2001/29/CE, la Commission présente au Parlement européen et au Conseil, au plus tard le 10 avril 2021, un rapport sur l'utilisation dans l'Union des mécanismes d'octroi de licences visés au paragraphe 1 du présent article, sur leur incidence sur les licences et sur les titulaires de droits, y compris les titulaires de droits qui ne sont pas membres de l'organisme qui octroie les licences ou qui sont des ressortissants d'un autre État membre ou qui résident dans un autre État membre, sur leur efficacité pour faciliter la diffusion de contenus culturels et sur leur incidence sur le marché intérieur, y compris la prestation transfrontière de services et la concurrence. Ce rapport est accompagné, le cas échéant, d'une proposition législative, y compris en ce qui concerne l'effet transfrontière de ces mécanismes nationaux.
+
+CHAPITRE 3
+
+Disponibilité d'œuvres audiovisuelles sur les plateformes de vidéo à la demande et accès à ces œuvres
+
+Article 13
+
+Mécanisme de négociation
+
+Les États membres veillent à ce que les parties qui rencontrent des difficultés en matière d'octroi de licences de droits lorsqu'elles souhaitent conclure un contrat en vue de mettre à disposition des œuvres audiovisuelles sur des services de vidéo à la demande, puissent recourir à l'assistance d'un organisme impartial ou de médiateurs. L'organisme impartial établi ou désigné par un État membre aux fins du présent article et les médiateurs apportent leur assistance aux parties dans la négociation et les aide à aboutir à un accord, y compris, le cas échéant, en leur soumettant des propositions.
+
+Les États membres notifient à la Commission le nom de l'organisme ou des médiateurs visés au premier alinéa au plus tard le 7 juin 2021. Lorsque les États membres ont choisi de de mettre en place la médiation, la notification à la Commission comprend au moins, lorsqu'elle est disponible, la source où les informations pertinentes sur les médiateurs en charge peuvent être trouvées.
+
+CHAPITRE 4
+
+Œuvres d'art visuel dans le domaine public
+
+Article 14
+
+Œuvres d'art visuel dans le domaine public
+
+Les États membres prévoient que, lorsque la durée de protection d'une œuvre d'art visuel est arrivée à expiration, tout matériel issu d'un acte de reproduction de cette œuvre ne peut être soumis au droit d'auteur ni aux droits voisins, à moins que le matériel issu de cet acte de reproduction ne soit original, en ce sens qu'il est la création intellectuelle propre à son auteur.
+
+TITRE IV
+
+MESURES VISANT À ASSURER LE BON FONCTIONNEMENT DU MARCHÉ DU DROIT D'AUTEUR
+
+CHAPITRE 1
+
+Droits sur les publications
+
+Article 15
+
+Protection des publications de presse en ce qui concerne les utilisations en ligne
+
+1.   Les États membres confèrent aux éditeurs de publications de presse établis dans un État membre les droits prévus à l'article 2 et à l'article 3, paragraphe 2, de la directive 2001/29/CE pour l'utilisation en ligne de leurs publications de presse par des fournisseurs de services de la société de l'information.
+
+Les droits prévus au premier alinéa ne s'appliquent pas aux utilisations, à titre privé ou non commercial, de publications de presse faites par des utilisateurs individuels.
+
+La protection accordée en vertu du premier alinéa ne s'applique pas aux actes d'hyperliens.
+
+Les droits prévus au premier alinéa ne s'appliquent pas en ce qui concerne l'utilisation de mots isolés ou de très courts extraits d'une publication de presse.
+
+2.   Les droits prévus au paragraphe 1 laissent intacts et n'affectent en aucune façon les droits conférés par le droit de l'Union aux auteurs et autres titulaires de droits, à l'égard des œuvres et autres objets protégés intégrés dans une publication de presse. Les droits prévus au paragraphe 1 sont inopposables aux auteurs et autres titulaires de droits et, en particulier, ne doivent pas les priver de leur droit d'exploiter leurs œuvres et autres objets protégés indépendamment de la publication de presse dans laquelle ils sont intégrés.
+
+Lorsqu'une œuvre ou autre objet protégé est intégré dans une publication de presse sur la base d'une licence non exclusive, les droits prévus au paragraphe 1 ne doivent pas être invoqués pour interdire l'utilisation par d'autres utilisateurs autorisés. Les droits prévus au paragraphe 1 ne doivent pas être invoqués pour interdire l'utilisation d'œuvres ou d'autres objets dont la protection a expiré.
+
+3.   Les articles 5 à 8 de la directive 2001/29/CE, la directive 2012/28/UE et la directive (UE) 2017/1564 du Parlement européen et du Conseil (19) s'appliquent mutatis mutandis aux droits prévus au paragraphe 1 du présent article.
+
+4.   Les droits prévus au paragraphe 1 expirent deux ans après que la publication de presse a été publiée. Cette durée est calculée à partir du 1er janvier de l'année suivant la date à laquelle la publication de presse a été publiée.
+
+Le paragraphe 1 ne s'applique pas aux publications de presse publiées pour la première fois avant le 6 juin 2019.
+
+5.   Les États membres prévoient que les auteurs d'œuvres intégrées dans une publication de presse reçoivent une part appropriée des revenus que les éditeurs de presse perçoivent des fournisseurs de services de la société de l'information pour l'utilisation de leurs publications de presse.
+
+Article 16
+
+Demande de compensation équitable
+
+Les États membres peuvent prévoir que lorsqu'un auteur a transféré ou octroyé sous licence un droit à un éditeur, ce transfert ou cette licence constitue un fondement juridique suffisant pour que l'éditeur puisse avoir droit à une part de la compensation versée pour les utilisations de l'œuvre faites dans le cadre d'une exception ou d'une limitation au droit transféré ou octroyé sous licence.
+
+Le premier alinéa est sans préjudice des dispositions existantes et futures dans les États membres concernant le droit de prêt public.
+
+CHAPITRE 2
+
+Utilisations particulières, par des services en ligne, de contenus protégés
+
+Article 17
+
+Utilisation de contenus protégés par des fournisseurs de services de partage de contenus en ligne
+
+1.   Les États membres prévoient qu'un fournisseur de services de partage de contenus en ligne effectue un acte de communication au public ou un acte de mise à la disposition du public aux fins de la présente directive lorsqu'il donne au public l'accès à des œuvres protégées par le droit d'auteur ou à d'autres objets protégés qui ont été téléversés par ses utilisateurs.
+
+Un fournisseur de services de partage de contenus en ligne doit dès lors obtenir une autorisation des titulaires de droits visés à l'article 3, paragraphes 1 et 2, de la directive 2001/29/CE, par exemple en concluant un accord de licence, afin de communiquer au public ou de mettre à la disposition du public des œuvres ou autres objets protégés.
+
+2.   Les États membres prévoient que, lorsqu'un fournisseur de services de partage de contenus en ligne obtient une autorisation, par exemple en concluant un accord de licence, cette autorisation couvre également les actes accomplis par les utilisateurs des services relevant du champ d'application de l'article 3 de la directive 2001/29/CE lorsqu'ils n'agissent pas à titre commerciale ou lorsque leur activité ne génère pas de revenus significatifs.
+
+3.   Quand un fournisseur de services de partage de contenus en ligne procède à un acte de communication au public ou à un acte de mise à la disposition du public, dans les conditions fixées par la présente directive, la limitation de responsabilité établie à l'article 14, paragraphe 1, de la directive 2000/31/CE ne s'applique pas aux situations couvertes par le présent article.
+
+Le premier alinéa du présent paragraphe n'affecte pas l'éventuelle application de l'article 14, paragraphe 1, de la directive 2000/31/CE à ces fournisseurs de services pour des finalités ne relevant pas du champ d'application de la présente directive.
+
+4.   Si aucune autorisation n'est accordée, les fournisseurs de services de partage de contenus en ligne sont responsables des actes non autorisés de communication au public, y compris la mise à la disposition du public, d'œuvres protégées par le droit d'auteur et d'autres objets protégés, à moins qu'ils ne démontrent que:
+
+a)
+
+ils ont fourni leurs meilleurs efforts pour obtenir une autorisation; et
+
+b)
+
+ils ont fourni leurs meilleurs efforts, conformément aux normes élevées du secteur en matière de diligence professionnelle, pour garantir l'indisponibilité d'œuvres et autres objets protégés spécifiques pour lesquels les titulaires de droits ont fourni aux fournisseurs de services les informations pertinentes et nécessaires; et en tout état de cause
+
+c)
+
+ils ont agi promptement, dès réception d'une notification suffisamment motivée de la part des titulaires de droits, pour bloquer l'accès aux œuvres et autres objets protégés faisant l'objet de la notification ou pour les retirer de leurs sites internet, et ont fourni leurs meilleurs efforts pour empêcher qu'ils soient téléversés dans le futur, conformément au point b).
+
+5.   Pour déterminer si le fournisseur de services a respecté les obligations qui lui incombent en vertu du paragraphe 4, et à la lumière du principe de proportionnalité, les éléments suivants sont, entre autres, pris en considération:
+
+a)
+
+le type, l'audience et la taille du service, ainsi que le type d'œuvres ou autres objets protégés téléversés par les utilisateurs du service; et
+
+b)
+
+la disponibilité de moyens adaptés et efficaces et leur coût pour les fournisseurs de services.
+
+6.   Les États membres prévoient que, à l'égard de nouveaux fournisseurs de services de partage de contenus en ligne dont les services ont été mis à la disposition du public dans l'Union depuis moins de trois ans et qui ont un chiffre d'affaires annuel inférieur à 10 millions d'euros calculés conformément à la recommandation 2003/361/CE de la Commission (20), les conditions au titre du régime de responsabilité énoncé au paragraphe 4 sont limitées au respect du paragraphe 4, point a), et au fait d'agir promptement, lorsqu'ils reçoivent une notification suffisamment motivée, pour bloquer l'accès aux œuvres ou autres objets protégés faisant l'objet de la notification ou pour les retirer de leurs site internet.
+
+Lorsque le nombre moyen de visiteurs uniques par mois de tels fournisseurs de services dépasse les 5 millions, calculé sur la base de l'année civile précédente, ils sont également tenus de démontrer qu'ils ont fourni leurs meilleurs efforts pour éviter d'autres téléversements des œuvres et autres objets protégés faisant l'objet de la notification pour lesquels les titulaires de droits ont fourni les informations pertinentes et nécessaires.
+
+7.   La coopération entre les fournisseurs de services de partage de contenus en ligne et les titulaires de droits ne conduit pas à empêcher la mise à disposition d'œuvres ou d'autres objets protégés téléversés par des utilisateurs qui ne portent pas atteinte au droit d'auteur et aux droits voisins, y compris lorsque ces œuvres ou autres objets protégés sont couverts par une exception ou une limitation.
+
+Les États membres veillent à ce que les utilisateurs dans chaque État membre puissent se prévaloir de l'une quelconque des exceptions ou limitations existantes suivantes lorsqu'ils téléversent et mettent à disposition des contenus générés par les utilisateurs sur les services de partage de contenus en ligne:
+
+a)
+
+citation, critique, revue;
+
+b)
+
+utilisation à des fins de caricature, de parodie ou de pastiche.
+
+8.   L'application du présent article ne donne lieu à aucune obligation générale de surveillance.
+
+Les États membres prévoient que les fournisseurs de services de partage de contenus en ligne fournissent aux titulaires de droits, à leur demande, des informations adéquates sur le fonctionnement de leurs pratiques en ce qui concerne la coopération visée au paragraphe 4 et, en cas d'accords de licence conclus entre les fournisseurs de services et les titulaires de droits, des informations sur l'utilisation des contenus couverts par les accords.
+
+9.   Les États membres prévoient la mise en place par les fournisseurs de services de partage de contenus en ligne d'un dispositif de traitement des plaintes et de recours rapide et efficace, à la disposition des utilisateurs de leurs services en cas de litige portant sur le blocage de l'accès à des œuvres ou autres objets protégés qu'ils ont téléversés ou sur leur retrait.
+
+Lorsque des titulaires de droits demandent à ce que l'accès à leurs œuvres ou autres objets protégés spécifiques soit bloqué ou à ce que ces œuvres ou autres objets protégés soient retirés, ils justifient dûment leurs demandes. Les plaintes déposées dans le cadre du dispositif prévu au premier alinéa sont traitées sans retard indu et les décisions de blocage d'accès aux contenus téléversés ou de retrait de ces contenus font l'objet d'un contrôle par une personne physique. Les États membres veillent également à ce que des mécanismes de recours extrajudiciaires soient disponibles pour le règlement des litiges. Ces mécanismes permettent un règlement impartial des litiges et ne privent pas l'utilisateur de la protection juridique accordée par le droit national, sans préjudice du droit des utilisateurs de recourir à des voies de recours judiciaires efficaces. En particulier, les États membres veillent à ce que les utilisateurs puissent s'adresser à un tribunal ou à une autre autorité judiciaire compétente pour faire valoir le bénéfice d'une exception ou d'une limitation au droit d'auteur et aux droits voisins.
+
+La présente directive n'affecte en aucune façon les utilisations légitimes, telles que les utilisations relevant des exceptions ou limitations prévues par le droit de l'Union, et n'entraîne aucune identification d'utilisateurs individuels ni de traitement de données à caractère personnel, excepté conformément à la directive 2002/58/CE et au règlement (UE) 2016/679.
+
+Les fournisseurs de services de partage de contenus en ligne informent leurs utilisateurs, dans leurs conditions générales d'utilisation, qu'ils peuvent utiliser des œuvres et autres objets protégés dans le cadre des exceptions ou des limitations au droit d'auteur et aux droits voisins prévues par le droit de l'Union.
+
+10.   À compter du 6 juin 2019, la Commission organise, en coopération avec les États membres, des dialogues entre parties intéressées afin d'examiner les meilleures pratiques pour la coopération entre les fournisseurs de services de partage de contenus en ligne et les titulaires de droits. Après consultation des fournisseurs de services de partage de contenus en ligne, des titulaires de droits, des organisations d'utilisateurs et des autres parties prenantes concernées, et compte tenu des résultats des dialogues entre parties intéressées, la Commission émet des orientations sur l'application du présent article, en particulier en ce qui concerne la coopération visée au paragraphe 4. Lors de l'examen des meilleures pratiques, une attention particulière doit être accordée, entre autres, à la nécessité de maintenir un équilibre entre les droits fondamentaux et le recours aux exceptions et aux limitations. Aux fins des dialogues avec les parties intéressées, les organisations d'utilisateurs ont accès aux informations adéquates fournies par les fournisseurs de services de partage de contenus en ligne sur le fonctionnement de leurs pratiques en ce qui concerne le paragraphe 4.
+
+CHAPITRE 3
+
+Juste rémunération des auteurs et des artistes interprètes ou exécutants dans le cadre des contrats d'exploitation
+
+Article 18
+
+Principe de rémunération appropriée et proportionnelle
+
+1.   Les États membres veillent à ce que, lorsque les auteurs et les artistes interprètes ou exécutants octroient sous licence ou transfèrent leurs droits exclusifs pour l'exploitation de leurs œuvres ou autres objets protégés, ils aient le droit de percevoir une rémunération appropriée et proportionnelle.
+
+2.   Aux fins de la mise en œuvre en droit national du principe énoncé au paragraphe 1, les États membres sont libres de recourir à différents mécanismes et tiennent compte du principe de la liberté contractuelle et d'un juste équilibre des droits et des intérêts.
+
+Article 19
+
+Obligation de transparence
+
+1.   Les États membres veillent à ce que les auteurs et les artistes interprètes ou exécutants reçoivent, régulièrement et au minimum une fois par an, et en prenant en compte les spécificités de chaque secteur, des informations actualisées, pertinentes et complètes, sur l'exploitation de leurs œuvres et les exécutions de la part des parties auxquelles ils ont octroyé sous licence ou transféré leurs droits, ou des ayants droits de celles-ci, notamment en ce qui concerne les modes d'exploitation, l'ensemble des revenus générés et la rémunération due.
+
+2.   Les États membres veillent à ce que, lorsque les droits visés au paragraphe 1 ont par la suite été octroyés sous licence, les auteurs et les artistes interprètes ou exécutants ou leurs représentants reçoivent, à leur demande, de la part des bénéficiaires de sous-licences, des informations complémentaires si leur premier partenaire contractuel ne détient pas toutes les informations nécessaires aux fins du paragraphe 1.
+
+Lorsque ces informations complémentaires sont demandées, le premier partenaire contractuel des auteurs et artistes interprètes ou exécutants fournit des informations sur l'identité des bénéficiaires de sous-licences.
+
+Les États membres peuvent prévoir que toute demande adressée aux bénéficiaires de sous-licences en vertu du premier alinéa est formulée directement ou indirectement par l'intermédiaire du partenaire contractuel de l'auteur ou de l'artiste interprète ou exécutant.
+
+3.   L'obligation énoncée au paragraphe 1 est proportionnée et effective pour garantir un degré élevé de transparence dans chaque secteur. Les États membres peuvent prévoir que, dans des cas dûment justifiés, lorsque la charge administrative résultant de l'obligation énoncée au paragraphe 1 se révèle disproportionnée par rapport aux revenus générés par l'exploitation de l'œuvre, ou de l'interprétation ou de l'exécution, l'obligation est limitée aux types et au niveau d'information que l'on peut raisonnablement attendre dans ces cas.
+
+4.   Les États membres peuvent décider que l'obligation énoncée au paragraphe 1 du présent article ne s'applique pas lorsque la contribution de l'auteur ou de l'artiste interprète ou exécutant n'est pas significative par rapport à l'ensemble de l'œuvre ou de l'exécution, à moins que l'auteur, l'artiste interprète ou exécutant ne démontre qu'il a besoin de ces informations pour exercer ses droits au titre de l'article 20, paragraphe 1, et qu'il demande ces informations à cette fin.
+
+5.   Les États membres peuvent prévoir que, pour les accords soumis à des accords collectifs ou fondés sur de tels accords, les règles de transparence de l'accord collectif concerné sont applicables pour autant que ces règles répondent aux critères prévus aux paragraphes 1 à 4.
+
+6.   Lorsque l'article 18 de la directive 2014/26/UE est applicable, l'obligation prévue au paragraphe 1 du présent article ne s'applique pas en ce qui concerne les accords conclus par les entités définies à l'article 3, points a) et b), de ladite directive ou par d'autres entités soumises aux règles nationales mettant en œuvre ladite directive.
+
+Article 20
+
+Mécanisme d'adaptation des contrats
+
+1.   En l'absence d'accord collectif applicable prévoyant un mécanisme comparable à celui énoncé dans le présent article, les États membres veillent à ce que les auteurs et les artistes interprètes ou exécutants ou leurs représentants aient le droit de réclamer à la partie avec laquelle ils ont conclu un contrat d'exploitation des droits ou aux ayants droits de cette partie, une rémunération supplémentaire appropriée et juste lorsque la rémunération initialement convenue se révèle exagérément faible par rapport à l'ensemble des revenus ultérieurement tirés de l'exploitation des œuvres ou des interprétations ou exécutions.
+
+2.   Le paragraphe 1 du présent article ne s'applique pas aux contrats conclus par les entités définies à l'article 3, points a) et b), de la directive 2014/26/UE ou par d'autres entités qui sont déjà soumises aux règles nationales transposant ladite directive.
+
+Article 21
+
+Procédure extra-judiciaire de règlement des litiges
+
+Les États membres prévoient que les litiges relatifs à l'obligation de transparence prévue à l'article 19 et au mécanisme d'adaptation des contrats prévu à l'article 20 peuvent être soumis à une procédure alternative de règlement des litiges volontaire. Les États membres veillent à ce que les organisations représentant les auteurs et les artistes interprètes ou exécutants puissent engager ces procédures à la demande spécifique d'un ou plusieurs auteurs et artistes interprètes ou exécutants.
+
+Article 22
+
+Droit de révocation
+
+1.   Les États membres veillent à ce que, lorsqu'un auteur ou un artiste interprète ou exécutant a octroyé sous licence ou transféré les droits qu'il détient sur une œuvre ou autre objet protégé à titre exclusif, cet auteur, artiste interprète ou exécutant puisse révoquer, en tout ou en partie, la licence ou le transfert de droits en cas de non-exploitation de cette œuvre ou autre objet protégé.
+
+2.   Des dispositions spécifiques relatives au mécanisme de révocation prévu au paragraphe 1 peuvent être prévues dans le droit national, qui tiennent compte:
+
+a)
+
+des spécificités des différents secteurs et des différents types d'œuvres et d'interprétations et d'exécutions; et
+
+b)
+
+lorsqu'une œuvre ou un autre objet protégé comporte la contribution de plus d'un auteur ou d'un artiste interprète ou exécutant, de l'importance relative des contributions individuelles et des intérêts légitimes de tous les auteurs et artistes interprètes ou exécutants concernés par l'application du mécanisme de révocation par un auteur ou un artiste interprète ou exécutant agissant à titre individuel.
+
+Les États membres peuvent exclure des œuvres ou autres objets protégés de l'application du mécanisme de révocation si ces œuvres ou autres objets protégés contiennent généralement des contributions d'une pluralité d'auteurs ou d'artistes interprètes ou exécutants.
+
+Les États membres peuvent prévoir que le mécanisme de révocation ne peut s'appliquer que dans un délai déterminé, lorsqu'une telle restriction est dûment justifiée par les spécificités du secteur ou le type d'œuvre ou autre objet protégé concerné.
+
+Les États membres peuvent prévoir que les auteurs ou les artistes interprètes ou exécutants peuvent choisir de mettre fin à l'exclusivité d'un contrat au lieu de révoquer la licence ou le transfert des droits.
+
+3.   Les États membres prévoient que la révocation prévue au paragraphe 1 ne peut être exercée qu'après un délai raisonnable après la conclusion de l'accord de licence ou de transfert des droits. L'auteur ou l'artiste interprète ou exécutant informe la personne à qui les droits ont été octroyés sous licence ou transférés et fixe un délai approprié à l'échéance duquel l'exploitation des droits octroyés sous licence ou transférés doit avoir lieu. À l'expiration de ce délai, l'auteur ou l'artiste interprète ou exécutant peut choisir de mettre fin à l'exclusivité du contrat au lieu de révoquer la licence ou le transfert des droits.
+
+4.   Le paragraphe 1 ne s'applique pas si l'absence d'exploitation des droits est principalement due à des circonstances auxquelles l'auteur ou l'artiste interprète ou exécutant peut remédier selon toute attente raisonnable.
+
+5.   Les États membres peuvent prévoir que toute disposition contractuelle dérogeant au mécanisme de révocation prévu au paragraphe 1 ne peut être appliquée que si elle est fondée sur un accord collectif.
+
+Article 23
+
+Dispositions communes
+
+1.   Les États membres veillent à ce que toute disposition contractuelle qui fait obstacle au respect des articles 19, 20 et 21 soit inopposable aux auteurs et aux artistes interprètes ou exécutants.
+
+2.   Les États membres prévoient que les articles 18 à 22 de la présente directive ne s'appliquent pas aux auteurs d'un programme d'ordinateur au sens de l'article 2 de la directive 2009/24/CE.
+
+TITRE V
+
+DISPOSITIONS FINALES
+
+Article 24
+
+Modifications des directives 96/9/CE et 2001/29/CE
+
+1.   La directive 96/9/CE est modifiée comme suit:
+
+a)
+
+à l'article 6, paragraphe 2, le point b) est remplacé par le texte suivant:
+
+«b)
+
+lorsqu'il y a utilisation à des fins exclusives d'illustration de l'enseignement ou de recherche scientifique, toujours sous réserve d'indiquer la source, dans la mesure justifiée par le but non commercial poursuivi, sans préjudice des exceptions et des limitations prévues dans la directive (UE) 2019/790 du Parlement européen et du Conseil (*1);
+
+(*1)  Directive (UE) 2019/790 du Parlement européen et du Conseil du 17 avril 2019 sur le droit d'auteur et les droits voisins dans le marché unique numérique et modifiant les directives 96/9/CE et 2001/29/CE (JO L 130 du 17.5.2019, p. 92).»;"
+
+b)
+
+à l'article 9, le point b) est remplacé par le texte suivant:
+
+«b)
+
+lorsqu'il s'agit d'une extraction à des fins d'illustration de l'enseignement ou de recherche scientifique, pour autant qu'il indique la source et dans la mesure justifiée par le but non commercial à atteindre, sans préjudice des exceptions et des limitations prévues dans la directive (UE) 2019/790;».
+
+2.   La directive 2001/29/CE est modifiée comme suit:
+
+a)
+
+à l'article 5, paragraphe 2, le point c) est remplacé par le texte suivant:
+
+«c)
+
+lorsqu'il s'agit d'actes de reproduction spécifiques effectués par des bibliothèques accessibles au public, des établissements d'enseignement ou des musées ou par des archives, qui ne recherchent aucun avantage commercial ou économique direct ou indirect, sans préjudice des exceptions et des limitations prévues par la directive (UE) 2019/790 du Parlement européen et du Conseil (*2);
+
+(*2)  Directive (UE) 2019/790 du Parlement européen et du Conseil du 17 avril 2019 sur le droit d'auteur et les droits voisins dans le marché unique numérique et modifiant les directives 96/9/CE et 2001/29/CE (JO L 130 du 17.5.2019, p. 92).»;"
+
+b)
+
+à l'article 5, paragraphe 3, le point a) est remplacé par le texte suivant:
+
+«a)
+
+lorsqu'il s'agit d'une utilisation à des fins exclusives d'illustration dans le cadre de l'enseignement ou de recherche scientifique, sous réserve d'indiquer, à moins que cela ne s'avère impossible, la source, y compris le nom de l'auteur, dans la mesure justifiée par le but non commercial poursuivi, sans préjudice des exceptions et des limitations prévues dans la directive (UE) 2019/790;»;
+
+c)
+
+à l'article 12, paragraphe 4, les points suivants sont ajoutés:
+
+«e)
+
+d'étudier l'incidence de la transposition de la directive (UE) 2019/790 sur le fonctionnement du marché intérieur et de mettre en lumière toute difficulté de transposition;
+
+f)
+
+de faciliter l'échange d'informations sur les évolutions législatives et jurisprudentielles pertinentes ainsi que sur l'application pratique des mesures prises par les États membres pour mettre en œuvre la directive (UE) 2019/790;
+
+g)
+
+d'examiner toutes les autres questions suscitées par l'application de la directive (UE) 2019/790.»
+
+Article 25
+
+Relation avec les exceptions et les limitations prévues par d'autres directives
+
+Les États membres peuvent adopter ou maintenir en vigueur des dispositions plus larges, compatibles avec les exceptions et les limitations prévues par les directives 96/9/CE et 2001/29/CE, pour les utilisations ou les matières couvertes par les exceptions ou les limitations prévues par la présente directive.
+
+Article 26
+
+Application dans le temps
+
+1.   La présente directive s'applique à l'égard de l'ensemble des œuvres et autres objets protégés qui sont protégés par le droit national en matière de droit d'auteur au 7 juin 2021 ou après cette date.
+
+2.   La présente directive s'applique sans préjudice des actes conclus et des droits acquis avant le 7 juin 2021.
+
+Article 27
+
+Disposition transitoire
+
+Les contrats de licence ou de transfert des droits des auteurs et des artistes interprètes ou exécutants sont soumis à l'obligation de transparence énoncée à l'article 19 à partir du 7 juin 2022.
+
+Article 28
+
+Protection des données à caractère personnel
+
+Le traitement des données à caractère personnel effectué dans le cadre de la présente directive est effectué dans le respect de la directive 2002/58/CE et du règlement (UE) 2016/679.
+
+Article 29
+
+Transposition
+
+1.   Les États membres mettent en vigueur les dispositions législatives, réglementaires et administratives nécessaires pour se conformer à la présente directive au plus tard le 7 juin 2021. Ils en informent immédiatement la Commission.
+
+Lorsque les États membres adoptent ces dispositions, celles-ci contiennent une référence à la présente directive ou sont accompagnées d'une telle référence lors de leur publication officielle. Les modalités de cette référence sont arrêtées par les États membres.
+
+2.   Les États membres communiquent à la Commission le texte des dispositions essentielles de droit interne qu'ils adoptent dans le domaine régi par la présente directive.
+
+Article 30
+
+Réexamen
+
+1.   Au plus tôt le 7 juin 2026, la Commission procède au réexamen de la présente directive et présente un rapport exposant ses principales conclusions au Parlement européen, au Conseil et au Comité économique et social européen.
+
+La Commission évalue, au plus tard le 7 juin 2024, l'incidence du régime de responsabilité spécifique énoncé à l'article 17 applicable aux fournisseurs de services de partage de contenus en ligne dont le chiffre d'affaires annuel est inférieur à 10 millions d'euros et dont les services ont été mis à la disposition du public dans l'Union depuis moins de trois ans en vertu de l'article 17, paragraphe 6, et, le cas échéant, prend des mesures conformément aux conclusions de son évaluation.
+
+2.   Les États membres fournissent à la Commission les informations nécessaires à l'établissement du rapport visé au paragraphe 1.
+
+Article 31
+
+Entrée en vigueur
+
+La présente décision entre en vigueur le vingtième jour suivant celui de sa publication au Journal officiel de l'Union européenne.
+
+Article 32
+
+Destinataires
+
+Les États membres sont destinataires de la présente directive.
+
+Fait à Strasbourg, le 17 avril 2019.
+
+Par le Parlement européen
+
+Le président
+
+A. TAJANI
+
+Par le Conseil
+
+Le président
+
+G. CIAMBA
+
+(1)
+JO C 125 du 21.4.2017, p. 27.
+
+(2)
+JO C 207 du 30.6.2017, p. 80.
+
+(3)  Position du Parlement européen du 26 mars 2019 (non encore parue au Journal officiel) et décision du Conseil du 15 avril 2019.
+
+(4)  Directive 96/9/CE du Parlement européen et du Conseil, du 11 mars 1996, concernant la protection juridique des bases de données (JO L 77 du 27.3.1996, p. 20).
+
+(5)  Directive 2000/31/CE du Parlement européen et du Conseil du 8 juin 2000 relative à certains aspects juridiques des services de la société de l'information, et notamment du commerce électronique, dans le marché intérieur (directive sur le commerce électronique) (JO L 178 du 17.7.2000, p. 1).
+
+(6)  Directive 2001/29/CE du Parlement européen et du Conseil du 22 mai 2001 sur l'harmonisation de certains aspects du droit d'auteur et des droits voisins dans la société de l'information (JO L 167 du 22.6.2001, p. 10).
+
+(7)  Directive 2006/115/CE du Parlement européen et du Conseil du 12 décembre 2006 relative au droit de location et de prêt et à certains droits voisins du droit d'auteur dans le domaine de la propriété intellectuelle (JO L 376 du 27.12.2006, p. 28).
+
+(8)  Directive 2009/24/CE du Parlement européen et du Conseil du 23 avril 2009 concernant la protection juridique des programmes d'ordinateur (JO L 111 du 5.5.2009, p. 16).
+
+(9)  Directive 2012/28/UE du Parlement européen et du Conseil du 25 octobre 2012 sur certaines utilisations autorisées des œuvres orphelines (JO L 299 du 27.10.2012, p. 5).
+
+(10)  Directive 2014/26/UE du Parlement européen et du Conseil du 26 février 2014 concernant la gestion collective du droit d'auteur et des droits voisins et l'octroi de licences multiterritoriales de droits sur des œuvres musicales en vue de leur utilisation en ligne dans le marché intérieur (JO L 84 du 20.3.2014, p. 72).
+
+(11)  Règlement (UE) no 386/2012 du Parlement européen et du Conseil du 19 avril 2012 confiant à l'Office de l'harmonisation dans le marché intérieur (marques, dessins et modèles) des tâches liées au respect des droits de propriété intellectuelle, notamment la réunion de représentants des secteurs public et privé au sein d'un Observatoire européen des atteintes aux droits de propriété intellectuelle (JO L 129 du 16.5.2012, p. 1).
+
+(12)  Directive 93/83/CEE du Conseil du 27 septembre 1993 relative à la coordination de certaines règles du droit d'auteur et des droits voisins du droit d'auteur applicables à la radiodiffusion par satellite et à la retransmission par câble (JO L 248 du 6.10.1993, p. 15).
+
+(13)  Directive (UE) 2015/1535 du Parlement européen et du Conseil du 9 septembre 2015 prévoyant une procédure d'information dans le domaine des réglementations techniques et des règles relatives aux services de la société de l'information (JO L 241 du 17.9.2015, p. 1).
+
+(14)  Directive (UE) 2018/1972 du Parlement européen et du Conseil du 11 décembre 2018 établissant le code des communications électroniques européen (JO L 321 du 17.12.2018, p. 36).
+
+(15)  Directive 2002/58/CE du Parlement européen et du Conseil du 12 juillet 2002 concernant le traitement des données à caractère personnel et la protection de la vie privée dans le secteur des communications électroniques (directive vie privée et communications électroniques) (JO L 201 du 31.7.2002, p. 37).
+
+(16)  Règlement (UE) 2016/679 du Parlement européen et du Conseil du 27 avril 2016 relatif à la protection des personnes physiques à l'égard du traitement des données à caractère personnel et à la libre circulation de ces données, et abrogeant la directive 95/46/CE (règlement général sur la protection des données) (JO L 119 du 4.5.2016, p. 1).
+
+(17)  Règlement (CE) no 593/2008 du Parlement européen et du Conseil du 17 juin 2008 sur la loi applicable aux obligations contractuelles (Rome I) (JO L 177 du 4.7.2008, p. 6).
+
+(18)
+JO C 369 du 17.12.2011, p. 14.
+
+(19)  Directive (UE) 2017/1564 du Parlement européen et du Conseil du 13 septembre 2017 sur certaines utilisations autorisées de certaines œuvres et d'autres objets protégés par le droit d'auteur et les droits voisins en faveur des aveugles, des déficients visuels et des personnes ayant d'autres difficultés de lecture des textes imprimés et modifiant la directive 2001/29/CE sur l'harmonisation de certains aspects du droit d'auteur et des droits voisins dans la société de l'information (JO L 242 du 20.9.2017, p. 6).
+
+(20)  Recommandation de la Commission du 6 mai 2003 concernant la définition des micro, petites et moyennes entreprises (JO L 124 du 20.5.2003, p. 36).
