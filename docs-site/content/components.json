@@ -1,0 +1,18 @@
+{
+  "components": [
+    {
+      "id": "tool-registry",
+      "group": "tools",
+      "tier": "A",
+      "title": { "en": "Tool registry and wrapper order", "vi": "Registry công cụ và thứ tự bọc" },
+      "summary": {
+        "en": "Single source of truth for how a tool reaches the model: READ tools auto-run, non-READ tools are gated, audit wraps outermost.",
+        "vi": "Nguồn sự thật duy nhất cho việc một tool đến tay model: tool READ chạy thẳng, tool non-READ bị chặn hỏi, audit bọc ngoài cùng."
+      },
+      "modules": ["declaw/tools/registry.py"],
+      "tickets": [],
+      "detail": "tool-registry",
+      "sources": [{ "file": "declaw/tools/registry.py", "start": 105, "end": 148 }]
+    }
+  ]
+}

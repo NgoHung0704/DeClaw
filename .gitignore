@@ -42,3 +42,8 @@ src-tauri/target/
 .coverage
 htmlcov/
 coverage.xml
+
+# docs-site
+docs-site/node_modules/
+docs-site/dist/
+docs-site/content/repo.json

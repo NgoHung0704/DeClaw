@@ -1,0 +1,9 @@
+{
+  "site": {
+    "title": { "en": "DeClaw Architecture", "vi": "Kiến trúc DeClaw" },
+    "tagline": {
+      "en": "How this repository is put together, and what it still owes.",
+      "vi": "Repo này được ghép lại thế nào, và còn nợ những gì."
+    }
+  }
+}
