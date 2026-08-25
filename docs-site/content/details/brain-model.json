@@ -1,0 +1,89 @@
+{
+  "component": "brain-model",
+  "functions": [
+    {
+      "id": "build_ollama_model",
+      "name": "build_ollama_model",
+      "signature": "build_ollama_model(tools, *, model=None, base_url=None) -> ModelCallable",
+      "file": "declaw/brain/chat_model.py",
+      "line": 25,
+      "note": {
+        "en": "Builds ChatOllama and binds the tool schemas, then adapts it to the injected ModelCallable seam the loop expects.",
+        "vi": "Dựng ChatOllama và gắn schema tool, rồi bọc lại thành seam ModelCallable mà vòng lặp mong đợi."
+      }
+    },
+    {
+      "id": "estimate_tokens",
+      "name": "estimate_tokens",
+      "signature": "estimate_tokens(messages: Sequence[BaseMessage]) -> int",
+      "file": "declaw/brain/context.py",
+      "line": 46,
+      "note": {
+        "en": "A deliberately conservative heuristic that over-estimates, so the prompt never silently exceeds the window.",
+        "vi": "Một heuristic cố ý thận trọng, luôn ước lượng dư, nên prompt không bao giờ âm thầm vượt cửa sổ."
+      }
+    },
+    {
+      "id": "fit_to_window",
+      "name": "fit_to_window",
+      "signature": "fit_to_window(messages, *, hard_cap, soft_cap, counter) -> list",
+      "file": "declaw/brain/context.py",
+      "line": 55,
+      "note": {
+        "en": "Trims the model-facing view only. The full history stays in AgentState, so nothing is lost for audit.",
+        "vi": "Chỉ cắt phần model nhìn thấy. Toàn bộ lịch sử vẫn nằm trong AgentState nên không mất gì cho kiểm toán."
+      }
+    },
+    {
+      "id": "with_context_window",
+      "name": "with_context_window",
+      "signature": "with_context_window(model, ...) -> ModelCallable",
+      "file": "declaw/brain/context.py",
+      "line": 87,
+      "note": {
+        "en": "A composable wrapper, so context management stacks with compaction and repair instead of being baked in.",
+        "vi": "Wrapper ghép được, nên quản lý ngữ cảnh chồng lên nén và sửa lỗi thay vì bị nhét cứng vào."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [],
+  "quotes": [
+    {
+      "file": "declaw/brain/context.py",
+      "start": 46,
+      "end": 54,
+      "anchor": "def estimate_tokens",
+      "note": {
+        "en": "Token counting is injectable, so a precise tokenizer can replace the heuristic without touching callers.",
+        "vi": "Việc đếm token có thể tiêm vào, nên một tokenizer chính xác có thể thay heuristic mà không đụng tới nơi gọi."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-repair-off",
+      "title": {
+        "en": "Tool-call repair is built but not enabled",
+        "vi": "Sửa lời gọi tool đã có nhưng không bật"
+      },
+      "body": {
+        "en": "Measured on the 50-prompt corpus, re-prompting after a bad tool call traded \"wrong tool\" for \"no tool\" and lowered net accuracy. Two of its three detection branches never fired on real Ollama output.",
+        "vi": "Đo trên bộ 50 prompt, việc hỏi lại sau một lời gọi tool sai đã đổi \"sai tool\" thành \"không gọi tool\" và làm giảm độ chính xác tổng. Hai trong ba nhánh phát hiện của nó chưa bao giờ kích hoạt trên đầu ra Ollama thật."
+      },
+      "source": {
+        "file": "declaw/brain/repair.py",
+        "start": 1,
+        "end": 12,
+        "anchor": "repair",
+        "note": {
+          "en": "The wrapper still exists and is still composable; it is simply not in the default.",
+          "vi": "Wrapper vẫn tồn tại và vẫn ghép được; chỉ là không nằm trong mặc định."
+        }
+      },
+      "principles": [
+        "P6"
+      ]
+    }
+  ]
+}

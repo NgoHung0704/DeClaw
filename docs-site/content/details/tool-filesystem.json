@@ -1,0 +1,56 @@
+{
+  "component": "tool-filesystem",
+  "functions": [
+    {
+      "id": "resolve_in_workspace",
+      "name": "resolve_in_workspace",
+      "signature": "resolve_in_workspace(raw_path: str) -> Path",
+      "file": "declaw/tools/builtin/_paths.py",
+      "line": 1,
+      "note": {
+        "en": "The single containment boundary: reject absolute paths, canonicalise symlinks and short names, then prove the result is inside the workspace.",
+        "vi": "Ranh giới chứa duy nhất: từ chối đường dẫn tuyệt đối, chuẩn hoá symlink và tên rút gọn, rồi chứng minh kết quả nằm trong workspace."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [],
+  "quotes": [
+    {
+      "file": "declaw/tools/builtin/_paths.py",
+      "start": 1,
+      "end": 25,
+      "anchor": "workspace",
+      "note": {
+        "en": "Promoted into its own module once four tools depended on it, so the boundary has exactly one implementation.",
+        "vi": "Được tách ra thành module riêng khi đã có bốn tool phụ thuộc, để ranh giới chỉ có duy nhất một hiện thực."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-windows-colon",
+      "title": {
+        "en": "On Windows a colon in a path is always an attack surface",
+        "vi": "Trên Windows, dấu hai chấm trong đường dẫn luôn là bề mặt tấn công"
+      },
+      "body": {
+        "en": "A colon can never be a legal filename character on Windows, so it is always either a drive-relative spec or an NTFS alternate data stream. POSIX allows it and has neither, so the check is platform-gated.",
+        "vi": "Trên Windows dấu hai chấm không bao giờ là ký tự tên tệp hợp lệ, nên nó luôn là drive spec hoặc NTFS alternate data stream. POSIX cho phép ký tự này và không có hai thứ đó, nên kiểm tra bị giới hạn theo nền tảng."
+      },
+      "source": {
+        "file": "declaw/tools/builtin/_paths.py",
+        "start": 1,
+        "end": 25,
+        "anchor": "workspace",
+        "note": {
+          "en": "The resolver documents each rejection layer.",
+          "vi": "Resolver ghi rõ từng lớp từ chối."
+        }
+      },
+      "principles": [
+        "P6"
+      ]
+    }
+  ]
+}

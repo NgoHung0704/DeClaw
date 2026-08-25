@@ -1,0 +1,178 @@
+{
+  "component": "sanitizer",
+  "functions": [
+    {
+      "id": "build_ollama_classifier",
+      "name": "build_ollama_classifier",
+      "signature": "build_ollama_classifier(*, model=None, base_url=None, language=None) -> Classifier",
+      "file": "declaw/sanitizer/classifier.py",
+      "line": 47,
+      "note": {
+        "en": "Builds a separate model session at temperature 0 with structured output. Every call rebuilds the message list, so the classifier is stateless by construction.",
+        "vi": "Dựng một phiên model riêng ở temperature 0 với đầu ra có cấu trúc. Mỗi lần gọi đều dựng lại danh sách tin nhắn, nên bộ phân loại không trạng thái theo thiết kế."
+      }
+    },
+    {
+      "id": "wrap_tool_with_sanitizer",
+      "name": "wrap_tool_with_sanitizer",
+      "signature": "wrap_tool_with_sanitizer(tool, language, sanitizer) -> StructuredTool",
+      "file": "declaw/sanitizer/pipeline.py",
+      "line": 47,
+      "note": {
+        "en": "Routes a tool output through the classifier. UNSAFE output is quarantined and replaced with a localized placeholder; no code path returns the raw payload.",
+        "vi": "Đưa đầu ra của tool qua bộ phân loại. Đầu ra UNSAFE bị cách ly và thay bằng chuỗi thay thế đúng ngôn ngữ; không nhánh mã nào trả về payload gốc."
+      }
+    },
+    {
+      "id": "Sanitizer.check",
+      "name": "Sanitizer.check",
+      "signature": "check(content, *, source) -> SanitizationResult",
+      "file": "declaw/sanitizer/sanitizer.py",
+      "line": 49,
+      "note": {
+        "en": "The orchestrator. On SAFE the result carries the content; on UNSAFE it carries only a quarantine id.",
+        "vi": "Bộ điều phối. Khi SAFE, kết quả mang theo nội dung; khi UNSAFE, nó chỉ mang một id cách ly."
+      }
+    }
+  ],
+  "flows": [
+    {
+      "id": "sanitize-one-read",
+      "title": {
+        "en": "One untrusted file read",
+        "vi": "Một lần đọc tệp không tin cậy"
+      },
+      "nodes": [
+        {
+          "id": "tool-out",
+          "kind": "port",
+          "label": {
+            "en": "Tool returns file content",
+            "vi": "Tool trả về nội dung tệp"
+          }
+        },
+        {
+          "id": "classify",
+          "kind": "step",
+          "label": {
+            "en": "Second model session classifies it",
+            "vi": "Phiên model thứ hai phân loại"
+          }
+        },
+        {
+          "id": "verdict",
+          "kind": "gate",
+          "label": {
+            "en": "SAFE or UNSAFE?",
+            "vi": "SAFE hay UNSAFE?"
+          }
+        },
+        {
+          "id": "pass",
+          "kind": "exit",
+          "label": {
+            "en": "Content reaches the brain",
+            "vi": "Nội dung tới brain"
+          }
+        },
+        {
+          "id": "quarantine",
+          "kind": "exit",
+          "label": {
+            "en": "Quarantined, user told",
+            "vi": "Bị cách ly, báo cho người dùng"
+          }
+        }
+      ],
+      "edges": [
+        {
+          "id": "e-fence",
+          "from": "tool-out",
+          "to": "classify",
+          "label": {
+            "en": "fenced as data, never commands",
+            "vi": "rào lại như dữ liệu, không phải lệnh"
+          }
+        },
+        {
+          "id": "e-verdict",
+          "from": "classify",
+          "to": "verdict",
+          "label": {
+            "en": "structured verdict only",
+            "vi": "chỉ nhận verdict có cấu trúc"
+          }
+        },
+        {
+          "id": "e-safe",
+          "from": "verdict",
+          "to": "pass",
+          "label": {
+            "en": "SAFE",
+            "vi": "SAFE"
+          }
+        },
+        {
+          "id": "e-unsafe",
+          "from": "verdict",
+          "to": "quarantine",
+          "label": {
+            "en": "UNSAFE, or anything unparseable",
+            "vi": "UNSAFE, hoặc bất cứ thứ gì không phân tích được"
+          }
+        }
+      ]
+    }
+  ],
+  "snippets": [
+    {
+      "file": "declaw/sanitizer/classifier.py",
+      "start": 74,
+      "end": 78,
+      "code": "        try:\n            raw = await structured.ainvoke(messages)\n        except Exception as exc:  # noqa: BLE001 - any failure must fail closed\n            return unsafe_fallback(f\"sanitizer error: {type(exc).__name__}\")\n        return _coerce_verdict(raw)",
+      "caption": {
+        "en": "Fail-closed in four lines: any exception becomes an UNSAFE verdict rather than a pass.",
+        "vi": "Fail-closed trong bốn dòng: mọi ngoại lệ thành verdict UNSAFE chứ không cho qua."
+      }
+    }
+  ],
+  "quotes": [
+    {
+      "file": "declaw/sanitizer/sanitizer.py",
+      "start": 33,
+      "end": 40,
+      "anchor": "cannot carry the payload toward the brain",
+      "note": {
+        "en": "The UNSAFE result has no field that could hold the content, so leaking it is a type error rather than a mistake someone has to avoid.",
+        "vi": "Kết quả UNSAFE không có trường nào chứa được nội dung, nên rò rỉ là lỗi kiểu chứ không phải điều ai đó phải nhớ tránh."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-fail-closed",
+      "title": {
+        "en": "Unparseable means unsafe",
+        "vi": "Không phân tích được nghĩa là không an toàn"
+      },
+      "body": {
+        "en": "If the classifier errors, times out, or answers something that is not a verdict, the content is treated as UNSAFE. The alternative would let a crash become a bypass.",
+        "vi": "Nếu bộ phân loại lỗi, hết giờ, hay trả về thứ không phải verdict thì nội dung bị coi là UNSAFE. Cách khác sẽ biến một lần crash thành một đường vòng qua hàng rào."
+      },
+      "source": {
+        "file": "declaw/sanitizer/classifier.py",
+        "start": 74,
+        "end": 78,
+        "anchor": "any failure must fail closed",
+        "note": {
+          "en": "The rule is written on the except line itself.",
+          "vi": "Quy tắc được ghi ngay trên dòng except."
+        }
+      },
+      "principles": [
+        "P4",
+        "P5"
+      ]
+    }
+  ]
+}

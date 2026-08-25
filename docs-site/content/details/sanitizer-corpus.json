@@ -1,0 +1,56 @@
+{
+  "component": "sanitizer-corpus",
+  "functions": [
+    {
+      "id": "heldout",
+      "name": "HELD_OUT_INJECTIONS",
+      "signature": "corpus/heldout.py",
+      "file": "declaw/sanitizer/corpus/heldout.py",
+      "line": 1,
+      "note": {
+        "en": "External samples the project did not write, labelled mechanically against our own UNSAFE definition rather than by reusing their labels.",
+        "vi": "Các mẫu bên ngoài không do dự án viết, được gán nhãn máy móc theo định nghĩa UNSAFE của chính chúng ta thay vì mượn nhãn của họ."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [],
+  "quotes": [
+    {
+      "file": "declaw/sanitizer/corpus/heldout.py",
+      "start": 1,
+      "end": 30,
+      "anchor": "held",
+      "note": {
+        "en": "Two rules are written into the module docstring and enforced by tests: never quote held-out samples in a prompt, and never tune against individual failures in it.",
+        "vi": "Hai quy tắc được ghi trong docstring của module và được test thực thi: không bao giờ trích mẫu held-out vào prompt, và không bao giờ tinh chỉnh theo từng lỗi cụ thể trong đó."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-heldout",
+      "title": {
+        "en": "A self-written corpus grades its own homework",
+        "vi": "Bộ mẫu tự viết là tự chấm bài mình"
+      },
+      "body": {
+        "en": "The sanitizer scored 91.7% on the corpus this project wrote and 53.3% on external data. Detection tracked corpus coverage almost exactly: 92% where samples were thick, 0% for a family with no samples at all.",
+        "vi": "Sanitizer đạt 91,7% trên bộ mẫu do dự án này viết và 53,3% trên dữ liệu bên ngoài. Khả năng phát hiện bám gần như chính xác theo độ phủ của bộ mẫu: 92% ở nơi có nhiều mẫu, 0% với một họ tấn công hoàn toàn không có mẫu nào."
+      },
+      "source": {
+        "file": "declaw/sanitizer/corpus/heldout.py",
+        "start": 1,
+        "end": 30,
+        "anchor": "held",
+        "note": {
+          "en": "The held-out module exists precisely to keep that gap visible.",
+          "vi": "Module held-out tồn tại chính là để giữ cho khoảng cách đó luôn hiện rõ."
+        }
+      },
+      "principles": [
+        "P4"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "component": "entry-cli",
+  "functions": [
+    {
+      "id": "chat",
+      "name": "chat",
+      "signature": "declaw chat [--debug]",
+      "file": "declaw/main.py",
+      "line": 103,
+      "note": {
+        "en": "Health-checks Ollama, builds the registry, starts the plugin host and the graph inside one event loop, then drives the REPL.",
+        "vi": "Kiểm tra Ollama, dựng registry, khởi động plugin host và graph trong cùng một event loop, rồi chạy REPL."
+      }
+    },
+    {
+      "id": "index",
+      "name": "index",
+      "signature": "declaw index [folder]",
+      "file": "declaw/main.py",
+      "line": 442,
+      "note": {
+        "en": "Indexes a folder of documents, skipping unchanged files by content hash.",
+        "vi": "Lập chỉ mục một thư mục tài liệu, bỏ qua các tệp không đổi dựa trên hash nội dung."
+      }
+    },
+    {
+      "id": "get_settings",
+      "name": "get_settings",
+      "signature": "get_settings() -> Settings",
+      "file": "declaw/config.py",
+      "line": 135,
+      "note": {
+        "en": "The cached settings singleton every module reads configuration from.",
+        "vi": "Singleton cấu hình được cache mà mọi module đọc thiết lập từ đó."
+      }
+    },
+    {
+      "id": "run_all",
+      "name": "run_all",
+      "signature": "run_all(settings=None) -> list[CheckResult]",
+      "file": "declaw/preflight.py",
+      "line": 230,
+      "note": {
+        "en": "Runs every preflight check. Each result carries a separate remedy field, so a failure tells the user what to do.",
+        "vi": "Chạy mọi kiểm tra preflight. Mỗi kết quả có trường remedy riêng, nên khi lỗi thì người dùng biết phải làm gì."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [
+    {
+      "file": "declaw/config.py",
+      "start": 115,
+      "end": 122,
+      "code": "    def _enforce_loopback(cls, value: str) -> str:\n        # Inviolable Principle #2: never bind outside loopback.\n        if value not in {\"127.0.0.1\", \"localhost\", \"::1\"}:\n            raise ValueError(\n                f\"DECLAW_HOST must be a loopback address (got {value!r}). \"\n                \"Binding the gateway outside 127.0.0.1 is forbidden.\"\n            )\n        return value",
+      "caption": {
+        "en": "Principle #2 enforced in code: a non-loopback host is refused at config load, not at bind time.",
+        "vi": "Nguyên tắc #2 được thực thi trong mã: host không phải loopback bị từ chối ngay khi nạp config, không đợi tới lúc bind."
+      }
+    }
+  ],
+  "quotes": [
+    {
+      "file": "declaw/preflight.py",
+      "start": 53,
+      "end": 74,
+      "anchor": "def _check_model_pulled",
+      "note": {
+        "en": "The model check matches an untagged name against its :latest tag, because that is what ollama pull actually stores.",
+        "vi": "Kiểm tra model so khớp tên không tag với tag :latest, vì đó mới là thứ ollama pull thực sự lưu."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-loopback",
+      "title": {
+        "en": "The gateway host is validated at config load",
+        "vi": "Host gateway được kiểm ngay khi nạp config"
+      },
+      "body": {
+        "en": "Binding outside 127.0.0.1 is forbidden, and the validator refuses the value before anything can bind it. The check is a field validator, not a runtime warning.",
+        "vi": "Bind ra ngoài 127.0.0.1 là điều cấm, và validator từ chối giá trị trước khi bất cứ thứ gì kịp bind. Đây là field validator chứ không phải cảnh báo lúc chạy."
+      },
+      "source": {
+        "file": "declaw/config.py",
+        "start": 115,
+        "end": 122,
+        "anchor": "Inviolable Principle #2",
+        "note": {
+          "en": "The principle is cited in the validator itself.",
+          "vi": "Nguyên tắc được trích dẫn ngay trong validator."
+        }
+      },
+      "principles": [
+        "P2"
+      ]
+    }
+  ]
+}

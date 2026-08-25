@@ -1,0 +1,89 @@
+{
+  "component": "brain-repl",
+  "functions": [
+    {
+      "id": "build_brain",
+      "name": "build_brain",
+      "signature": "build_brain(tools: Sequence[BaseTool] | None = None) -> AgentGraph",
+      "file": "declaw/brain/repl.py",
+      "line": 68,
+      "note": {
+        "en": "The first end-to-end assembly: context-managed model plus tools, compiled into the graph.",
+        "vi": "Bản lắp ráp đầu-cuối đầu tiên: model có quản lý ngữ cảnh cộng với tool, biên dịch thành graph."
+      }
+    },
+    {
+      "id": "make_console_confirmation_provider",
+      "name": "make_console_confirmation_provider",
+      "signature": "make_console_confirmation_provider(prompt, language) -> ConfirmationProvider",
+      "file": "declaw/brain/repl.py",
+      "line": 81,
+      "note": {
+        "en": "Runs the blocking prompt through asyncio.to_thread so waiting on a human never stalls the event loop.",
+        "vi": "Chạy prompt chặn qua asyncio.to_thread nên việc chờ người dùng không bao giờ làm nghẽn event loop."
+      }
+    },
+    {
+      "id": "run_chat",
+      "name": "run_chat",
+      "signature": "run_chat(graph, *, read, write, debug=False, language=...)",
+      "file": "declaw/brain/repl.py",
+      "line": 142,
+      "note": {
+        "en": "The multi-turn loop with injected I/O, so it is testable without a terminal. A failed turn is rolled back, leaving only completed turns in history.",
+        "vi": "Vòng lặp nhiều lượt với I/O tiêm vào, nên kiểm thử được mà không cần terminal. Lượt thất bại bị hoàn tác, lịch sử chỉ giữ các lượt hoàn tất."
+      }
+    },
+    {
+      "id": "turn_failure_message",
+      "name": "turn_failure_message",
+      "signature": "turn_failure_message(exc: Exception, language: Language) -> str",
+      "file": "declaw/brain/repl.py",
+      "line": 113,
+      "note": {
+        "en": "Reports a mid-turn failure to the user in their language instead of printing a traceback and exiting.",
+        "vi": "Báo lỗi giữa lượt cho người dùng bằng ngôn ngữ của họ thay vì in traceback rồi thoát."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [],
+  "quotes": [
+    {
+      "file": "declaw/brain/repl.py",
+      "start": 84,
+      "end": 95,
+      "anchor": "anything",
+      "note": {
+        "en": "Only an explicit yes approves. EOF, Ctrl-C and anything unrecognised all deny, so the safe default when the user cannot answer is no.",
+        "vi": "Chỉ một câu đồng ý rõ ràng mới được duyệt. EOF, Ctrl-C và mọi thứ không nhận dạng được đều bị từ chối, nên mặc định an toàn khi người dùng không trả lời được là không."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-no-system-prompt",
+      "title": {
+        "en": "Chat deliberately seeds no system prompt",
+        "vi": "Chat cố ý không nạp system prompt"
+      },
+      "body": {
+        "en": "A prompt-variant experiment showed any instruction text collapsed tool-calling on the model of the day, and tool-related wording was the worst. The prompts remain available for compositions that do not bind tools.",
+        "vi": "Thí nghiệm biến thể prompt cho thấy mọi đoạn chỉ dẫn đều làm sập khả năng gọi tool của model thời điểm đó, và chữ nghĩa liên quan tới tool là tệ nhất. Các prompt vẫn còn đó cho những cấu hình không gắn tool."
+      },
+      "source": {
+        "file": "declaw/brain/prompts.py",
+        "start": 1,
+        "end": 10,
+        "anchor": "prompt",
+        "note": {
+          "en": "The module still ships the bilingual prompts it built.",
+          "vi": "Module vẫn cung cấp các prompt song ngữ đã dựng."
+        }
+      },
+      "principles": [
+        "P4"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "component": "planned-surfaces",
+  "functions": [
+    {
+      "id": "gateway",
+      "name": "declaw.gateway",
+      "signature": "empty package",
+      "file": "declaw/gateway/__init__.py",
+      "line": 1,
+      "note": {
+        "en": "Zero bytes. The FastAPI gateway is named in the architecture and in the dependency list, and no route exists yet.",
+        "vi": "Không byte nào. Gateway FastAPI được nêu trong kiến trúc và trong danh sách dependency, nhưng chưa có route nào tồn tại."
+      }
+    },
+    {
+      "id": "routes",
+      "name": "declaw.gateway.routes",
+      "signature": "empty package",
+      "file": "declaw/gateway/routes/__init__.py",
+      "line": 1,
+      "note": {
+        "en": "Zero bytes. The route package is a placeholder for the Phase 9 web UI.",
+        "vi": "Không byte nào. Package route là chỗ giữ sẵn cho web UI ở Phase 9."
+      }
+    },
+    {
+      "id": "sandbox",
+      "name": "declaw.sandbox",
+      "signature": "empty package",
+      "file": "declaw/sandbox/__init__.py",
+      "line": 1,
+      "note": {
+        "en": "Zero bytes. Shell execution was dropped from v0.1, so the Docker sandbox was deferred rather than built.",
+        "vi": "Không byte nào. Việc chạy shell đã bị loại khỏi v0.1, nên sandbox Docker được hoãn lại chứ không được xây."
+      }
+    }
+  ],
+  "flows": [],
+  "snippets": [],
+  "quotes": [
+    {
+      "file": "pyproject.toml",
+      "start": 1,
+      "end": 40,
+      "anchor": "fastapi",
+      "note": {
+        "en": "FastAPI, uvicorn and docker are all declared dependencies of a project that uses none of them yet.",
+        "vi": "FastAPI, uvicorn và docker đều là dependency đã khai báo của một dự án chưa dùng tới cái nào."
+      }
+    }
+  ],
+  "why": [
+    {
+      "id": "why-empty-packages",
+      "title": {
+        "en": "These packages are honest placeholders",
+        "vi": "Các package này là chỗ giữ sẵn được nói thật"
+      },
+      "body": {
+        "en": "Reading the dependency list suggests a running web gateway and a working sandbox. Neither exists. The files are kept in the coverage universe on purpose, so this page cannot quietly omit them.",
+        "vi": "Đọc danh sách dependency sẽ tưởng có một web gateway đang chạy và một sandbox hoạt động. Không cái nào tồn tại. Các tệp này được cố ý giữ trong phạm vi kiểm tra độ phủ, để trang này không thể lặng lẽ bỏ qua chúng."
+      },
+      "source": {
+        "file": "pyproject.toml",
+        "start": 1,
+        "end": 40,
+        "anchor": "uvicorn",
+        "note": {
+          "en": "Declared, not used.",
+          "vi": "Đã khai báo, chưa dùng."
+        }
+      },
+      "principles": []
+    }
+  ]
+}
