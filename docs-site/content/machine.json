@@ -1,362 +1,712 @@
 {
   "id": "machine",
   "title": {
-    "en": "DeClaw as a production line",
-    "vi": "DeClaw như một dây chuyền sản xuất"
+    "en": "DeClaw as a machine",
+    "vi": "DeClaw như một cỗ máy"
   },
-  "nodes": [
+  "canvas": {
+    "width": 1480,
+    "height": 760
+  },
+  "chassis": {
+    "x": 320,
+    "y": 70,
+    "w": 780,
+    "h": 620,
+    "label": {
+      "en": "DeClaw, one local process",
+      "vi": "DeClaw, một tiến trình cục bộ"
+    }
+  },
+  "ports": [
     {
       "id": "port-prompt",
-      "kind": "port",
-      "component": "brain-repl",
+      "x": 50,
+      "y": 150,
+      "w": 210,
+      "h": 62,
       "label": {
-        "en": "Intake: a user turn",
-        "vi": "Cổng vào: một lượt người dùng"
+        "en": "A user turn",
+        "vi": "Một lượt người dùng"
       },
-      "x": 40,
-      "y": 90,
-      "w": 190,
-      "h": 62
+      "note": {
+        "en": "You type a question in declaw chat.",
+        "vi": "Bạn gõ một câu hỏi trong declaw chat."
+      }
     },
     {
       "id": "port-document",
-      "kind": "port",
-      "component": "documents",
+      "x": 50,
+      "y": 300,
+      "w": 210,
+      "h": 62,
       "label": {
-        "en": "Intake: a folder of documents",
-        "vi": "Cổng vào: một thư mục tài liệu"
+        "en": "A folder of documents",
+        "vi": "Một thư mục tài liệu"
       },
-      "x": 40,
-      "y": 470,
-      "w": 190,
-      "h": 62
+      "note": {
+        "en": "declaw index walks the workspace.",
+        "vi": "declaw index duyệt workspace."
+      }
     },
+    {
+      "id": "port-plugin",
+      "x": 50,
+      "y": 450,
+      "w": 210,
+      "h": 62,
+      "label": {
+        "en": "A builtin plugin",
+        "vi": "Một plugin builtin"
+      },
+      "note": {
+        "en": "Discovered, validated, then launched.",
+        "vi": "Được phát hiện, kiểm tra, rồi khởi chạy."
+      }
+    }
+  ],
+  "parts": [
     {
       "id": "part-brain",
-      "kind": "step",
       "component": "brain-loop",
+      "x": 356,
+      "y": 120,
+      "w": 250,
+      "h": 96,
       "label": {
-        "en": "Agent loop decides",
-        "vi": "Vòng lặp agent quyết định"
+        "en": "Agent loop",
+        "vi": "Vòng lặp agent"
       },
-      "x": 290,
-      "y": 90,
-      "w": 190,
-      "h": 62
+      "note": {
+        "en": "Thinks, calls a tool, observes the result, thinks again.",
+        "vi": "Nghĩ, gọi tool, quan sát kết quả, rồi nghĩ tiếp."
+      },
+      "subparts": [
+        {
+          "id": "declaw/brain/__init__.py",
+          "file": "declaw/brain/__init__.py",
+          "label": "__init__.py",
+          "path": "declaw/brain/__init__.py"
+        },
+        {
+          "id": "declaw/brain/loop.py",
+          "file": "declaw/brain/loop.py",
+          "label": "loop.py",
+          "path": "declaw/brain/loop.py"
+        },
+        {
+          "id": "declaw/brain/state.py",
+          "file": "declaw/brain/state.py",
+          "label": "state.py",
+          "path": "declaw/brain/state.py"
+        }
+      ]
     },
     {
-      "id": "part-index",
-      "kind": "step",
-      "component": "documents",
-      "label": {
-        "en": "Indexer stores chunks",
-        "vi": "Indexer lưu các chunk"
-      },
-      "x": 290,
-      "y": 470,
-      "w": 190,
-      "h": 62
-    },
-    {
-      "id": "part-audit",
-      "kind": "step",
-      "component": "audit",
-      "label": {
-        "en": "Audit wrapper, outermost",
-        "vi": "Wrapper audit, ngoài cùng"
-      },
-      "x": 540,
-      "y": 90,
-      "w": 190,
-      "h": 62
-    },
-    {
-      "id": "gate-classification",
-      "kind": "gate",
-      "label": {
-        "en": "READ, and does it produce outside content?",
-        "vi": "Là READ, và có sinh nội dung từ bên ngoài không?"
-      },
-      "x": 530,
-      "y": 250,
-      "w": 210,
-      "h": 86
-    },
-    {
-      "id": "part-confirmation",
-      "kind": "step",
+      "id": "part-tools",
       "component": "tool-registry",
+      "x": 814,
+      "y": 120,
+      "w": 250,
+      "h": 96,
       "label": {
-        "en": "Confirmation gate asks you",
-        "vi": "Cổng xác nhận hỏi bạn"
+        "en": "Tool gate",
+        "vi": "Cổng công cụ"
       },
-      "x": 800,
-      "y": 196,
-      "w": 190,
-      "h": 62
+      "note": {
+        "en": "Decides how each tool reaches the model: auto-run, confirm, or sanitize.",
+        "vi": "Quyết định mỗi tool tới model thế nào: chạy thẳng, hỏi xác nhận, hay lọc."
+      },
+      "subparts": [
+        {
+          "id": "declaw/tools/confirmation.py",
+          "file": "declaw/tools/confirmation.py",
+          "label": "confirmation.py",
+          "path": "declaw/tools/confirmation.py"
+        },
+        {
+          "id": "declaw/tools/registry.py",
+          "file": "declaw/tools/registry.py",
+          "label": "registry.py",
+          "path": "declaw/tools/registry.py"
+        }
+      ]
     },
     {
       "id": "part-sanitizer",
-      "kind": "step",
       "component": "sanitizer",
+      "x": 356,
+      "y": 265,
+      "w": 250,
+      "h": 96,
       "label": {
-        "en": "Sanitizer classifies the content",
-        "vi": "Sanitizer phân loại nội dung"
+        "en": "Sanitizer",
+        "vi": "Bộ lọc nội dung"
       },
-      "x": 800,
-      "y": 330,
-      "w": 190,
-      "h": 62
+      "note": {
+        "en": "A second model session judges outside content before the brain sees it.",
+        "vi": "Một phiên model thứ hai xét nội dung bên ngoài trước khi brain nhìn thấy."
+      },
+      "subparts": [
+        {
+          "id": "declaw/sanitizer/__init__.py",
+          "file": "declaw/sanitizer/__init__.py",
+          "label": "__init__.py",
+          "path": "declaw/sanitizer/__init__.py"
+        },
+        {
+          "id": "declaw/sanitizer/benchmark.py",
+          "file": "declaw/sanitizer/benchmark.py",
+          "label": "benchmark.py",
+          "path": "declaw/sanitizer/benchmark.py"
+        },
+        {
+          "id": "declaw/sanitizer/classifier.py",
+          "file": "declaw/sanitizer/classifier.py",
+          "label": "classifier.py",
+          "path": "declaw/sanitizer/classifier.py"
+        },
+        {
+          "id": "declaw/sanitizer/pipeline.py",
+          "file": "declaw/sanitizer/pipeline.py",
+          "label": "pipeline.py",
+          "path": "declaw/sanitizer/pipeline.py"
+        },
+        {
+          "id": "declaw/sanitizer/prompts.py",
+          "file": "declaw/sanitizer/prompts.py",
+          "label": "prompts.py",
+          "path": "declaw/sanitizer/prompts.py"
+        },
+        {
+          "id": "declaw/sanitizer/quarantine.py",
+          "file": "declaw/sanitizer/quarantine.py",
+          "label": "quarantine.py",
+          "path": "declaw/sanitizer/quarantine.py"
+        },
+        {
+          "id": "declaw/sanitizer/sanitizer.py",
+          "file": "declaw/sanitizer/sanitizer.py",
+          "label": "sanitizer.py",
+          "path": "declaw/sanitizer/sanitizer.py"
+        },
+        {
+          "id": "declaw/sanitizer/verdict.py",
+          "file": "declaw/sanitizer/verdict.py",
+          "label": "verdict.py",
+          "path": "declaw/sanitizer/verdict.py"
+        }
+      ]
     },
     {
-      "id": "part-tool",
-      "kind": "step",
-      "component": "tool-filesystem",
-      "label": {
-        "en": "Tool runs with typed arguments",
-        "vi": "Tool chạy với tham số có kiểu"
-      },
-      "x": 1050,
-      "y": 250,
-      "w": 190,
-      "h": 62
-    },
-    {
-      "id": "part-plugin",
-      "kind": "step",
+      "id": "part-plugins",
       "component": "plugin-host",
+      "x": 814,
+      "y": 265,
+      "w": 250,
+      "h": 96,
       "label": {
-        "en": "Plugin subprocess, over a pipe",
-        "vi": "Tiến trình con plugin, qua ống"
+        "en": "Plugin host",
+        "vi": "Plugin host"
       },
-      "x": 1050,
-      "y": 470,
-      "w": 190,
-      "h": 62
+      "note": {
+        "en": "Runs each plugin in its own scrubbed subprocess, and supervises it.",
+        "vi": "Chạy mỗi plugin trong tiến trình con đã dọn sạch, và giám sát nó."
+      },
+      "subparts": [
+        {
+          "id": "declaw/plugin_host/__init__.py",
+          "file": "declaw/plugin_host/__init__.py",
+          "label": "__init__.py",
+          "path": "declaw/plugin_host/__init__.py"
+        },
+        {
+          "id": "declaw/plugin_host/errors.py",
+          "file": "declaw/plugin_host/errors.py",
+          "label": "errors.py",
+          "path": "declaw/plugin_host/errors.py"
+        },
+        {
+          "id": "declaw/plugin_host/grants_helper.py",
+          "file": "declaw/plugin_host/grants_helper.py",
+          "label": "grants_helper.py",
+          "path": "declaw/plugin_host/grants_helper.py"
+        },
+        {
+          "id": "declaw/plugin_host/host.py",
+          "file": "declaw/plugin_host/host.py",
+          "label": "host.py",
+          "path": "declaw/plugin_host/host.py"
+        },
+        {
+          "id": "declaw/plugin_host/ipc.py",
+          "file": "declaw/plugin_host/ipc.py",
+          "label": "ipc.py",
+          "path": "declaw/plugin_host/ipc.py"
+        },
+        {
+          "id": "declaw/plugin_host/loader.py",
+          "file": "declaw/plugin_host/loader.py",
+          "label": "loader.py",
+          "path": "declaw/plugin_host/loader.py"
+        },
+        {
+          "id": "declaw/plugin_host/manifest.py",
+          "file": "declaw/plugin_host/manifest.py",
+          "label": "manifest.py",
+          "path": "declaw/plugin_host/manifest.py"
+        },
+        {
+          "id": "declaw/plugin_host/permissions.py",
+          "file": "declaw/plugin_host/permissions.py",
+          "label": "permissions.py",
+          "path": "declaw/plugin_host/permissions.py"
+        },
+        {
+          "id": "declaw/plugin_host/process.py",
+          "file": "declaw/plugin_host/process.py",
+          "label": "process.py",
+          "path": "declaw/plugin_host/process.py"
+        },
+        {
+          "id": "declaw/plugin_host/schema.py",
+          "file": "declaw/plugin_host/schema.py",
+          "label": "schema.py",
+          "path": "declaw/plugin_host/schema.py"
+        },
+        {
+          "id": "declaw/plugin_host/signing.py",
+          "file": "declaw/plugin_host/signing.py",
+          "label": "signing.py",
+          "path": "declaw/plugin_host/signing.py"
+        },
+        {
+          "id": "declaw/plugin_host/state.py",
+          "file": "declaw/plugin_host/state.py",
+          "label": "state.py",
+          "path": "declaw/plugin_host/state.py"
+        },
+        {
+          "id": "declaw/plugin_host/supervisor.py",
+          "file": "declaw/plugin_host/supervisor.py",
+          "label": "supervisor.py",
+          "path": "declaw/plugin_host/supervisor.py"
+        },
+        {
+          "id": "declaw/plugin_host/tools.py",
+          "file": "declaw/plugin_host/tools.py",
+          "label": "tools.py",
+          "path": "declaw/plugin_host/tools.py"
+        }
+      ]
     },
+    {
+      "id": "part-documents",
+      "component": "documents",
+      "x": 356,
+      "y": 410,
+      "w": 250,
+      "h": 96,
+      "label": {
+        "en": "Documents",
+        "vi": "Tài liệu"
+      },
+      "note": {
+        "en": "Parses, embeds, encrypts, retrieves, and cites.",
+        "vi": "Phân tích, nhúng vector, mã hoá, truy hồi và trích dẫn."
+      },
+      "subparts": [
+        {
+          "id": "declaw/documents/__init__.py",
+          "file": "declaw/documents/__init__.py",
+          "label": "__init__.py",
+          "path": "declaw/documents/__init__.py"
+        },
+        {
+          "id": "declaw/documents/catalog.py",
+          "file": "declaw/documents/catalog.py",
+          "label": "catalog.py",
+          "path": "declaw/documents/catalog.py"
+        },
+        {
+          "id": "declaw/documents/citations.py",
+          "file": "declaw/documents/citations.py",
+          "label": "citations.py",
+          "path": "declaw/documents/citations.py"
+        },
+        {
+          "id": "declaw/documents/indexer.py",
+          "file": "declaw/documents/indexer.py",
+          "label": "indexer.py",
+          "path": "declaw/documents/indexer.py"
+        },
+        {
+          "id": "declaw/documents/models.py",
+          "file": "declaw/documents/models.py",
+          "label": "models.py",
+          "path": "declaw/documents/models.py"
+        },
+        {
+          "id": "declaw/documents/prompts.py",
+          "file": "declaw/documents/prompts.py",
+          "label": "prompts.py",
+          "path": "declaw/documents/prompts.py"
+        },
+        {
+          "id": "declaw/documents/search.py",
+          "file": "declaw/documents/search.py",
+          "label": "search.py",
+          "path": "declaw/documents/search.py"
+        },
+        {
+          "id": "declaw/documents/session.py",
+          "file": "declaw/documents/session.py",
+          "label": "session.py",
+          "path": "declaw/documents/session.py"
+        },
+        {
+          "id": "declaw/documents/store.py",
+          "file": "declaw/documents/store.py",
+          "label": "store.py",
+          "path": "declaw/documents/store.py"
+        },
+        {
+          "id": "declaw/documents/tools.py",
+          "file": "declaw/documents/tools.py",
+          "label": "tools.py",
+          "path": "declaw/documents/tools.py"
+        },
+        {
+          "id": "declaw/documents/watcher.py",
+          "file": "declaw/documents/watcher.py",
+          "label": "watcher.py",
+          "path": "declaw/documents/watcher.py"
+        }
+      ]
+    },
+    {
+      "id": "part-memory",
+      "component": "memory",
+      "x": 814,
+      "y": 410,
+      "w": 250,
+      "h": 96,
+      "label": {
+        "en": "Memory",
+        "vi": "Bộ nhớ"
+      },
+      "note": {
+        "en": "Conversation buffer, encrypted vectors, episodes, export and wipe.",
+        "vi": "Buffer hội thoại, vector mã hoá, episode, xuất và xoá."
+      },
+      "subparts": [
+        {
+          "id": "declaw/memory/__init__.py",
+          "file": "declaw/memory/__init__.py",
+          "label": "__init__.py",
+          "path": "declaw/memory/__init__.py"
+        },
+        {
+          "id": "declaw/memory/buffer.py",
+          "file": "declaw/memory/buffer.py",
+          "label": "buffer.py",
+          "path": "declaw/memory/buffer.py"
+        },
+        {
+          "id": "declaw/memory/chroma.py",
+          "file": "declaw/memory/chroma.py",
+          "label": "chroma.py",
+          "path": "declaw/memory/chroma.py"
+        },
+        {
+          "id": "declaw/memory/crypto.py",
+          "file": "declaw/memory/crypto.py",
+          "label": "crypto.py",
+          "path": "declaw/memory/crypto.py"
+        },
+        {
+          "id": "declaw/memory/embeddings.py",
+          "file": "declaw/memory/embeddings.py",
+          "label": "embeddings.py",
+          "path": "declaw/memory/embeddings.py"
+        },
+        {
+          "id": "declaw/memory/episodic.py",
+          "file": "declaw/memory/episodic.py",
+          "label": "episodic.py",
+          "path": "declaw/memory/episodic.py"
+        },
+        {
+          "id": "declaw/memory/gdpr.py",
+          "file": "declaw/memory/gdpr.py",
+          "label": "gdpr.py",
+          "path": "declaw/memory/gdpr.py"
+        },
+        {
+          "id": "declaw/memory/semantic.py",
+          "file": "declaw/memory/semantic.py",
+          "label": "semantic.py",
+          "path": "declaw/memory/semantic.py"
+        }
+      ]
+    },
+    {
+      "id": "part-audit",
+      "component": "audit",
+      "x": 356,
+      "y": 555,
+      "w": 250,
+      "h": 96,
+      "label": {
+        "en": "Audit and egress",
+        "vi": "Kiểm toán và egress"
+      },
+      "note": {
+        "en": "Records every tool call, permission prompt and network request.",
+        "vi": "Ghi lại mọi lời gọi tool, mọi lần hỏi quyền và mọi request mạng."
+      },
+      "subparts": [
+        {
+          "id": "declaw/audit/__init__.py",
+          "file": "declaw/audit/__init__.py",
+          "label": "__init__.py",
+          "path": "declaw/audit/__init__.py"
+        },
+        {
+          "id": "declaw/audit/egress.py",
+          "file": "declaw/audit/egress.py",
+          "label": "egress.py",
+          "path": "declaw/audit/egress.py"
+        },
+        {
+          "id": "declaw/audit/events.py",
+          "file": "declaw/audit/events.py",
+          "label": "events.py",
+          "path": "declaw/audit/events.py"
+        },
+        {
+          "id": "declaw/audit/export.py",
+          "file": "declaw/audit/export.py",
+          "label": "export.py",
+          "path": "declaw/audit/export.py"
+        },
+        {
+          "id": "declaw/audit/logger.py",
+          "file": "declaw/audit/logger.py",
+          "label": "logger.py",
+          "path": "declaw/audit/logger.py"
+        },
+        {
+          "id": "declaw/audit/report.py",
+          "file": "declaw/audit/report.py",
+          "label": "report.py",
+          "path": "declaw/audit/report.py"
+        },
+        {
+          "id": "declaw/audit/sinks.py",
+          "file": "declaw/audit/sinks.py",
+          "label": "sinks.py",
+          "path": "declaw/audit/sinks.py"
+        },
+        {
+          "id": "declaw/audit/summary.py",
+          "file": "declaw/audit/summary.py",
+          "label": "summary.py",
+          "path": "declaw/audit/summary.py"
+        },
+        {
+          "id": "declaw/audit/tooling.py",
+          "file": "declaw/audit/tooling.py",
+          "label": "tooling.py",
+          "path": "declaw/audit/tooling.py"
+        }
+      ]
+    },
+    {
+      "id": "part-store",
+      "component": "persistence",
+      "x": 814,
+      "y": 555,
+      "w": 250,
+      "h": 96,
+      "label": {
+        "en": "Storage",
+        "vi": "Lưu trữ"
+      },
+      "note": {
+        "en": "Four SQLite tables and the migrations that shape them.",
+        "vi": "Bốn bảng SQLite và các migration định hình chúng."
+      },
+      "subparts": [
+        {
+          "id": "declaw/db/__init__.py",
+          "file": "declaw/db/__init__.py",
+          "label": "__init__.py",
+          "path": "declaw/db/__init__.py"
+        },
+        {
+          "id": "declaw/db/engine.py",
+          "file": "declaw/db/engine.py",
+          "label": "engine.py",
+          "path": "declaw/db/engine.py"
+        },
+        {
+          "id": "declaw/db/models.py",
+          "file": "declaw/db/models.py",
+          "label": "models.py",
+          "path": "declaw/db/models.py"
+        }
+      ]
+    }
+  ],
+  "exits": [
     {
       "id": "exit-answer",
-      "kind": "exit",
-      "component": "brain-repl",
+      "x": 1200,
+      "y": 120,
+      "w": 230,
+      "h": 62,
       "label": {
-        "en": "Exit: an answer, with citations",
-        "vi": "Lối ra: câu trả lời, kèm trích dẫn"
+        "en": "An answer, with citations",
+        "vi": "Câu trả lời, kèm trích dẫn"
       },
-      "x": 1300,
-      "y": 90,
-      "w": 200,
-      "h": 62
+      "note": {
+        "en": "Built from retrieval metadata, never from model output.",
+        "vi": "Dựng từ metadata truy hồi, không phải từ đầu ra của model."
+      }
     },
     {
-      "id": "exit-fs",
-      "kind": "exit",
-      "component": "tool-filesystem",
+      "id": "exit-file",
+      "x": 1200,
+      "y": 240,
+      "w": 230,
+      "h": 62,
       "label": {
-        "en": "Exit: a file written or moved",
-        "vi": "Lối ra: một tệp được ghi hoặc di chuyển"
+        "en": "A file written or moved",
+        "vi": "Tệp được ghi hoặc di chuyển"
       },
-      "x": 1300,
-      "y": 180,
-      "w": 200,
-      "h": 62
+      "note": {
+        "en": "Inside the workspace only, and only after you approve.",
+        "vi": "Chỉ trong workspace, và chỉ sau khi bạn duyệt."
+      }
     },
     {
-      "id": "exit-audit-db",
-      "kind": "exit",
-      "component": "persistence",
+      "id": "exit-audit",
+      "x": 1200,
+      "y": 360,
+      "w": 230,
+      "h": 62,
       "label": {
-        "en": "Exit: a row in the audit trail",
-        "vi": "Lối ra: một dòng trong nhật ký kiểm toán"
+        "en": "A row in the audit trail",
+        "vi": "Một dòng nhật ký kiểm toán"
       },
-      "x": 1300,
-      "y": 310,
-      "w": 200,
-      "h": 62
+      "note": {
+        "en": "Append-only, and rendered in plain language.",
+        "vi": "Chỉ thêm, và kết xuất bằng câu chữ dễ đọc."
+      }
     },
     {
       "id": "exit-quarantine",
-      "kind": "exit",
-      "component": "sanitizer",
+      "x": 1200,
+      "y": 480,
+      "w": 230,
+      "h": 62,
       "label": {
-        "en": "Exit: quarantined, and you are told",
-        "vi": "Lối ra: bị cách ly, và bạn được báo"
+        "en": "Quarantined content",
+        "vi": "Nội dung bị cách ly"
       },
-      "x": 1300,
-      "y": 400,
-      "w": 200,
-      "h": 62
+      "note": {
+        "en": "Held for a human. It never reaches the brain.",
+        "vi": "Giữ lại cho con người xem. Không bao giờ tới brain."
+      }
     },
     {
-      "id": "exit-ollama",
-      "kind": "exit",
-      "component": "brain-model",
+      "id": "exit-network",
+      "x": 1200,
+      "y": 600,
+      "w": 230,
+      "h": 62,
       "label": {
-        "en": "Exit: the only network egress",
-        "vi": "Lối ra: luồng ra mạng duy nhất"
+        "en": "The only network egress",
+        "vi": "Luồng ra mạng duy nhất"
       },
-      "x": 1300,
-      "y": 500,
-      "w": 200,
-      "h": 62
+      "note": {
+        "en": "Loopback to Ollama, and every call is audited.",
+        "vi": "Loopback tới Ollama, và mọi lời gọi đều được ghi kiểm toán."
+      }
     }
   ],
-  "edges": [
+  "links": [
     {
-      "id": "m-prompt-brain",
-      "from": "port-prompt",
-      "to": "part-brain",
-      "label": {
-        "en": "your words",
-        "vi": "lời của bạn"
-      }
-    },
-    {
-      "id": "m-doc-index",
-      "from": "port-document",
-      "to": "part-index",
-      "label": {
-        "en": "unchanged files skipped by hash",
-        "vi": "tệp không đổi bị bỏ qua theo hash"
-      }
-    },
-    {
-      "id": "m-brain-ollama",
+      "id": "l-brain-tools",
       "from": "part-brain",
-      "to": "exit-ollama",
-      "label": {
-        "en": "inference, audited",
-        "vi": "suy luận, có ghi kiểm toán"
-      }
-    },
-    {
-      "id": "m-index-ollama",
-      "from": "part-index",
-      "to": "exit-ollama",
-      "label": {
-        "en": "embedding, audited",
-        "vi": "nhúng vector, có ghi kiểm toán"
-      }
-    },
-    {
-      "id": "m-brain-audit",
-      "from": "part-brain",
-      "to": "part-audit",
+      "to": "part-tools",
       "label": {
         "en": "a tool call",
         "vi": "một lời gọi tool"
       }
     },
     {
-      "id": "m-audit-gate",
-      "from": "part-audit",
-      "to": "gate-classification",
-      "label": {
-        "en": "recorded, then dispatched",
-        "vi": "ghi nhận xong rồi điều phối"
-      }
-    },
-    {
-      "id": "m-audit-db",
-      "from": "part-audit",
-      "to": "exit-audit-db",
-      "label": {
-        "en": "ok, denied or error",
-        "vi": "ok, bị từ chối hoặc lỗi"
-      }
-    },
-    {
-      "id": "m-gate-confirm",
-      "from": "gate-classification",
-      "to": "part-confirmation",
-      "label": {
-        "en": "non-READ: ask the human first",
-        "vi": "không phải READ: hỏi người dùng trước"
-      }
-    },
-    {
-      "id": "m-gate-sanitize",
-      "from": "gate-classification",
+      "id": "l-tools-sanitizer",
+      "from": "part-tools",
       "to": "part-sanitizer",
       "label": {
-        "en": "READ and outside content: sanitize instead",
-        "vi": "READ và có nội dung ngoài: chuyển sang lọc"
+        "en": "outside content",
+        "vi": "nội dung bên ngoài"
       }
     },
     {
-      "id": "m-confirm-tool",
-      "from": "part-confirmation",
-      "to": "part-tool",
+      "id": "l-tools-plugins",
+      "from": "part-tools",
+      "to": "part-plugins",
       "label": {
-        "en": "approved",
-        "vi": "được duyệt"
+        "en": "plugin capability",
+        "vi": "capability của plugin"
       }
     },
     {
-      "id": "m-confirm-answer",
-      "from": "part-confirmation",
-      "to": "exit-answer",
+      "id": "l-docs-sanitizer",
+      "from": "part-documents",
+      "to": "part-sanitizer",
       "label": {
-        "en": "denied: the model is told so",
-        "vi": "bị từ chối: model được báo lại"
+        "en": "retrieved passages",
+        "vi": "đoạn văn truy hồi"
       }
     },
     {
-      "id": "m-sanitize-tool",
-      "from": "part-sanitizer",
-      "to": "part-tool",
+      "id": "l-docs-memory",
+      "from": "part-documents",
+      "to": "part-memory",
       "label": {
-        "en": "SAFE passes through",
-        "vi": "SAFE thì đi tiếp"
+        "en": "encrypted vectors",
+        "vi": "vector đã mã hoá"
       }
     },
     {
-      "id": "m-sanitize-quarantine",
-      "from": "part-sanitizer",
-      "to": "exit-quarantine",
+      "id": "l-audit-store",
+      "from": "part-audit",
+      "to": "part-store",
       "label": {
-        "en": "UNSAFE, or unparseable",
-        "vi": "UNSAFE, hoặc không phân tích được"
-      }
-    },
-    {
-      "id": "m-tool-fs",
-      "from": "part-tool",
-      "to": "exit-fs",
-      "label": {
-        "en": "inside the workspace only",
-        "vi": "chỉ trong phạm vi workspace"
-      }
-    },
-    {
-      "id": "m-tool-plugin",
-      "from": "part-tool",
-      "to": "part-plugin",
-      "label": {
-        "en": "plugin-backed capability",
-        "vi": "capability do plugin cung cấp"
-      }
-    },
-    {
-      "id": "m-plugin-answer",
-      "from": "part-plugin",
-      "to": "exit-answer",
-      "label": {
-        "en": "result becomes an observation",
-        "vi": "kết quả trở thành một quan sát"
-      }
-    },
-    {
-      "id": "m-tool-answer",
-      "from": "part-tool",
-      "to": "exit-answer",
-      "label": {
-        "en": "result or refusal",
-        "vi": "kết quả hoặc lời từ chối"
+        "en": "typed events",
+        "vi": "sự kiện có kiểu"
       }
     }
   ],
-  "canvas": {
-    "width": 1540,
-    "height": 640
-  }
+  "portLinks": [
+    {
+      "id": "pl-prompt",
+      "from": "port-prompt",
+      "to": "part-brain"
+    },
+    {
+      "id": "pl-document",
+      "from": "port-document",
+      "to": "part-documents"
+    },
+    {
+      "id": "pl-plugin",
+      "from": "port-plugin",
+      "to": "part-plugins"
+    }
+  ]
 }

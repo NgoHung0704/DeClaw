@@ -243,8 +243,8 @@
       "vi": "DeClaw như một dây chuyền"
     },
     "intro": {
-      "en": "Intake ports on the left, parts in the middle, exits on the right. Filtering by ticket lights the parts that ticket touches — including the parts it only passes through.",
-      "vi": "Cổng vào bên trái, các bộ phận ở giữa, lối ra bên phải. Lọc theo ticket sẽ làm sáng những bộ phận ticket đó chạm tới — kể cả bộ phận nó chỉ đi ngang qua."
+      "en": "Intake on the left, the parts inside, exits on the right. Click a part to open it and see only its own pieces. Filtering by ticket lights the parts that ticket touched, including the ones it only passed through.",
+      "vi": "Cổng vào bên trái, các bộ phận bên trong, lối ra bên phải. Bấm vào một bộ phận để mở riêng nó ra. Lọc theo ticket sẽ làm sáng những bộ phận ticket đó chạm tới, kể cả bộ phận nó chỉ đi ngang qua."
     },
     "legendCreates": {
       "en": "Created by this ticket",
@@ -261,6 +261,18 @@
     "noTicket": {
       "en": "No ticket filter",
       "vi": "Không lọc theo ticket"
+    },
+    "backToMachine": {
+      "en": "Back",
+      "vi": "Quay lại"
+    },
+    "modules": {
+      "en": "modules",
+      "vi": "module"
+    },
+    "openComponent": {
+      "en": "Open the full component",
+      "vi": "Mở chi tiết thành phần"
     }
   },
   "debt": {

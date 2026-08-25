@@ -144,3 +144,108 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ---- the machine ------------------------------------------------------- */
+
+.chassis__shape {
+  fill: color-mix(in srgb, var(--bg-raised) 60%, transparent);
+  stroke: var(--signal-line);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 2 6;
+  stroke-linecap: round;
+}
+.chassis__label {
+  fill: var(--signal);
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.slot__shape {
+  fill: var(--bg-sunken);
+  stroke: var(--ink-faint);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+.slot--port .slot__shape { fill: var(--signal-soft); stroke: var(--signal-line); }
+.slot__label { fill: var(--ink); font-family: var(--font-body); font-size: 12px; }
+
+.wire {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 1.4;
+  vector-effect: non-scaling-stroke;
+}
+.wire--bus { stroke: var(--signal-line); stroke-width: 2; }
+.wire--in { stroke: var(--signal-line); }
+.wire__label {
+  fill: var(--ink-faint);
+  font-family: var(--font-display);
+  font-size: 10.5px;
+  paint-order: stroke;
+  stroke: var(--bg-sunken);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.part { cursor: pointer; }
+.part:focus { outline: none; }
+.part__shape {
+  fill: var(--bg-raised);
+  stroke: var(--line);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  transition: stroke var(--dur-fast) var(--ease-out);
+}
+.part:hover .part__shape,
+.part:focus-visible .part__shape {
+  stroke: var(--signal);
+  stroke-width: 2.4;
+  filter: drop-shadow(var(--glow));
+}
+.part__shape--open { fill: var(--bg-sunken); stroke: var(--signal); stroke-width: 1.8; }
+.part__label { fill: var(--ink); font-family: var(--font-body); font-size: 13px; }
+.part__count {
+  fill: var(--ink-faint);
+  font-family: var(--font-display);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.part__open-title {
+  fill: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+}
+.part__open-note { fill: var(--ink-muted); font-family: var(--font-body); font-size: 12px; }
+
+.subpart__shape {
+  fill: var(--bg-raised);
+  stroke: var(--line-soft);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.subpart__label {
+  fill: var(--ink-muted);
+  font-family: var(--font-code);
+  font-size: 11px;
+}
+
+.part__back { cursor: pointer; }
+.part__back rect {
+  fill: var(--bg-raised);
+  stroke: var(--line);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.part__back text {
+  fill: var(--ink-muted);
+  font-family: var(--font-display);
+  font-size: 11px;
+}
+.part__back:hover rect { stroke: var(--signal); }
+.part__back:hover text { fill: var(--signal); }
+
+.partdetail { display: flex; flex-direction: column; gap: var(--space-3); }
