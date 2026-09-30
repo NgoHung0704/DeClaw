@@ -67,8 +67,8 @@
       "readers": ["documents"],
       "enforcement": {
         "file": "declaw/documents/indexer.py",
-        "start": 144,
-        "end": 146,
+        "start": 181,
+        "end": 183,
         "anchor": "retried next run",
         "note": {
           "en": "A document that failed halfway is retried rather than remembered as done.",

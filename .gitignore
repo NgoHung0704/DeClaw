@@ -47,3 +47,7 @@ coverage.xml
 docs-site/node_modules/
 docs-site/dist/
 docs-site/content/repo.json
+
+# Design drafts and local generation helpers
+.superdesign/tmp/
+.superdesign/init-context.py

@@ -1,0 +1,4 @@
+dist/
+.publish/
+.verification/
+node_modules/

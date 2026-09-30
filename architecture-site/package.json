@@ -1,0 +1,11 @@
+{
+  "name": "declaw-atlas",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/content.test.mjs",
+    "dev": "node scripts/serve.mjs"
+  }
+}

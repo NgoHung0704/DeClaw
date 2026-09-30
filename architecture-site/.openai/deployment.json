@@ -1,0 +1,11 @@
+{
+  "project_id": "appgprj_6abccf1cbb448191ad2345680230a5e2",
+  "version_id": "appgprj_6abccf1cbb448191ad2345680230a5e2~appgver_5361668d38f081918b263a9819e2bb50",
+  "deployment_id": "appgdep_6abcd3768ac48191b230a43a39d1fca3",
+  "status": "succeeded",
+  "url": "https://declaw-architecture-atlas.ngoanhhungbhmt2k4.chatgpt.site",
+  "source_commit": "b0462e54ba31336ad05c883cc8f31632f07fe5ea",
+  "architecture_snapshot": "852a554",
+  "deployed_at": "2026-09-30T09:16:54.020676+00:00",
+  "superdesign_canvas": "https://superdesign.dev/teams/a77a34bb-1dee-4e15-b282-bf601cf2c568/projects/191fb8ed-f726-49f3-96dd-053d99ccbb9c"
+}

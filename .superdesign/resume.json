@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "targets": {
+    "architecture-site/overview": {
+      "targetKind": "new-target",
+      "projectId": "191fb8ed-f726-49f3-96dd-053d99ccbb9c",
+      "activeDraftId": "a863f4ea-99d5-4aca-b421-62c4f240cabf",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "architecture-site/app.js",
+        "architecture-site/style.css",
+        "architecture-site/content.js"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "5ce68e8b707dc5b7e6ef0aaf302e7f913965a08f676757a4c0d40300b2b47703",
+        "architecture-site/app.js": "7c21b28fd1b3724267afb72522c67a3b5dd6db316951e1e4807929bccf95ed99",
+        "architecture-site/style.css": "880a4d619a89c77fce7a690b0a60e2b6b067c42c8ea7ebc2c2866414af988458",
+        "architecture-site/content.js": "b38908019746c08a184f2cceb0ca8ae706a978b17555c5ffb8b8f8eb1a71c111"
+      },
+      "drafts": {
+        "a863f4ea-99d5-4aca-b421-62c4f240cabf": {
+          "title": "DeClaw Atlas - System overview",
+          "visualDirection": "Light sage technical atlas",
+          "currentVersion": 1
+        }
+      },
+      "updatedAt": "2026-09-30T09:12:22.506170+00:00"
+    }
+  }
+}
