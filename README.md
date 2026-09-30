@@ -1,390 +1,189 @@
-# 🦀 DeClaw
+# DeClaw
 
-> **Your private AI agent. Runs local. Explains everything.**
+**A local AI agent for working with private documents.** DeClaw runs an agent and document search on your machine, asks before changing files, and records its actions. The current working interface is a command-line application.
 
-DeClaw is a local-first AI agent designed for **EU regulated professionals** — lawyers, notaries, doctors, accountants — who cannot legally use cloud AI on client data because of GDPR and professional secrecy.
+> **Development status:** The Python CLI, agent loop, filesystem tools, document indexing and search, plugin host, memory, and audit code are present on this branch. The FastAPI gateway, connected desktop experience, installer, and shell sandbox are still future work. See [Implementation status](#implementation-status).
 
-- **Private by default** — Qwen2.5 3B runs 100% local via Ollama. Nothing leaves the machine. Ever.
-- **Safe by architecture** — Every tool takes typed, validated parameters scoped to your workspace; external content is screened by a dual-model sanitizer before the agent acts on it; file changes require your confirmation. (Shell execution and its mandatory Docker sandbox are deferred to post-MVP — v0.1 needs no shell.)
-- **Transparent always** — Every task produces a natural-language audit log; a network egress monitor proves nothing left the device.
-- **Easy for everyone** — One-click installer, native desktop app (Tauri), no terminal required.
-- **Scalable by design** — Plugin-first architecture: every capability is an installable skill that can be disabled or removed.
+[Quickstart](#quickstart) · [Architecture](#architecture) · [Data flows](#data-flows) · [Security boundaries](#security-boundaries) · [Repository map](#repository-map)
 
----
+## What works today
 
-## Why DeClaw exists
+- **Local conversation:** A LangGraph agent uses Ollama for model inference. English and French are supported by the core application.
+- **Workspace tools:** Typed read, list, write, and move operations stay within the configured workspace. Write-class operations require a human decision.
+- **Document questions:** The built-in `doc-intel` plugin parses PDF, DOCX, XLSX, text, and Markdown files. DeClaw indexes changed files, retrieves relevant passages, screens retrieved text, and supplies structural citations.
+- **Local state and audit:** SQLite stores structured records; ChromaDB stores document and semantic vectors. An audit trail records tool calls, permission decisions, quarantine events, and instrumented HTTP requests.
+- **Architecture explorer:** [`docs-site/`](./docs-site/) documents the system with interactive diagrams and source references. A separate [three-language Atlas](https://declaw-architecture-atlas.ngoanhhungbhmt2k4.chatgpt.site) is currently owner-private.
 
-EU professionals handling 50–500 confidential documents a day face an impossible choice:
+The implementation is **pre-release**. Availability of a code path or passing tests is not a claim that the product is ready for regulated production use.
 
-| Option | Problem |
+## Quickstart
+
+**Requirements:** Python 3.12+, [uv](https://docs.astral.sh/uv/), and a running [Ollama](https://ollama.com/) service. DeClaw uses these model defaults:
+
+| Purpose | Default model |
 | --- | --- |
-| Cloud AI (Claude.ai, ChatGPT, Copilot) | Violates GDPR + professional secrecy. **Illegal** for client data. |
-| Don't use AI | Falls behind on document workload. |
-| Existing local agents (OpenClaw, NanoClaw, ZeroClaw…) | Insecure, too technical, no audit trail. |
+| Agent | `qwen2.5:3b` |
+| External-content classifier | `qwen2.5:7b` |
+| Embeddings | `nomic-embed-text` |
 
-DeClaw is built specifically for that market: regulated, document-heavy, French/English-speaking, willing to pay for a tool that **just works** and is **provably private**.
+```bash
+uv sync --frozen
 
----
+ollama pull qwen2.5:3b
+ollama pull qwen2.5:7b
+ollama pull nomic-embed-text
 
-## The 7 Inviolable Principles
+uv run declaw status
+uv run declaw plugins list
+uv run declaw index
+uv run declaw chat
+```
 
-These are not guidelines. They cannot be bypassed for performance, convenience, or "just for testing." If a feature requires breaking one, the feature is wrong.
+`declaw index` indexes the default workspace (`~/DeClaw-workspace`), or an optional path **inside** that workspace. Run it before asking about document contents. `declaw chat` starts an interactive session; type `/exit` to leave. The `doc-intel` plugin must be enabled for document parsing, search, and summarization. If it is disabled, run `uv run declaw plugins enable doc-intel`.
 
-1. **NEVER** store credentials in plaintext — always `python-keyring` (OS-native vault).
-2. **NEVER** bind the gateway outside `127.0.0.1` — no LAN, no `0.0.0.0`, no exceptions.
-3. **NEVER** execute shell commands outside the Docker sandbox — if Docker is unavailable, the tool is **disabled**, not bypassed.
-4. **NEVER** skip the sanitizer layer on content sourced from outside the agent (email, web, file contents).
-5. **NEVER** auto-trust content from documents/emails/web — all external content is treated as potentially adversarial.
-6. **NEVER** let an LLM call a function with raw user input as a shell string — all tools take **typed, validated parameters**.
-7. **NEVER** make a network call without logging it to the audit trail — "data left the device" must be observable.
+Configuration is loaded from environment variables and an optional local `.env` file; [`.env.example`](./.env.example) lists the settings. `DECLAW_WORKSPACE_DIR` selects the document folder, while `DECLAW_DATA_DIR` selects the application data folder. Keep `.env` out of Git.
 
----
-
-## MVP definition (v0.1)
-
-The MVP is "done" when an EU lawyer can:
-
-1. ✅ Install DeClaw in under 5 minutes, **no terminal required**
-2. ✅ Point DeClaw at a folder of client documents (PDF, DOCX, XLSX, TXT)
-3. ✅ Ask questions in French or English and get **correct, cited answers**
-4. ✅ Command the agent to move/rename/summarize files (with confirmation)
-5. ✅ Review a clear audit log: "Here's what I did, and confirmation that nothing left your device"
-6. ✅ Verify (network-level) that 100% nothing was sent to the internet
-
-**Out of scope for v0.1**: shell execution and its Docker sandbox (deferred — the v0.1 feature set needs no shell), browser automation, vision-based agents, OS control beyond `os-bridge`, plugin marketplace, mobile apps.
-
----
+Other implemented commands include `declaw report`, `declaw audit export`, `declaw memory export`, `declaw memory wipe`, and `declaw plugins list|enable|disable|revoke`. `declaw start` and `declaw stop` currently report that the gateway is unavailable.
 
 ## Architecture
 
-### Stack
+DeClaw is principally **one local Python application** with internal modules. Ollama is a separate model service. Each loaded plugin runs in a separate local Python process. SQLite, ChromaDB, the workspace, and the OS keyring are data dependencies, not HTTP microservices.
 
-| Layer | Choice |
-| --- | --- |
-| Brain model | Ollama + Qwen2.5 3B (default — tool-calling tuned, fits 4GB GPU). Optional: Qwen2.5 7B, Llama 3.1 8B |
-| Embeddings | `nomic-embed-text` (via Ollama) |
-| Language | Python 3.12+ (uv-managed, lockfile committed) |
-| Agent framework | LangGraph |
-| API gateway | FastAPI, bound to `127.0.0.1:7842` only |
-| Desktop shell | Tauri 2.0 (Rust + webview), Windows first |
-| Frontend | Vanilla JS + TailwindCSS CDN (zero build step), EN + FR i18n |
-| Vector store | ChromaDB (Fernet at-rest encryption) |
-| Document parsing | `pypdf`, `python-docx`, `openpyxl`, `unstructured` |
-| Task / audit DB | SQLite via SQLModel |
-| Credentials | `python-keyring` (Windows Credential Manager / Keychain / KWallet) |
-| Sandbox | Docker SDK for Python (shell execution only — **deferred to post-MVP**) |
-| Prompt-injection defense | Dual-model sanitizer (second Mistral instance, locked-down prompt) — **implemented (Phase 4)** |
-| Plugin signatures | ed25519 (`pynacl`) |
-| License | AGPL-3.0-or-later (commercial dual-license possible) |
+```mermaid
+flowchart LR
+    user["Person at the CLI"]
+    workspace[("Workspace files")]
+    ollama["Ollama<br/>local model service"]
+    sqlite[("SQLite<br/>tasks · audit · episodes · catalog")]
+    chroma[("ChromaDB<br/>document · memory vectors")]
+    vault[("OS keyring")]
+    worker["doc-intel<br/>plugin subprocess"]
 
-### High-level diagram
+    subgraph core["DeClaw · Python process"]
+        cli["Typer CLI / REPL"]
+        brain["LangGraph agent"]
+        registry["Typed tool registry"]
+        confirm{"Human approval<br/>for non-READ tools"}
+        filesystem["Workspace tools"]
+        sanitizer["External-content sanitizer"]
+        documents["Index · search · citations"]
+        plugins["Plugin host"]
+        memory["Memory"]
+        audit["Audit / HTTP observer"]
+    end
 
-```
-                ┌──────────────────────────────────────────────────────┐
-                │  Tauri Desktop Shell                     (Phase 10)  │
-                │  Webview UI  (Tailwind, EN/FR i18n)      (Phase  9)  │
-                └──────────────────────┬───────────────────────────────┘
-                                       │  HTTP REST / WebSocket
-                                       ▼
-╔══════════════════════════════════════════════════════════════════════════╗
-║  DeClaw CORE  —  Python, runs entirely on the user's machine             ║
-║                                                                          ║
-║      ┌─────────┐        ┌──────────────┐   reason    ┌──────────────┐    ║
-║      │ Gateway │ ─────▶ │    Brain     │ ──────────▶ │   Ollama     │    ║
-║      │(FastAPI)│        │ (LangGraph)  │ ◀────────── │   (local)    │    ║
-║      │loopback │        └──────┬───────┘             │              │    ║
-║      │(Phase 9)│               │ tool call           │ Mistral #1   │    ║
-║      └─────────┘               ▼                     │ Mistral #2   │    ║
-║                         ┌──────────────┐             │ (sanitizer)  │    ║
-║                         │ TOOL REGISTRY│             └──────────────┘    ║
-║                         └──┬────────┬──┘                                 ║
-║           built-in path    │        │   plugin path                      ║
-║                            ▼        ▼                                    ║
-║                     ┌──────────┐  ┌──────────────┐                       ║
-║                     │CONFIRMA- │  │ PLUGIN HOST  │                       ║
-║                     │TION GATE │  │ subprocess + │                       ║
-║                     │ (WRITE/  │  │ ed25519 sigs │                       ║
-║                     │ DESTRUCT)│  │  (Phase 7)   │                       ║
-║                     └─────┬────┘  └──┬────────┬──┘                       ║
-║                           ▼          ▼        ▼                          ║
-║                     ┌──────────┐  ┌──────┐ ┌──────┐                      ║
-║                     │ BUILT-IN │  │ Doc- │ │  OS- │                      ║
-║                     │ FS TOOLS │  │Intel │ │Bridge│                      ║
-║                     │  read /  │  │  P8  │ │  P11 │                      ║
-║                     │  list /  │  └──┬───┘ └──────┘                      ║
-║                     │  write / │     │                                   ║
-║                     │  move    │     │  (PDF text, future)               ║
-║                     └─────┬────┘     │                                   ║
-║                           │ file body│                                   ║
-║                           └────┬─────┘                                   ║
-║                                ▼                                         ║
-║                     ┌──────────────────────┐                             ║
-║                     │      SANITIZER       │  uses Mistral #2            ║
-║                     │   fail-closed +      │  (separate session,         ║
-║                     │   locked prompt      │   no shared state)          ║
-║                     └──┬──────────────┬────┘                             ║
-║                    SAFE│              │ UNSAFE                           ║
-║                        │              ▼                                  ║
-║                        │       ┌─────────────┐                           ║
-║                        │       │ QUARANTINE  │  hash + source            ║
-║                        │       │ (UI only)   │  raw never returned       ║
-║                        │       └─────────────┘                           ║
-║                        │                                                 ║
-║                        └────── SAFE → back to Brain ─────▶               ║
-║                                                                          ║
-║  Storage  :  ChromaDB (Fernet)  ·  SQLite (tasks/audit)  ·  Keyring      ║
-║  ┌──────────────────────────────────────────────────────────────────┐    ║
-║  │  Audit logger  +  Network egress monitor  (wraps every action)   │    ║
-║  └──────────────────────────────────────────────────────────────────┘    ║
-║  Deferred :  Docker sandbox for shell execution  (Phase 3, post-MVP)     ║
-╚══════════════════════════════════════════════════════════════════════════╝
-                                    │
-                                    ▼   local only — never the internet
+    user --> cli --> brain
+    brain <-->|chat| ollama
+    brain -->|tool call| registry
+    registry -->|non-READ| confirm
+    confirm -->|file write or move| filesystem
+    confirm -->|document actions| documents
+    registry -->|READ| filesystem
+    filesystem <--> workspace
+    registry -->|external READ result| sanitizer
+    registry -->|document tool| documents
+    cli -->|index command| documents
+    documents -->|parse| plugins -->|NDJSON over stdio| worker
+    documents <-->|chunks and search| chroma
+    documents <-->|catalog| sqlite
+    documents -->|embeddings| ollama
+    documents -->|retrieved top-k| sanitizer
+    sanitizer -->|separate classifier session| ollama
+    memory <--> chroma
+    memory --> vault
+    audit --> sqlite
+    registry -.->|tool and permission events| audit
+    sanitizer -.->|quarantine events| audit
 ```
 
-**Component status**
+The diagram shows the current module and process boundaries. The audit observer also instruments `httpx` requests in the core process, including Ollama calls. The gateway and desktop UI are omitted because they do not yet serve this path.
 
-| Component                                | Status        | Phase |
-| ---------------------------------------- | ------------- | ----- |
-| Brain (LangGraph loop)                   | ✅ shipped    | 1     |
-| Tool Registry                            | ✅ shipped    | 2     |
-| Built-in FS Tools (read/list/write/move) | ✅ shipped    | 2     |
-| Confirmation Gate (WRITE/DESTRUCT)       | ✅ shipped    | 2     |
-| Sanitizer + Quarantine                   | ✅ shipped    | 4     |
-| SQLite (tasks/audit DB)                  | ✅ shipped    | 0     |
-| ChromaDB (Fernet at-rest)                | 🟡 next       | 5     |
-| Audit logger + Egress monitor            | 🟡 next       | 5     |
-| Keyring (credentials)                    | ⬜ planned    | 6     |
-| Plugin Host (subprocess + ed25519)       | ⬜ planned    | 7     |
-| Doc-Intel plugin                         | ⬜ planned    | 8     |
-| Gateway (FastAPI, loopback)              | ⬜ planned    | 9     |
-| Webview UI (Tailwind, EN/FR)             | ⬜ planned    | 9     |
-| Tauri Desktop Shell                      | ⬜ planned    | 10    |
-| OS-Bridge plugin                         | ⬜ planned    | 11    |
-| Docker sandbox (shell execution)         | ⏸️ deferred   | 3     |
+### Components
 
-### Plugin-first architecture
-
-**Every capability is a plugin.** This is non-negotiable. The core contains only:
-
-- **Brain** (LangGraph orchestrator)
-- **Sanitizer** (prompt-injection defense)
-- **Sandbox executor** (Docker isolation)
-- **Permission system** (mobile-app-style consent dialogs)
-- **Audit logger** + network egress monitor
-- **Plugin host** (loader, signature verification, subprocess isolation, IPC)
-- **Gateway** (FastAPI)
-
-Document Intelligence, OS Bridge, Email Reader — all plugins. Benefits:
-
-- Disable a misbehaving plugin → the rest of the system keeps working
-- New integrations are added without touching core
-- Third parties can write plugins (ed25519 signatures required)
-- Security audits are scoped per plugin
-- Each plugin runs in its own Python subprocess with no keyring access (must go through core API)
-
-### Plugin manifest example (`plugin.yaml`)
-
-```yaml
-name: doc-intel
-version: 1.0.0
-display_name: "Document Intelligence"
-signature: "ed25519:…"   # required for non-builtin plugins
-
-permissions:
-  - type: filesystem_read
-    scope: user_workspace
-  - type: filesystem_write
-    scope: user_workspace
-    requires_confirmation: true
-  - type: vector_store
-
-denied:
-  - network_external
-  - shell_execute
-  - credential_access
-  - os_control
-
-entry_point: "doc_intel.main:Plugin"
-```
-
-### Sanitizer layer
-
-Every piece of content from outside the agent (PDF text, email body, web page) goes through a **second Mistral instance** with a locked-down system prompt **before** the brain sees it. The sanitizer cannot execute tools, cannot see conversation history, and outputs only `{verdict: SAFE|UNSAFE, reason: str}`. It **fails closed** (any error or unparseable output is treated as UNSAFE). UNSAFE content is quarantined (logged by hash + source, never raw) and surfaced in the UI; the brain never sees it. Implemented in Phase 4 and wired into `declaw chat` — file contents are sanitized before the agent acts on them.
-
-Performance targets, encoded in the Phase 4 benchmark harness (`scripts/sanitizer_benchmark.py`, over a locked 110-sample FR+EN corpus):
-- False positive rate < 2% (on the benign corpus)
-- Detection rate high on the known-injection corpus (false negatives low)
-- p95 latency < 500 ms per chunk
-
-> Note: the latency target assumes a GPU-served classifier. On 4GB GPU full-offload (Qwen2.5 3B) the budget is realistic; CPU-only or partial offload will be slower. The harness reports the real numbers so the target can be tracked as the model/hardware changes.
-
-### Audit log
-
-After every task, the brain auto-generates a natural-language audit entry:
-
-```json
-{
-  "task_id": "t_20260512_001",
-  "user_query": "Find all contracts with penalty clauses for client Dupont",
-  "summary_fr": "J'ai trouvé 4 contrats avec des clauses de pénalité…",
-  "summary_en": "I found 4 contracts with penalty clauses…",
-  "actions": [
-    {"tool": "doc_intel.search", "query": "Dupont penalty clause", "results": 4},
-    {"tool": "doc_intel.cite", "documents": ["contract_2024_03.pdf", "…"]}
-  ],
-  "network_calls": [],
-  "data_left_device": false,
-  "model_used": "qwen2.5:3b",
-  "plugins_invoked": ["doc-intel"]
-}
-```
-
-A network egress monitor cross-checks `network_calls` against the actual outbound traffic during the task.
-
----
-
-## Project status
-
-**Pre-alpha — Phases 0–2 and 4 complete; Phase 3 (sandbox) deferred for v0.1.** The core agent already runs: `declaw chat` drives a local LangGraph brain (Qwen2.5 3B via Ollama) with typed, workspace-scoped filesystem tools, a confirmation gate on writes, and the dual-model sanitizer screening file contents before the brain sees them. Still missing for a usable product: document intelligence (Phase 8), the web UI (Phase 9), and the desktop app (Phase 10).
-
-### Roadmap
-
-| Phase | Theme | Status |
+| Component | Responsibility | Start reading |
 | --- | --- | --- |
-| 0 | Project foundation (scaffold, config, logging, preflight) | ✅ done |
-| 1 | Core brain (LangGraph loop, tool calls, context management) | ✅ done |
-| 2 | Tool layer (typed filesystem tools, registry) | ✅ done |
-| 3 | **Sandbox layer** (Docker isolation, escape tests) | ⏸️ deferred (post-MVP) |
-| 4 | **Sanitizer layer** ⚠️ (dual-model defense, injection corpus) | ✅ done |
-| 5 | Memory & audit (ChromaDB, network egress monitor) | 🟡 next (MVP critical path) |
-| 6 | Credentials & permissions (keyring, plugin perms, ed25519) | ⬜ planned |
-| 7 | Plugin host (subprocess isolation, IPC, SDK) | ⬜ planned |
-| 8 | ⭐ Doc-Intel plugin (PDF/DOCX/XLSX, RAG, citations) | ⬜ planned |
-| 9 | Gateway & Web UI (FastAPI, chat, audit viewer, FR+EN) | ⬜ planned |
-| 10 | Tauri desktop app (Windows MSI, tray, native picker) | ⬜ planned |
-| 11 | OS-Bridge plugin (typed audio/display/launcher) | ⬜ planned |
-| 12 | Security hardening (pen tests, OWASP-LLM, SECURITY.md) | ⬜ planned |
-| 13 | Testing & QA (CI, coverage gates, benchmarks) | ⬜ continuous |
-| 14 | Installer & launch (MSI, first-run wizard, docs) | ⬜ planned |
+| CLI and session | Configure the session, start the REPL, wire dependencies, and expose commands | [`declaw/main.py`](./declaw/main.py), [`declaw/brain/repl.py`](./declaw/brain/repl.py) |
+| Agent | Alternate model reasoning and tool execution; treat tool refusals as observations | [`declaw/brain/loop.py`](./declaw/brain/loop.py) |
+| Tool registry | Validate schemas and route reads, approvals, sanitization, and audit wrapping | [`declaw/tools/registry.py`](./declaw/tools/registry.py) |
+| Document pipeline | Index changed files, search safe passages, and construct citations | [`declaw/documents/`](./declaw/documents/) |
+| Plugin host | Check manifests and grants; supervise a process per loaded plugin | [`declaw/plugin_host/`](./declaw/plugin_host/), [`plugins/builtin/doc-intel/`](./plugins/builtin/doc-intel/) |
+| Safety filter | Classify untrusted text in a separate model session and quarantine unsafe results | [`declaw/sanitizer/`](./declaw/sanitizer/) |
+| Memory and storage | Manage episodes, encrypted text payloads, vectors, and the document catalog | [`declaw/memory/`](./declaw/memory/), [`declaw/db/`](./declaw/db/) |
+| Audit | Persist structured events, render deterministic reports, and observe core HTTP traffic | [`declaw/audit/`](./declaw/audit/) |
 
-### Phase gating (strict)
+## Data flows
 
-- ⛔ Phase 8 (doc-intel) cannot start before Phase 7 (plugin host) is complete
-- ⛔ Phase 9 (Web UI) cannot start before Phase 4 (sanitizer) is complete ✅ — Phase 3 (sandbox) is **deferred for v0.1** (shell execution dropped), so it no longer gates Phase 9
-- ⛔ v1.0 cannot ship before Phase 12 (security hardening) is complete
+**A file read:** the model requests a validated `filesystem_read` call → the path is checked against the workspace → returned text passes through the sanitizer → safe text becomes a tool observation. Unsafe text or a classifier failure produces a quarantine result. The audit wrapper records the outcome.
 
-> **Why Phase 3 is deferred:** the v0.1 feature set (document Q&A, file move/rename) needs no shell, and requiring Docker Desktop (WSL2, admin rights, paid licensing for larger orgs) contradicts the "install in under 5 minutes, no terminal" goal. Principle #3 stays in force: if shell execution returns post-MVP, it must go through the Docker sandbox — never bypassed.
+**A file change:** the model requests a typed write, move, organize, or summary action → a human sees the proposed action → denial stops execution; approval lets the validated tool run → the outcome is recorded. This is a separate route from the sanitizer for external READ results.
 
-### Tracking work
+**Document indexing:** `declaw index` finds supported files → compares content hashes with the SQLite catalog → calls `doc-intel` through the plugin host → embeds parsed chunks through Ollama → stores encrypted chunk text and searchable vectors in ChromaDB → updates the catalog **after** storage succeeds. A scoped indexing run reconciles deleted or renamed files only within the scanned subtree. Scanned PDFs without readable text are reported; OCR is not implemented.
 
-- **Backlog**: [GitHub Issues](https://github.com/NgoHung0704/DeClaw/issues) — every phase has an umbrella issue with sub-issues for each ticket (DCL-001 through DCL-247).
-- **Milestones**: [Phase milestones](https://github.com/NgoHung0704/DeClaw/milestones) — one per phase.
-- **Source-of-truth files** (mirror the GitHub backlog):
-  - [`TICKETS.md`](./TICKETS.md) — full ticket list with acceptance criteria, dependencies, estimates.
-  - [`CLAUDE.md`](./CLAUDE.md) — living development context for Claude Code sessions.
+**Document search:** a question reaches `document_search` → the query is embedded and ChromaDB returns the most relevant chunks → a sanitizer screens the retrieved top-k chunks, caching verdicts per chunk hash → safe hits are returned with source metadata for citations. Indexing does not classify every chunk in advance.
 
----
+## Security boundaries
 
-## Repository layout
+These are properties of the **current code**, with their practical scope:
 
+- File tools reject paths that escape the configured workspace. Non-READ tools use a confirmation provider; the default answer is denial.
+- The model receives typed tool schemas. With the default security settings, external file reads and retrieved document passages are screened before they enter its context. The classifier uses a separate Ollama session and fails closed on classification errors.
+- Document and semantic-memory **text payloads** are encrypted before ChromaDB storage. Embedding vectors and some searchable metadata are **not** encrypted. SQLite should not be described as wholly encrypted.
+- Credentials use the OS keyring, with an encrypted file fallback when the keyring has no usable backend.
+- The HTTP observer records requests made through `httpx` in the core process and flags hosts outside its local allowlist. It is **not** an operating-system firewall or a proof that all processes made zero network requests. Ollama's host is configurable.
+- Plugin subprocesses and permission checks are implemented. A subprocess boundary does not provide the isolation of a full OS sandbox. Shell execution and its sandbox are deferred; no shell tool ships in the current CLI.
+
+See [`docs/`](./docs/) for detailed reviews, security decisions, and limitations. Do not use this README alone as a compliance or privacy certification.
+
+## Implementation status
+
+| Area | State on this branch |
+| --- | --- |
+| CLI, LangGraph brain, typed filesystem tools | Implemented and wired into `declaw chat` |
+| Sanitizer, confirmation gate, SQLite audit, HTTP observer | Implemented in the CLI path |
+| Memory, credentials, plugin host and SDK | Implemented in source |
+| `doc-intel` parsing, indexing, retrieval, citations, and document actions | Implemented in source and CLI paths; quality and performance still need product validation |
+| Gateway / API | Configuration and package skeleton; `start` and `stop` are stubs |
+| Desktop UI, Tauri integration, installer | Repository scaffolding; no working end-user desktop release |
+| Shell execution and sandbox | Deferred; no shell tool is exposed |
+
+The [ticket backlog](./TICKETS.md) and [phase reviews](./docs/README.md) provide finer-grained progress. The status above follows executable code rather than old phase labels.
+
+## Repository map
+
+```text
+declaw/                 Python application
+  brain/                Agent graph, model adapter, context management
+  tools/                Typed tools, registry, confirmation, workspace paths
+  documents/            Indexing, search, citations, document actions
+  sanitizer/            External-text classification and quarantine
+  plugin_host/          Manifests, grants, subprocess supervision, IPC
+  memory/               Conversation, episodic and semantic memory
+  audit/                Events, reports, HTTP observation
+  credentials/          OS keyring and encrypted fallback
+  db/                   SQLite models and engine
+  gateway/, sandbox/    Future runtime surfaces
+declaw_plugin_sdk/      Protocol used by plugin subprocesses
+plugins/builtin/        Built-in doc-intel plugin
+alembic/                Database migrations
+docs-site/              Source-linked architecture documentation site
+docs/                   Phase reviews, specifications, design decisions
+ui/, tauri/             Future desktop interface scaffolding
+tests/                  Unit, integration, security and regression tests
 ```
-declaw/                Core Python package
-├── gateway/           FastAPI app (loopback only)
-├── brain/             LangGraph orchestrator
-├── sanitizer/         Prompt-injection defense (+ corpus)
-├── sandbox/           Docker SDK executor
-├── plugin_host/       Loader, IPC, signatures, isolation
-├── memory/            ChromaDB wrapper + Fernet encryption
-├── audit/             Logger, NL reporter, network egress monitor
-├── credentials/       python-keyring wrapper
-├── db/                SQLite via SQLModel
-├── tools/builtin/     Core sandboxed tools
-├── config.py          pydantic-settings (enforces loopback)
-└── main.py            Typer CLI
 
-plugins/builtin/
-├── doc-intel/         ⭐ MVP plugin (PDF/DOCX/XLSX, RAG, actions)
-└── os-bridge/         Phase 2 plugin (audio/display/launcher)
+## Development
 
-ui/                    Vanilla JS + Tailwind CDN, EN + FR
-tauri/                 Tauri 2.0 desktop shell
-sandbox_images/        Dockerfiles for python/shell sandboxes
-tests/
-├── unit/
-├── integration/
-├── security/          ⚠️ Critical: injection, escape, perm, egress
-└── fixtures/
-scripts/               Preflight checks, installer helpers, GitHub sync
-docs/                  Architecture, security model, plugin guide
-```
-
----
-
-## Quickstart (developers)
-
-**Prerequisites**: Python 3.12+, [uv](https://docs.astral.sh/uv/), and [Ollama](https://ollama.com/) with `qwen2.5:3b` pulled (`ollama pull qwen2.5:3b`, ~2GB). Docker is **not** required for v0.1 (it is only needed for the deferred shell sandbox).
+The repository uses `uv.lock` for Python dependencies. Run the same Python checks as CI:
 
 ```bash
-# Install dependencies (reproducible build via uv.lock)
-uv sync
-
-# Show CLI help
-uv run declaw --help
-
-# Print current configuration (loopback host, security flags, model names)
-uv run declaw status
-
-# Print version
-uv run declaw version
-
-# Chat with the local agent (needs Ollama running with qwen2.5:3b)
-uv run declaw chat            # add --debug to trace tool calls
+uv sync --frozen
+uv run ruff check .
+uv run mypy declaw declaw_plugin_sdk
+uv run pytest
 ```
 
-`declaw chat` is a working local-agent REPL (Phases 1–2 + 4): it can read, list, write, and move files inside your workspace with typed, validated parameters — writes/moves ask for confirmation, and file contents pass the sanitizer first. The `start` / `stop` subcommands (the FastAPI gateway) are stubs until Phase 9.
-
-The sanitizer benchmark can be run against your local model:
-
-```bash
-uv run python scripts/sanitizer_benchmark.py            # full corpus
-uv run python scripts/sanitizer_benchmark.py --quick    # 6-sample smoke
-```
-
-### Working rules (for contributors and Claude Code)
-
-- Update `CLAUDE.md` after every completed ticket.
-- Mark `[x]` in `TICKETS.md` when a ticket is done.
-- Commit format: `feat(DCL-XXX): description` or `fix(DCL-XXX): …`
-- Security-critical code: write tests **first** (TDD).
-- Code + comments in English. UI defaults to English + French.
-- When in doubt about architecture or security → stop, ask, log in `CLAUDE.md` "Open decisions".
-
-### Backlog sync utility
-
-`scripts/sync_github_issues.py` is an idempotent script that mirrors `TICKETS.md` to GitHub (milestones, phase labels, parent umbrella issues, sub-issues). Re-run it whenever you add or rename tickets:
-
-```bash
-uv run python scripts/sync_github_issues.py            # create/update
-uv run python scripts/sync_github_issues.py --project 3  # also add to project board
-```
-
----
-
-## Security
-
-If you discover a vulnerability, please follow the disclosure policy in [SECURITY.md](./SECURITY.md) (in progress — Phase 12). Until then, open a private security advisory on GitHub.
-
-DeClaw refuses to ship v1.0 until Phase 12 (security hardening) is complete: pen-test script, OWASP Top 10 for LLM mapping, threat model, network egress test asserting zero outbound traffic during a task, `pip-audit` + Bandit in CI.
-
----
+The documentation site has its own Node project under [`docs-site/`](./docs-site/), with `npm ci`, `npm run guards`, and `npm run build`. Its guards check source references and module coverage against this repository. Development context and open decisions live in [`CLAUDE.md`](./CLAUDE.md).
 
 ## License
 
-AGPL-3.0-or-later. Commercial dual-licensing may be offered later for organizations that cannot meet the AGPL's network-use clause.
-
----
-
-## Acknowledgements
-
-DeClaw was conceived as an answer to a specific gap in the EU professional-services market: local AI that is **simultaneously** private, safe, transparent, and usable by non-developers. None of the existing local agents satisfied all four constraints — hence this project.
+The project metadata declares **AGPL-3.0-or-later** in [`pyproject.toml`](./pyproject.toml).
