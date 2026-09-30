@@ -206,8 +206,8 @@
   "snippets": [
     {
       "file": "declaw/documents/indexer.py",
-      "start": 144,
-      "end": 146,
+      "start": 181,
+      "end": 183,
       "code": "        stat = resolved.stat()\n        # Recorded only now: a document that failed above is retried next run.\n        await self.catalog.record(",
       "caption": {
         "en": "The catalog write happens only after chunks land, so a half-failed document is retried rather than remembered as done.",

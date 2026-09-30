@@ -41,8 +41,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 242,
-        "end": 242,
+        "start": 236,
+        "end": 236,
         "anchor": "is deferred to post-MVP",
         "note": {
           "en": "The decision and its rationale are recorded in the living context document.",
@@ -67,8 +67,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 210,
-        "end": 210,
+        "start": 204,
+        "end": 204,
         "anchor": "the gap is 38 points",
         "note": {
           "en": "Measured, and recorded with the correction that an earlier estimate was optimistic.",
@@ -92,8 +92,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 225,
-        "end": 225,
+        "start": 219,
+        "end": 219,
         "anchor": "measurably weaker in French",
         "note": {
           "en": "Tested, hypothesis rejected, and written up rather than smoothed over.",
@@ -193,8 +193,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 285,
-        "end": 285,
+        "start": 294,
+        "end": 294,
         "anchor": "signs only",
         "note": {
           "en": "Named as a prerequisite for third-party install.",
@@ -203,27 +203,27 @@
       }
     },
     {
-      "id": "debt-retrieval-unmeasured",
+      "id": "debt-retrieval-heldout-gap",
       "severity": "unvalidated",
       "title": {
-        "en": "Nobody has measured whether the answers are good",
-        "vi": "Chưa ai đo xem câu trả lời có tốt không"
+        "en": "Retrieval finds only half the expected passages on held-out documents",
+        "vi": "Truy hồi chỉ tìm đúng một nửa đoạn văn kỳ vọng trên tài liệu held-out"
       },
       "body": {
-        "en": "Phase 8a proves the indexing, retrieval and citation machinery is correct. It does not prove retrieval quality: no benchmark scores whether the right passage comes back for a real question. That measurement is the next phase.",
-        "vi": "Phase 8a chứng minh bộ máy lập chỉ mục, truy hồi và trích dẫn là đúng. Nó không chứng minh chất lượng truy hồi: chưa có benchmark nào chấm xem đúng đoạn văn có được trả về cho một câu hỏi thật hay không. Phép đo đó thuộc về phase kế tiếp."
+        "en": "Phase 8b measured retrieval quality: recall@5 is 0.92 on 12 development questions but only 0.50 on 10 held-out questions over genuine EU legal texts. This benchmark measures passage retrieval, not the quality of generated answers.",
+        "vi": "Phase 8b đã đo chất lượng truy hồi: recall@5 đạt 0,92 trên 12 câu hỏi phát triển nhưng chỉ 0,50 trên 10 câu hỏi held-out với văn bản pháp lý EU thật. Benchmark này đo khả năng tìm đúng đoạn văn, không đo chất lượng câu trả lời được sinh ra."
       },
       "components": [
         "documents"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 262,
-        "end": 262,
-        "anchor": "Retrieval quality is still unmeasured",
+        "file": "docs/phase-8b-review.md",
+        "start": 34,
+        "end": 35,
+        "anchor": "held-out     recall@1 0.50  recall@5 0.50",
         "note": {
-          "en": "Stated plainly in the phase notes rather than implied by the passing tests.",
-          "vi": "Được nói thẳng trong ghi chú của phase chứ không để các test xanh ngụ ý hộ."
+          "en": "The Phase 8b benchmark reports development and held-out retrieval scores; its limitations are discussed in the same review.",
+          "vi": "Benchmark Phase 8b ghi rõ điểm truy hồi trên tập phát triển và held-out; các giới hạn được phân tích trong cùng tài liệu review."
         }
       }
     },
@@ -244,8 +244,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 273,
-        "end": 273,
+        "start": 282,
+        "end": 282,
         "anchor": "episodic memory still unpopulated",
         "note": {
           "en": "Carried forward across several phases rather than quietly dropped.",
@@ -296,8 +296,8 @@
       ],
       "source": {
         "file": "CLAUDE.md",
-        "start": 273,
-        "end": 273,
+        "start": 282,
+        "end": 282,
         "anchor": "still not in `build_brain`",
         "note": {
           "en": "An A/B probe is the stated precondition for enabling it.",
