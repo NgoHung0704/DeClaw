@@ -1,6 +1,6 @@
 # DeClaw Atlas
 
-An interactive, English / French / Vietnamese architecture explorer built from the DeClaw source tree. English is the default. This is a standalone replacement experience; the original `docs-site` remains available.
+An interactive, English / French / Vietnamese architecture explorer built from the DeClaw source tree. English is the default. This is a standalone architecture viewer; the [React explorer](../docs-site/README.md) has a separate build and GitHub Pages workflow. Neither site is the Phase 9 product UI. Start with the [current documentation index](../docs/README.md) for implementation status and decisions.
 
 Live owner-private site: https://declaw-architecture-atlas.ngoanhhungbhmt2k4.chatgpt.site
 

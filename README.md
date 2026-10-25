@@ -146,7 +146,7 @@ See [`docs/`](./docs/) for detailed reviews, security decisions, and limitations
 | Desktop UI, Tauri integration, installer | Repository scaffolding; no working end-user desktop release |
 | Shell execution and sandbox | Deferred; no shell tool is exposed |
 
-The [ticket backlog](./TICKETS.md) and [phase reviews](./docs/README.md) provide finer-grained progress. The status above follows executable code rather than old phase labels.
+Use the [current status](./docs/project-status.md), [documentation index](./docs/README.md), and [Phase 9 readiness assessment](./docs/phase-9-readiness.md) for handoff. The [ticket backlog](./TICKETS.md) and historical reviews preserve planning and rationale; executable code takes precedence.
 
 ## Repository map
 
@@ -182,7 +182,7 @@ uv run mypy declaw declaw_plugin_sdk
 uv run pytest
 ```
 
-The documentation site has its own Node project under [`docs-site/`](./docs-site/), with `npm ci`, `npm run guards`, and `npm run build`. Its guards check source references and module coverage against this repository. Development context and open decisions live in [`CLAUDE.md`](./CLAUDE.md).
+The documentation site has its own Node project under [`docs-site/`](./docs-site/), with `npm ci`, `npm run guards`, and `npm run build`. Its guards check source references and module coverage against this repository. Agents start at [`AGENTS.md`](./AGENTS.md), then use the [current status](./docs/project-status.md), [code map](./docs/code-map.md), and [active decisions](./docs/architecture-decisions.md). Historical development context is archived under [`docs/history/`](./docs/history/).
 
 ## License
 
