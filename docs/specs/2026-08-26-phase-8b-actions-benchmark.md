@@ -1,7 +1,13 @@
 # Phase 8b — actions, index reconciliation, and the quality benchmark
 
+> **Approved design record.** This file records decisions and assumptions
+> from its original date, not current implementation or a new approval.
+> Verify wiring and limitations against [current status](../project-status.md)
+> and [active decisions](../architecture-decisions.md). Historical
+> CLAUDE.md diary references can be recovered through [Git history](../README.md#history).
+
 - **Date**: 2026-08-26
-- **Status**: approved, ready for implementation planning
+- **Status**: approved design; phase implemented later (see current status for scope)
 - **Tickets**: DCL-113..117, plus one unticketed defect that outranks all of them
 - **Branch**: `feat/phase-8b-actions-benchmark` (from `feat/phase-7-plugin-host`)
 - **Context**: `2026-08-23-phase-8a-doc-intel-design.md`, `2026-08-23-phase-7-9-roadmap.md`

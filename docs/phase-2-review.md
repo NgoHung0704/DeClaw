@@ -1,5 +1,14 @@
 # Phase 2 — Tool Layer: Hướng dẫn review cho người mới
 
+> **Historical phase review.** Reviewed for context on 2026-10-25. The body
+> preserves phase-time examples, completion claims and measurements; they
+> are not current startup instructions or fresh test results. Start with
+> [current status](project-status.md) and the [code map](code-map.md).
+> The former CLAUDE.md diary is available through
+> [historical log recovery](README.md#history), not as a current context file.
+
+**Current scope correction (2026-10-25):** The current CLI uses built-in typed filesystem tools, not a deployed os-bridge plugin. Tool refusals and turn recovery are covered by the current loop/REPL tests.
+
 > **Đối tượng**: reviewer hoặc contributor mới. Đọc xong hiểu **thế nào là "typed tool"**, **cách DeClaw chặn escape khỏi workspace**, và **tại sao mọi write đều cần confirmation**.
 
 ---
@@ -152,6 +161,7 @@ Explicit tuple = **auditable list** của mọi tool DeClaw ship. Reviewer nhìn
 ### (6) **`langchain_tools(...)` là source of truth cho wiring**
 
 Registry method `langchain_tools(language, approve, sanitizer=None)`:
+
 - **READ tools**: pass through `as_langchain_tool(language)` — auto-run
 - **WRITE/DESTRUCTIVE**: wrap qua `wrap_tool_with_confirmation(tool, language, approve)` — hỏi user trước
 - **Tool có `produces_external_content=True`**: wrap qua `wrap_tool_with_sanitizer` (Phase 4)
@@ -256,6 +266,7 @@ class EchoTool(DeclawTool[EchoArgs]):
 **Delivered**: [declaw/tools/builtin/filesystem.py](../declaw/tools/builtin/filesystem.py) — `FilesystemReadTool`.
 
 Args:
+
 - `path: str` (required, workspace-relative)
 - `max_bytes: int` (default 100000, `ge=1`) — cap để 1 tool call không blow context window
 
@@ -268,6 +279,7 @@ Args:
 **Delivered**: `FilesystemWriteTool` + [declaw/tools/confirmation.py](../declaw/tools/confirmation.py).
 
 Tool args: `path`, `content`, `overwrite=False`. 2 extra guardrail:
+
 - Refuse overwrite by default (phải `overwrite=true` explicit)
 - Refuse silent `mkdir -p` parent (parent phải tồn tại)
 
@@ -281,6 +293,7 @@ Chose `Callable` alias over `Protocol` — plain `async def` function match clea
 **Test helpers**: `always_approve` / `always_deny`.
 
 **`wrap_tool_with_confirmation(tool, language, approve)`** build StructuredTool:
+
 - Coroutine await `approve` trước khi delegate `run_validated`
 - Return localized denial message trên False
 - **Wrapped tool giữ nguyên metadata** (name, description, args_schema) → `bind_tools` model không thấy khác gì
@@ -291,6 +304,7 @@ Chose `Callable` alias over `Protocol` — plain `async def` function match clea
 **Delivered**: `FilesystemMoveTool`. Args: `source`, `destination`, `overwrite=False`.
 
 Order of checks:
+
 1. Source exists
 2. Source is file (not dir)
 3. Cross-volume check (`source.drive != destination.drive`) — defense-in-depth
@@ -345,6 +359,7 @@ registry.register(MyTool)  # same thing
 **Delivered**: [tests/unit/test_path_traversal.py](../tests/unit/test_path_traversal.py) — 36-vector corpus + hardening.
 
 3 nhóm vector:
+
 - **`_ALWAYS_REJECTED`** (13): forward-slash `..`, `/etc/passwd`, NUL bytes — raise trên every OS
 - **`_WINDOWS_ONLY_REJECTED`** (12, `skipif != win32`): drive specs, UNC, backslash traversal, `:` NTFS ADS
 - **`_CONTAINED_TRICKS`** (11): URL-encoding, unicode dot look-alikes, `~` — phải stay inside workspace
@@ -352,6 +367,7 @@ registry.register(MyTool)  # same thing
 Headline test `test_invariant_never_escapes` parametrize over 36 vector.
 
 **Hardening từ probe**:
+
 1. **NTFS Alternate Data Streams** (`notes.txt:hidden`, `::$DATA`) — resolved inside workspace nhưng là side-channel → reject on Windows via `":" in raw_path` guard
 2. **NUL bytes** raise bare `ValueError` from `resolve()` → convert thành `WorkspacePathError` cho auditable boundary
 
@@ -383,6 +399,7 @@ Headline test `test_invariant_never_escapes` parametrize over 36 vector.
 ### Why Windows `:` is Windows-only guard
 
 `sys.platform == "win32"` gated because:
+
 - Windows: `:` **never legal** trong filename → always drive spec hoặc NTFS ADS
 - POSIX: `:` **is legal** filename character. Reject nó trên Linux/Mac sẽ block legitimate files
 
@@ -540,6 +557,7 @@ Mỗi write call = 1 prompt. Nếu user muốn move 100 file → 100 prompt. UX 
 ## 10. Checklist review
 
 ### ✅ Base + Schema
+
 - [ ] `DeclawTool[ArgsT]` generic — subclass parameterize args_schema
 - [ ] `args_schema` là Pydantic BaseModel, validate runtime
 - [ ] `frozen=True` — tool metadata immutable
@@ -547,6 +565,7 @@ Mỗi write call = 1 prompt. Nếu user muốn move 100 file → 100 prompt. UX 
 - [ ] `classification` field: READ/WRITE/DESTRUCTIVE — enum, không string
 
 ### ✅ Filesystem tools
+
 - [ ] Tất cả 4 tool dùng `_resolve_in_workspace` — không tự roll boundary check
 - [ ] `filesystem_write` refuse overwrite by default
 - [ ] `filesystem_move` cross-volume check explicit
@@ -554,6 +573,7 @@ Mỗi write call = 1 prompt. Nếu user muốn move 100 file → 100 prompt. UX 
 - [ ] `filesystem_read` có `max_bytes` cap để không blow context
 
 ### ✅ Confirmation
+
 - [ ] `ConfirmationProvider` là Callable alias, không Protocol (mypy strict)
 - [ ] `always_approve` / `always_deny` test helpers
 - [ ] `wrap_tool_with_confirmation` giữ nguyên metadata → invisible với bind_tools
@@ -561,6 +581,7 @@ Mỗi write call = 1 prompt. Nếu user muốn move 100 file → 100 prompt. UX 
 - [ ] Async — blocking input qua `asyncio.to_thread`
 
 ### ✅ Registry
+
 - [ ] `register()` chỉ chấp nhận `type[DeclawTool]` subclass — no eval/exec
 - [ ] Duplicate raise `ValueError`
 - [ ] Unknown raise `UnknownToolError(KeyError)`
@@ -568,6 +589,7 @@ Mỗi write call = 1 prompt. Nếu user muốn move 100 file → 100 prompt. UX 
 - [ ] `langchain_tools()` single source of truth cho READ/WRITE routing
 
 ### ✅ Path traversal
+
 - [ ] `_ALWAYS_REJECTED` + `_WINDOWS_ONLY_REJECTED` + `_CONTAINED_TRICKS` corpus locked
 - [ ] `test_invariant_never_escapes` parametrized over toàn corpus
 - [ ] Windows `:` guard `sys.platform`-gated
@@ -575,6 +597,7 @@ Mỗi write call = 1 prompt. Nếu user muốn move 100 file → 100 prompt. UX 
 - [ ] Symlink follow qua `resolve()` — escape thì `relative_to` fail
 
 ### ⚠️ Red flags
+
 - ❌ Tool subclass không dùng `args_schema` → args validation bypass
 - ❌ Path check dùng `startswith(workspace)` thay vì `relative_to` → bypass với symlink
 - ❌ `resolve()` không canonicalize NTFS short name → bypass Windows
@@ -615,7 +638,7 @@ Mỗi write call = 1 prompt. Nếu user muốn move 100 file → 100 prompt. UX 
 - [phase-0-review.md](./phase-0-review.md) — Phase 0 (Foundation)
 - [phase-1-review.md](./phase-1-review.md) — Phase 1 (Core Brain)
 - [phase-4-review.md](./phase-4-review.md) — Phase 4 (Sanitizer)
-- [CLAUDE.md](../CLAUDE.md) — Living dev context
+- [historical log recovery](README.md#history) — Historical development context
 - [TICKETS.md](../TICKETS.md) — DCL-020..026 với acceptance criteria
 
 ---

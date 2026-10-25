@@ -1,9 +1,18 @@
 # Phase 8b — actions, reconciliation, benchmark: Hướng dẫn review
 
+> **Historical phase review.** Reviewed for context on 2026-10-25. The body
+> preserves phase-time examples, completion claims and measurements; they
+> are not current startup instructions or fresh test results. Start with
+> [current status](project-status.md) and the [code map](code-map.md).
+> The former CLAUDE.md diary is available through
+> [historical log recovery](README.md#history), not as a current context file.
+
+**Current scope correction (2026-10-25):** Reconciliation runs when indexing; it is not live watching. Organize validates its plan before executing but is not an atomic batch. Retrieval benchmark values below are dated, not fresh validation.
+
 > Branch: `feat/phase-8b-actions-benchmark` (tách từ `feat/phase-7-plugin-host`)
 > Tickets: DCL-113..117, cộng một defect không có ticket nhưng quan trọng hơn cả
-> Spec: `docs/superpowers/specs/2026-08-26-phase-8b-actions-benchmark.md`
-> Plan: `docs/superpowers/plans/2026-08-26-phase-8b-actions-benchmark.md`
+> Spec: `docs/specs/2026-08-26-phase-8b-actions-benchmark.md`
+> Historical implementation plan: available in Git at `5f168db:docs/superpowers/plans/2026-08-26-phase-8b-actions-benchmark.md` (removed from the working tree after completion).
 
 ## Mục lục
 

@@ -1,5 +1,14 @@
 # Phase 1 — Core Brain: Hướng dẫn review cho người mới
 
+> **Historical phase review.** Reviewed for context on 2026-10-25. The body
+> preserves phase-time examples, completion claims and measurements; they
+> are not current startup instructions or fresh test results. Start with
+> [current status](project-status.md) and the [code map](code-map.md).
+> The former CLAUDE.md diary is available through
+> [historical log recovery](README.md#history), not as a current context file.
+
+**Current scope correction (2026-10-25):** The current default brain uses context-window trimming. Repair, summarizing compaction, memory retrieval and the system prompt are available helpers, not enabled defaults. Model comparisons below are dated measurements.
+
 > **Đối tượng**: reviewer hoặc contributor mới. Đọc xong hiểu **thế nào là "agentic loop"**, **cách DeClaw ghép LangGraph với Ollama**, và **những quyết định probe-driven** (khác thường!) đã shape Phase 1.
 
 ---
@@ -40,6 +49,7 @@ Phase 1 build **"não" của DeClaw** — vòng lặp agent nói chuyện với 
 ### Agent
 
 Đơn giản: **một LLM có công cụ (tools) + khả năng quyết định**. Không chỉ trả lời câu hỏi, mà có thể:
+
 - Đọc file
 - Tính toán
 - Gọi API
@@ -81,11 +91,13 @@ Model: "File contains: 'Hello DeClaw...'"
 ### (1) **LangGraph over raw LangChain**
 
 LangChain có `AgentExecutor` cho pattern này, nhưng:
+
 - Opaque state — khó debug
 - Retry/error handling implicit
 - Không thể inject custom logic vào loop
 
 **LangGraph** = state machine explicit:
+
 - `AgentState` là **Pydantic BaseModel** với typed slots (messages, plan, tool_calls, audit_refs)
 - Node là function `(state) -> state` — testable, mockable
 - Edge là function `(state) -> next_node_name` — routing explicit
@@ -117,6 +129,7 @@ Bài học: **"tính năng nghe hay" cần verify empirically, không assume**.
 Đây là quyết định counter-intuitive nhất. Best practice thường là "seed system prompt với rules cho model". DeClaw làm ngược lại — không seed gì. Vì sao?
 
 **Prompt-variant experiment** (2026-06-11):
+
 - Control (không system prompt): **68%** tool-calling accuracy
 - Với system prompt (dạng nào cũng vậy): **0-23%**
 
@@ -142,6 +155,7 @@ Model có context window (Mistral 7B: 32K, Qwen2.5 3B: 32K+). Long conversation 
 - **Soft cap** (24000): eviction target — không trim mỗi turn, chỉ khi vượt hard cap
 
 `fit_to_window` giữ:
+
 - Leading `SystemMessage` (nếu có)
 - Most recent message
 - Drop orphan `ToolMessage` (đầu tail bị mồ côi khi cắt)
@@ -184,6 +198,7 @@ Thay drop oldest → thay bằng 1 SystemMessage summary note.
 ```
 
 **agent node**: gọi injected `model(state.messages)`. Model trả:
+
 - AIMessage với `tool_calls` → route sang `tools`
 - AIMessage không có tool_calls → END
 
@@ -269,6 +284,7 @@ def build_ollama_model(tools, *, model=None, base_url=None) -> ModelCallable:
 **Delivered**: [declaw/brain/repair.py](../declaw/brain/repair.py) — `with_tool_call_repair(model, tools)`.
 
 Detect 3 failure modes:
+
 - `invalid_tool_calls` (args không parse JSON)
 - Unknown tool name
 - Args fail pydantic schema
@@ -308,12 +324,14 @@ Summariser default: LLM call với prompt "summarize concisely, preserve facts/d
 `build_brain` là **assembly point**: build Ollama model, wrap với context window (không repair, không compaction default), build agent graph.
 
 `run_chat` là REPL:
+
 - Injectable `read`/`write` I/O — testable không cần terminal
 - `/exit`/`/quit` để thoát
 - Blank line skip
 - `--debug` in `[tool call]`/`[tool result]` lines
 
 [declaw/main.py:95](../declaw/main.py#L95) là chat command:
+
 - Health check Ollama trước
 - Ensure workspace dir exists
 - Wire registry tools + confirmation provider + sanitizer vào brain
@@ -324,6 +342,7 @@ Summariser default: LLM call với prompt "summarize concisely, preserve facts/d
 **Delivered**: [declaw/brain/prompts.py](../declaw/brain/prompts.py) — locked EN/FR prompts.
 
 **Trạng thái tricky**: prompt tồn tại **nhưng không được seed** vào `declaw chat` (probe data). Vẫn có cho:
+
 - Composition khác không bind tools (sanitizer dùng approach tương tự)
 - Nếu mai mốt A/B verify Qwen chịu được system prompt → re-enable
 
@@ -336,6 +355,7 @@ Prompts embed 7 Inviolable Principles + pin language "Answer in English"/"Répon
 ### `declaw/brain/eval.py` — reusable benchmark
 
 Promotes probe từ ad-hoc script thành framework:
+
 - **`PROBE_TOOLS`**: 3 toy tool (echo/add/say_hello) — đơn giản để cô lập tool-calling reliability khỏi complexity của fs tool
 - **`BENCHMARK_CORPUS_V0`**: 50 frozen prompt, 8 category:
   - Direct EN/FR (8/8)
@@ -449,39 +469,46 @@ Mỗi lần compact tạo summary mới → duplicate work. Follow-up optimizati
 ## 9. Checklist review
 
 ### ✅ Architecture
+
 - [ ] `AgentState` là Pydantic BaseModel, không dict
 - [ ] `messages` field dùng `add_messages` reducer (append), không overwrite
 - [ ] Model injected qua `ModelCallable` protocol — không hard-code ChatOllama
 - [ ] Router `tools_condition` check `tool_calls` không rỗng
 
 ### ✅ Ollama binding
+
 - [ ] `build_ollama_model` call `bind_tools(tools)` — model biết tool schema
 - [ ] Tool list wire vào brain **phải match** tool list bind vào model
 - [ ] Test với fake `ChatOllama` — no daemon needed
 
 ### ✅ Wrappers
+
 - [ ] `with_tool_call_repair` composable — không bật default
 - [ ] `with_context_window` bật default trong `build_brain`
 - [ ] `with_compaction` composable — không bật default (latency cost)
 - [ ] Wrapper composable — order matter, documented
 
 ### ✅ REPL
+
 - [ ] `run_chat` inject read/write I/O — testable
 - [ ] `/exit` + `/quit` handle
 - [ ] Blank line skip
 - [ ] `--debug` in tool call/result
 
 ### ✅ Prompts
+
 - [ ] EN + FR versions của mọi prompt
 - [ ] Language switch qua Settings + `DECLAW_LANGUAGE` env
 - [ ] **Không** seed system prompt vào `declaw chat` (probe-driven)
 
 ### ✅ Probe framework
+
 - [ ] `BENCHMARK_CORPUS_V0` locked (add, không rewrite)
 - [ ] Toy tools (echo/add/say_hello) đơn giản — isolate tool-calling từ tool complexity
 - [ ] Baseline numbers ghi trong CLAUDE.md có evidence
 
 ### ⚠️ Red flags
+
 - ❌ System prompt seed vào chat mà không có A/B probe evidence
 - ❌ Hard-code model name thay vì `settings.model`
 - ❌ Model created ở nhiều nơi thay vì 1 factory
@@ -521,7 +548,7 @@ Mỗi lần compact tạo summary mới → duplicate work. Follow-up optimizati
 - [phase-0-review.md](./phase-0-review.md) — Phase 0 (Foundation)
 - [phase-2-review.md](./phase-2-review.md) — Phase 2 (Tool Layer)
 - [phase-4-review.md](./phase-4-review.md) — Phase 4 (Sanitizer)
-- [CLAUDE.md](../CLAUDE.md) — Living dev context, đặc biệt "Post-Phase 1 calibration"
+- [historical log recovery](README.md#history) — Historical development context, đặc biệt "Post-Phase 1 calibration"
 - [TICKETS.md](../TICKETS.md) — DCL-010..017 với acceptance criteria
 
 ---

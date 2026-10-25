@@ -1,5 +1,14 @@
 # Phase 5 — Memory & Audit: Hướng dẫn review cho người mới
 
+> **Historical phase review.** Reviewed for context on 2026-10-25. The body
+> preserves phase-time examples, completion claims and measurements; they
+> are not current startup instructions or fresh test results. Start with
+> [current status](project-status.md) and the [code map](code-map.md).
+> The former CLAUDE.md diary is available through
+> [historical log recovery](README.md#history), not as a current context file.
+
+**Current scope correction (2026-10-25):** The HTTP observer covers instrumented core-process httpx calls, not all processes or OS egress. Text payload encryption does not encrypt vectors/SQLite. The encrypted credential fallback exists. Memory wipe covers semantic memory and episodes, not the document collection or the audit DB; it is not a disk scrub. Episodic population and memory retrieval are not wired into default chat.
+
 > **Đối tượng**: reviewer hoặc contributor mới. Đọc xong hiểu **memory 4 loại**, **audit trail hoạt động thế nào**, và **cách DeClaw đạt MVP DoD #5 (NL audit log) + #6 (egress monitor)**.
 
 ---
@@ -27,6 +36,7 @@
 Phase 5 build **2 subsystem lớn** liên quan nhau:
 
 **Memory** — DeClaw nhớ được gì:
+
 - **Short-term buffer**: FIFO ring bounded, in-memory
 - **Semantic memory** (ChromaDB): vector search theo topic, Fernet-encrypted at rest
 - **Episodic memory** (SQLite): task history, query theo date/tag
@@ -34,6 +44,7 @@ Phase 5 build **2 subsystem lớn** liên quan nhau:
 - **GDPR export + wipe**: JSON archive + right-to-be-forgotten CLI
 
 **Audit** — DeClaw ghi lại gì (Principle #7):
+
 - **Typed audit events**: ToolCall, NetworkCall, Quarantine, PermissionPrompt... (discriminated union)
 - **Real-time logger**: OUTERMOST tool wrapper — audit → confirm → sanitize → tool
 - **NL summary + daily report**: deterministic templates (NOT LLM — no hallucination)
@@ -51,11 +62,13 @@ Phase 5 build **2 subsystem lớn** liên quan nhau:
 ### Memory: agent cần "nhớ"
 
 Không có memory:
+
 - Mỗi lần chat = từ đầu, không nhớ document trước đã đọc
 - Hỏi cùng câu 10 lần → phải re-parse document 10 lần
 - Không thể "trở lại task tuần trước"
 
 Có memory:
+
 - Semantic search: "tôi hỏi về hợp đồng Dupont" → retrieve context liên quan từ document đã đọc
 - Episodic: "task tôi làm hôm thứ Ba" → query DB
 - Working buffer: giữ vài turn gần nhất trong prompt
@@ -65,11 +78,13 @@ Có memory:
 *"NEVER make a network call without logging it to the audit trail — 'data left the device' must be observable"*
 
 Không có audit:
+
 - User không biết agent làm gì thay mặt mình
 - Không thể chứng minh "không có data gì rời khỏi máy" — vốn là core value proposition cho luật sư/bác sĩ
 - Không GDPR-compliant (Article 15 — right of access, Article 30 — records of processing)
 
 Có audit:
+
 - Mỗi tool call, mỗi network call, mỗi quarantine event = 1 record
 - Cuối ngày có "daily report" NL: *"DeClaw đã đọc 4 file, di chuyển 1 file, không gọi mạng ngoài Ollama"*
 - User export dưới dạng PDF → gửi lawyer review
@@ -148,6 +163,7 @@ audit → confirmation → sanitizer → tool
 ```
 
 `wrap_tool_with_audit` là **OUTERMOST**. Nghĩa là:
+
 - Audit ghi call **exactly as model experienced it** (kể cả với clipped args)
 - Denial → audit ghi `outcome="denied"` với DeClaw-generated denial string match
 - Error → `outcome="error"` + exception info
@@ -245,6 +261,7 @@ sanitizer(confirmation(audit(tool)))  ← WRONG
 ```
 
 Vì:
+
 - Audit phải record call **EXACTLY** như model gọi — kể cả bị denied hay bị sanitizer quarantine
 - Nếu audit ở innermost → miss denied calls (không có exec → không log)
 - Innermost audit = incomplete audit = broken Principle #7
@@ -260,6 +277,7 @@ CLI prompt confirm unless `--yes` — accidental wipe protection.
 ### (7) **fpdf2 new dependency cho PDF export**
 
 Trade-off: extra dependency vs manual PDF gen. Chose fpdf2 vì:
+
 - Core fonts đủ Latin-1 (EN + FR)
 - Không cần TTF external
 - Deterministic layout
@@ -314,6 +332,7 @@ Non-Latin-1 punctuation transliterated (vd em-dash `—` → hyphen). Test extra
 **File**: [declaw/db/models.py](../declaw/db/models.py) (Episode model), [declaw/memory/episodic.py](../declaw/memory/episodic.py).
 
 Migration `3f1c2a9d4e5b`:
+
 - `Episode` table: uuid PK, task FK, JSON tags, tz-aware started/finished, indexed started_at
 - `record(task_id, summary, tags)` — insert
 - `query(on=date, tag=None)` — SQL WHERE date + Python filter tag (documented local-scale trade-off; if tag count grows → dedicated table)
@@ -326,6 +345,7 @@ Full alembic chain verified against fresh DB (migration → schema → CRUD → 
 **File**: [declaw/brain/memory_context.py](../declaw/brain/memory_context.py).
 
 `with_memory(model, retrieve)` composable wrapper:
+
 - Latest HumanMessage = query
 - Retrieve top-k
 - Fold vào ONE SystemMessage với token budget
@@ -361,6 +381,7 @@ Archive shape:
 ```
 
 Wipe empties BOTH stores. Emits:
+
 - `MemoryExportEvent` (fields: count only, no content)
 - `MemoryWipeEvent` (fields: counts only, structurally cannot leak content)
 
@@ -369,6 +390,7 @@ Wipe empties BOTH stores. Emits:
 **File**: [declaw/audit/events.py](../declaw/audit/events.py).
 
 Union of frozen pydantic models, discriminated on `event_type`:
+
 - `ToolCallEvent`
 - `NetworkCallEvent`
 - `QuarantineEvent`
@@ -411,6 +433,7 @@ Union of frozen pydantic models, discriminated on `event_type`:
 CLI: `declaw report [--date YYYY-MM-DD]`
 
 **Deterministic templates**:
+
 - Per-tool EN + FR verbs (`filesystem_read` → "read" / "a lu")
 - Denied/failed suffixes
 - Quarantine lines
@@ -423,6 +446,7 @@ CLI: `declaw report [--date YYYY-MM-DD]`
 **File**: [declaw/audit/egress.py](../declaw/audit/egress.py).
 
 Monkeypatch `httpx.AsyncClient.send` and `Client.send`:
+
 - Every outbound request → NetworkCallEvent
 - Host outside `allowed_hosts_from_settings()` (loopback + Ollama) → `flagged=True` + loguru warning
 
@@ -517,6 +541,7 @@ DeClaw target market = EU regulated professionals. GDPR compliance là **product
 ### Article 15 — Right of access
 
 User được quyền **truy cập tất cả data về mình**. `declaw memory export` implement:
+
 - Semantic memory: DECRYPTED text (readable), metadata, timestamps
 - Episodic memory: task history, summary, tags
 - Self-describing archive (schema_version, exported_at)
@@ -524,6 +549,7 @@ User được quyền **truy cập tất cả data về mình**. `declaw memory 
 ### Article 17 — Right to be forgotten
 
 User được quyền **xóa tất cả data về mình**. `declaw memory wipe` implement:
+
 - Empty semantic + episodic stores
 - Audit trail giữ **counts only** — `MemoryWipeEvent` structurally không carry content
 - Wipe itself is audited (compliance requires knowing wipe happened, when, by whom)
@@ -576,6 +602,7 @@ with install_egress_monitor(logger, ["127.0.0.1", "localhost"]):
 ### Allowlist
 
 `allowed_hosts_from_settings(settings)`:
+
 - `localhost`, `127.0.0.1`, `::1` — loopback always allowed
 - `settings.ollama_base_url` host — usually `localhost` too
 
@@ -677,6 +704,7 @@ uv run declaw memory export --output after_wipe.json
 ### ⚠️ Embedding vectors NOT encrypted
 
 Chroma cần plaintext vector để search. Embedding-inversion attack có thể approximate text. **Documented** → Phase 12 consideration. Mitigation options:
+
 - Encrypted search schemes (research area)
 - Homomorphic encryption (too slow for MVP)
 - Just accept for v0.1, warn user
@@ -714,6 +742,7 @@ Trade-off intentional. Regulated professional > pretty prose. Documented.
 ## 12. Checklist review
 
 ### ✅ Memory
+
 - [ ] ChromaDB telemetry OFF (`anonymized_telemetry=False`)
 - [ ] Embedder injectable — never Chroma's default internet-ONNX
 - [ ] Fernet key stored via keyring, NEVER on disk
@@ -724,6 +753,7 @@ Trade-off intentional. Regulated professional > pretty prose. Documented.
 - [ ] `with_memory` wrapper composable — NOT wired default
 
 ### ✅ Audit
+
 - [ ] `AuditEvent` = discriminated union keyed on `event_type`
 - [ ] `schema_version` on every event
 - [ ] `clip_args` truncate + SHA-256 fingerprint (audit DB không duplicate documents)
@@ -734,12 +764,14 @@ Trade-off intentional. Regulated professional > pretty prose. Documented.
 - [ ] Composite sink append loguru + DB
 
 ### ✅ NL summary + report
+
 - [ ] Templates deterministic, NOT LLM-generated (locked decision)
 - [ ] Per-tool EN + FR verb templates
 - [ ] Denied/failed suffixes
 - [ ] "Data left device: yes/no" last line — MVP DoD #6 headline
 
 ### ✅ Egress monitor
+
 - [ ] Patches BOTH `httpx.AsyncClient.send` and `Client.send`
 - [ ] Success AND failure emit NetworkCallEvent
 - [ ] Allowlist = loopback + Ollama host
@@ -747,16 +779,19 @@ Trade-off intentional. Regulated professional > pretty prose. Documented.
 - [ ] Context manager pattern — installed around `declaw chat`
 
 ### ✅ Export
+
 - [ ] JSON = full typed payload with envelope, round-trips
 - [ ] Markdown = one-line-per-event table
 - [ ] PDF via fpdf2 core fonts, EN+FR OK, verified via pypdf extract
 
 ### ✅ GDPR
+
 - [ ] Export = DECRYPTED (portability)
 - [ ] Wipe emits MemoryWipeEvent with **counts only** — no content field by construction
 - [ ] CLI wipe prompts unless `--yes`
 
 ### ⚠️ Red flags
+
 - ❌ NL summary calls LLM (violates locked decision, hallucination risk)
 - ❌ Audit event has raw content field (leak risk)
 - ❌ Wrap order != OUTERMOST audit (miss denied calls)
@@ -802,7 +837,7 @@ Trade-off intentional. Regulated professional > pretty prose. Documented.
 - [phase-2-review.md](./phase-2-review.md) — Tools (audit wraps tools)
 - [phase-4-review.md](./phase-4-review.md) — Sanitizer (quarantine bridges into audit)
 - [phase-6-review.md](./phase-6-review.md) — Credentials + Permissions (DCL-070 landed here, DCL-074 in Phase 6)
-- [CLAUDE.md](../CLAUDE.md) — Living dev context
+- [historical log recovery](README.md#history) — Historical development context
 - [TICKETS.md](../TICKETS.md) — DCL-050..057, 060..065
 
 ---

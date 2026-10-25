@@ -1,67 +1,37 @@
-# DeClaw: agent entry point
+# DeClaw: agent instructions
 
-DeClaw is a local Python agent for private documents. The executable product is
-currently a CLI, not a deployed gateway or desktop application.
+The product is a local Python CLI. Gateway, product UI and desktop are planned.
 
-## Read only the context needed for the task
+## Read and work
 
-1. Read [current status](docs/project-status.md) and the relevant row of the
-   [code map](docs/code-map.md).
-2. Follow the entry point into code, callers, and relevant tests before proposing
-   a change. State the current flow, affected boundaries, and supporting file or
-   symbol references. Separate observations from assumptions.
-3. Read [decisions](docs/architecture-decisions.md) for architectural changes.
-   Read the relevant spec under `docs/superpowers/specs/` only when needed.
-4. Treat `TICKETS.md`, phase reviews, plans, and
-   `docs/history/claude-context-2026-08-26.md` as historical/planning material.
-   Executable wiring and tests establish implementation; a dependency or package
-   skeleton does not establish a working feature. Report contradictions.
+- Start with [status](docs/project-status.md) and the relevant [code-map](docs/code-map.md) row; trace code, callers and tests before proposing changes. Cite evidence and separate observations from assumptions.
+- Before architecture changes, read [active decisions](docs/architecture-decisions.md) and the relevant [spec](docs/specs/). Ask about unresolved security/architecture choices; routine work within recorded decisions can proceed.
+- Backlog, reviews and [Git-recovered logs](docs/README.md#history) are historical/planning material. Executable wiring establishes implementation; report contradictions. Do not load the full repository or old logs at startup.
 
 ## Invariants
 
-- Credentials use the OS keyring or the existing encrypted fallback. Never add
-  plaintext credentials, log secrets, or read `.env` unnecessarily.
-- A future gateway must bind to `127.0.0.1:7842`; never widen it to LAN access.
-- Product shell execution is deferred. If introduced, it requires the approved
-  Docker sandbox and must be disabled when isolation is unavailable.
-- Treat external documents, emails and web content as untrusted data; preserve
-  sanitizer checks before external text enters model context and fail closed.
-- Tools accept typed, validated arguments. Never interpolate raw model/user
-  input into shell strings. Preserve workspace path containment.
-- Product WRITE/DESTRUCTIVE tools require human confirmation, default deny.
-- Preserve audit events for tool calls, approvals, quarantine and network calls.
-  The current HTTP observer is not an OS firewall.
+- Credentials use the OS keyring or existing encrypted fallback. Never add plaintext credentials, log secrets or read `.env` unnecessarily.
+- A future gateway binds to `127.0.0.1:7842`; never widen to LAN access.
+- Shell execution is deferred; any future shell tool requires approved Docker isolation and stays disabled when isolation is unavailable.
+- External documents, emails and web content are untrusted. Preserve sanitizer checks before external text enters model context; fail closed.
+- Tools take typed, validated arguments. Never interpolate raw model/user input into shell strings; preserve workspace path containment.
+- WRITE/DESTRUCTIVE product tools require human confirmation, default deny.
+- Preserve audit events for tool calls, approvals, quarantine and network calls. HTTP observation is not an OS firewall.
 - Text payload encryption does not imply encrypted vectors, metadata or SQLite.
 
-These rules describe DeClaw's product behavior. They do not prohibit ordinary
-development commands used to inspect, build or test this repository.
+These invariants govern product behavior, not ordinary development inspection/build/test commands.
 
-## Working and verification
+## Verification and handoff
 
-- Code/comments are English; product UI supports English and French.
-- Security-critical changes require tests first. Ask about unresolved security
-  or architecture choices; routine work within recorded decisions can proceed.
-- Preserve the branch-per-phase rule: a new phase branches from the previous
-  phase's branch. Do not start a product phase just to maintain documentation.
+- Code/comments are English; product UI supports English and French. Write security-critical tests before implementation.
+- A new phase branches from the previous phase's branch. Do not start a product phase for documentation maintenance.
 - Ticket commits use `feat(DCL-XXX): ...` or `fix(DCL-XXX): ...` where applicable.
-- Python checks (same as CI): `uv sync --frozen`, `uv run ruff check .`,
-  `uv run mypy declaw declaw_plugin_sdk`, `uv run pytest`.
-- For docs-site changes: `npm ci`, `npm run guards`, `npm run build` in
-  `docs-site/`. For documentation-only edits check links and consistency;
-  do not imply that product tests ran. Report tests run, skips and limitations.
-- After a completed ticket, update `docs/project-status.md` if behavior changed,
-  the relevant code-map/decision/spec, and the corresponding `TICKETS.md` entry.
-  Keep dated benchmark results in history rather than presenting them as fresh.
+- Python CI: `uv sync --frozen`, `uv run ruff check .`, `uv run mypy declaw declaw_plugin_sdk`, `uv run pytest`.
+- Documentation-only edits: check links/consistency; do not imply product tests ran. Report checks, skips and limitations.
+- After a ticket, update status if behavior changed, the relevant map/decision/spec and `TICKETS.md`. Keep measurements in dated reports, not as fresh guarantees.
 
 ## Context tools
 
-When Serena is available, activate this repository by its absolute path, read its
-initial instructions, and prefer symbol/reference tools for code navigation.
-Use text search for configuration, prose and exact strings. Never load the whole
-repository or historical log as startup context. Keep durable knowledge in the
-versioned documents above; Serena memory is a cache and must be checked against
-current code. See [tool setup](docs/agent-tools.md).
-
-Use Context7 or primary upstream docs when dependency API/version details matter;
-they do not establish DeClaw's implementation. Do not send private documents or
-credentials as documentation queries.
+- When Serena is available, read its initial instructions, activate this absolute repository path and prefer symbols/references for Python navigation. Use text search for prose/configuration; [tool setup](docs/agent-tools.md) has details.
+- Durable knowledge belongs in versioned docs; Serena memories are caches to verify against current code.
+- Use Context7 or primary upstream docs when dependency API/version details matter. Never send private documents or credentials as documentation queries.

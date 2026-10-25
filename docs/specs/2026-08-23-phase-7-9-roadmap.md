@@ -1,5 +1,11 @@
 # Roadmap — Phases 7, 8, 9
 
+> **Approved design record.** This file records decisions and assumptions
+> from its original date, not current implementation or a new approval.
+> Verify wiring and limitations against [current status](../project-status.md)
+> and [active decisions](../architecture-decisions.md). Historical
+> CLAUDE.md diary references can be recovered through [Git history](../README.md#history).
+
 - **Date**: 2026-08-23
 - **Status**: design direction approved; detailed spec written per phase
 - **Covers**: DCL-090..097 (Phase 7), DCL-100..117 (Phase 8), DCL-120..134 (Phase 9)
@@ -15,10 +21,9 @@ spec → plan → implementation cycle. This document is the arc: what each phas
 owns after the decisions below, and which cross-phase choices are already
 settled so a later phase does not silently re-open them.
 
-Only **Phase 7 has a detailed spec today**
-(`2026-08-23-phase-7-plugin-host-design.md`). Phases 8 and 9 are sketches
-here, to be specced when their turn comes, with real knowledge from the phase
-before.
+At roadmap approval on 2026-08-23, only Phase 7 had a detailed spec.
+Detailed Phase 8a and 8b specifications were subsequently written in this
+directory. Phase 9 remains a sketch and requires its own reviewed design.
 
 ## Four decisions taken on 2026-08-23
 

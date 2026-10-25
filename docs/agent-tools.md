@@ -20,6 +20,11 @@ session (or restart the app) after setup, and use `/mcp` to confirm the two serv
 are connected. A successful standalone smoke test does not prove an existing
 chat has reloaded its tool catalog.
 
+The entire `.codex/` and `.claude/` directories are machine-local and ignored.
+Do not commit their settings or credentials; recreate local MCP configuration
+with the setup script. Shared development instructions remain in `AGENTS.md`,
+with `CLAUDE.md` as a small import pointer.
+
 ## Everyday use
 
 - Start at `AGENTS.md`, then current status and the relevant code-map row.
@@ -57,7 +62,7 @@ The health check exercises code navigation. It is not a DeClaw product test. Log
 `.serena/logs/health-checks/`. A first language-server launch may download its
 dependencies; subsequent launches reuse the cache.
 
-## Verification on 2026-10-25
+## Verification record — 2026-10-25
 
 - Serena 2.1.0 health check passed on this Windows checkout, including symbol
   overview, lookup and reference search.
@@ -72,8 +77,12 @@ dependencies; subsequent launches reuse the cache.
   `git diff --check` passed. Product tests were not run for these documentation
   and developer-tool configuration changes.
 
-This verifies standalone tool operation, not loading into the already-running
-chat. Confirm the active servers with `/mcp` in a new trusted project session.
+The bullets above describe the original standalone checks. A subsequent live
+chat session on 2026-10-25 also loaded both servers: Serena initial instructions,
+project activation, symbol lookup and chat/index reference lookup succeeded;
+Context7 resolve and public LangGraph documentation queries succeeded. This
+separates configured servers, standalone operation and actual session loading.
+For a future session, confirm the catalog again instead of assuming it reloaded.
 
 Official references: [Serena client configuration](https://oraios.github.io/serena/02-usage/030_clients.html),
 [Codex MCP configuration](https://developers.openai.com/codex/mcp),
