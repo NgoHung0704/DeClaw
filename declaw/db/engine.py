@@ -61,9 +61,12 @@ def get_engine() -> AsyncEngine:
 def get_sessionmaker() -> async_sessionmaker[AsyncSession]:
     global _sessionmaker
     if _sessionmaker is None:
+        # Initialize the engine before taking the shared, non-reentrant lock.
+        # Otherwise a cold get_engine() tries to acquire the lock a second time.
+        engine = get_engine()
         with _lock:
             if _sessionmaker is None:
-                _sessionmaker = build_sessionmaker(get_engine())
+                _sessionmaker = build_sessionmaker(engine)
     return _sessionmaker
 
 
