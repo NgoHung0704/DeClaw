@@ -40,13 +40,13 @@
         "planned-surfaces"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 236,
-        "end": 236,
+        "file": "docs/history/claude-context-2026-08-26.md",
+        "start": 240,
+        "end": 240,
         "anchor": "is deferred to post-MVP",
         "note": {
-          "en": "The decision and its rationale are recorded in the living context document.",
-          "vi": "Quyết định và lý do được ghi trong tài liệu ngữ cảnh sống."
+          "en": "Historical record archived on 2026-10-25. The decision and its rationale are recorded in the archived development notes.",
+          "vi": "Ghi nhận lịch sử, lưu trữ ngày 2026-10-25. Quyết định và lý do được ghi trong nhật ký phát triển đã lưu trữ."
         }
       }
     },
@@ -58,21 +58,21 @@
         "vi": "Sanitizer tệ hơn 38 điểm trên dữ liệu không do ai ở đây viết"
       },
       "body": {
-        "en": "Detection is 91.7% on the project's own corpus and 53.3% on an external held-out set. The category breakdown shows detection tracking corpus coverage almost exactly: 92% where samples are thick, 33% where the same family is phrased differently, and 0% for a family with no samples at all. Treat 91.7% as a corpus-specific score, not a capability claim.",
-        "vi": "Khả năng phát hiện đạt 91,7% trên bộ mẫu của chính dự án và 53,3% trên tập held-out bên ngoài. Bảng phân tích theo họ tấn công cho thấy khả năng phát hiện bám gần như chính xác theo độ phủ của bộ mẫu: 92% ở nơi có nhiều mẫu, 33% khi cùng họ nhưng diễn đạt khác, và 0% với họ hoàn toàn không có mẫu. Hãy coi 91,7% là điểm số riêng của bộ mẫu, không phải khẳng định về năng lực."
+        "en": "Historical benchmark from 2026-07-26, not a fresh evaluation. Detection is 91.7% on the project's own corpus and 53.3% on an external held-out set. The category breakdown shows detection tracking corpus coverage almost exactly: 92% where samples are thick, 33% where the same family is phrased differently, and 0% for a family with no samples at all. Treat 91.7% as a corpus-specific score, not a capability claim.",
+        "vi": "Benchmark lịch sử ngày 2026-07-26, không phải đánh giá mới. Khả năng phát hiện đạt 91,7% trên bộ mẫu của chính dự án và 53,3% trên tập held-out bên ngoài. Bảng phân tích theo họ tấn công cho thấy khả năng phát hiện bám gần như chính xác theo độ phủ của bộ mẫu: 92% ở nơi có nhiều mẫu, 33% khi cùng họ nhưng diễn đạt khác, và 0% với họ hoàn toàn không có mẫu. Hãy coi 91,7% là điểm số riêng của bộ mẫu, không phải khẳng định về năng lực."
       },
       "components": [
         "sanitizer",
         "sanitizer-corpus"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 204,
-        "end": 204,
+        "file": "docs/history/claude-context-2026-08-26.md",
+        "start": 208,
+        "end": 208,
         "anchor": "the gap is 38 points",
         "note": {
-          "en": "Measured, and recorded with the correction that an earlier estimate was optimistic.",
-          "vi": "Đã đo, và ghi kèm đính chính rằng con số ước lượng trước đó là lạc quan."
+          "en": "Historical record archived on 2026-10-25. Measured, and recorded with the correction that an earlier estimate was optimistic.",
+          "vi": "Ghi nhận lịch sử, lưu trữ ngày 2026-10-25. Đã đo, và ghi kèm đính chính rằng con số ước lượng trước đó là lạc quan."
         }
       }
     },
@@ -84,20 +84,20 @@
         "vi": "Sanitizer yếu hơn rõ rệt trong tiếng Pháp"
       },
       "body": {
-        "en": "Detection splits 96.7% English against 86.7% French, and switching to the French prompt made it slightly worse rather than better, so it is a model-capability gap and not a prompt-wiring bug. For a France-first product this is the most consequential known weakness in the layer.",
-        "vi": "Khả năng phát hiện là 96,7% với tiếng Anh so với 86,7% với tiếng Pháp, và chuyển sang prompt tiếng Pháp còn làm tệ đi một chút chứ không tốt lên, nên đây là giới hạn năng lực của model chứ không phải lỗi đấu nối prompt. Với một sản phẩm ưu tiên thị trường Pháp, đây là điểm yếu đã biết nghiêm trọng nhất của tầng này."
+        "en": "Historical benchmark recorded in the archived development notes; no new measurement was run. Detection splits 96.7% English against 86.7% French, and switching to the French prompt made it slightly worse rather than better, so it is a model-capability gap and not a prompt-wiring bug. For a France-first product this is the most consequential known weakness in the layer.",
+        "vi": "Benchmark lịch sử trong nhật ký đã lưu trữ; chưa chạy phép đo mới. Khả năng phát hiện là 96,7% với tiếng Anh so với 86,7% với tiếng Pháp, và chuyển sang prompt tiếng Pháp còn làm tệ đi một chút chứ không tốt lên, nên đây là giới hạn năng lực của model chứ không phải lỗi đấu nối prompt. Với một sản phẩm ưu tiên thị trường Pháp, đây là điểm yếu đã biết nghiêm trọng nhất của tầng này."
       },
       "components": [
         "sanitizer"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 219,
-        "end": 219,
+        "file": "docs/history/claude-context-2026-08-26.md",
+        "start": 223,
+        "end": 223,
         "anchor": "measurably weaker in French",
         "note": {
-          "en": "Tested, hypothesis rejected, and written up rather than smoothed over.",
-          "vi": "Đã kiểm chứng, bác bỏ giả thuyết, và ghi lại thay vì làm nhẹ đi."
+          "en": "Historical record archived on 2026-10-25. Tested, hypothesis rejected, and written up rather than smoothed over.",
+          "vi": "Ghi nhận lịch sử, lưu trữ ngày 2026-10-25. Đã kiểm chứng, bác bỏ giả thuyết, và ghi lại thay vì làm nhẹ đi."
         }
       }
     },
@@ -117,13 +117,13 @@
         "documents"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 126,
-        "end": 126,
+        "file": "docs/history/claude-context-2026-08-26.md",
+        "start": 130,
+        "end": 130,
         "anchor": "embedding vectors are NOT encrypted",
         "note": {
-          "en": "Recorded as a Phase 12 consideration when the encryption was built.",
-          "vi": "Được ghi nhận là hạng mục cho Phase 12 ngay khi xây phần mã hoá."
+          "en": "Historical record archived on 2026-10-25. Recorded as a Phase 12 consideration when the encryption was built.",
+          "vi": "Ghi nhận lịch sử, lưu trữ ngày 2026-10-25. Được ghi nhận là hạng mục cho Phase 12 ngay khi xây phần mã hoá."
         }
       }
     },
@@ -142,13 +142,13 @@
         "audit"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 132,
-        "end": 132,
+        "file": "docs/history/claude-context-2026-08-26.md",
+        "start": 136,
+        "end": 136,
         "anchor": "in-process observation only",
         "note": {
-          "en": "OS-level verification is tracked separately as a hardening ticket.",
-          "vi": "Việc kiểm chứng ở mức hệ điều hành được theo dõi riêng như một ticket gia cố."
+          "en": "Historical record archived on 2026-10-25. OS-level verification is tracked separately as a hardening ticket.",
+          "vi": "Ghi nhận lịch sử, lưu trữ ngày 2026-10-25. Việc kiểm chứng ở mức hệ điều hành được theo dõi riêng như một ticket gia cố."
         }
       }
     },
@@ -167,13 +167,13 @@
         "plugin-host"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 150,
-        "end": 150,
+        "file": "docs/history/claude-context-2026-08-26.md",
+        "start": 154,
+        "end": 154,
         "anchor": "auto-granted the permissions",
         "note": {
-          "en": "The decision, its narrow justification, and the condition for closing it are all recorded.",
-          "vi": "Quyết định, lý do biện minh hẹp, và điều kiện để đóng lại đều đã được ghi."
+          "en": "Historical record archived on 2026-10-25. The decision, its narrow justification, and the condition for closing it are all recorded.",
+          "vi": "Ghi nhận lịch sử, lưu trữ ngày 2026-10-25. Quyết định, lý do biện minh hẹp, và điều kiện để đóng lại đều đã được ghi."
         }
       }
     },
@@ -192,13 +192,13 @@
         "plugin-host"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 294,
-        "end": 294,
+        "file": "docs/history/claude-context-2026-08-26.md",
+        "start": 298,
+        "end": 298,
         "anchor": "signs only",
         "note": {
-          "en": "Named as a prerequisite for third-party install.",
-          "vi": "Được nêu là điều kiện tiên quyết cho việc cài plugin bên thứ ba."
+          "en": "Historical record archived on 2026-10-25. Named as a prerequisite for third-party install.",
+          "vi": "Ghi nhận lịch sử, lưu trữ ngày 2026-10-25. Được nêu là điều kiện tiên quyết cho việc cài plugin bên thứ ba."
         }
       }
     },
@@ -243,13 +243,13 @@
         "audit"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 282,
-        "end": 282,
+        "file": "docs/history/claude-context-2026-08-26.md",
+        "start": 286,
+        "end": 286,
         "anchor": "episodic memory still unpopulated",
         "note": {
-          "en": "Carried forward across several phases rather than quietly dropped.",
-          "vi": "Được mang theo qua nhiều phase chứ không lặng lẽ bỏ đi."
+          "en": "Historical record archived on 2026-10-25. Carried forward across several phases rather than quietly dropped.",
+          "vi": "Ghi nhận lịch sử, lưu trữ ngày 2026-10-25. Được mang theo qua nhiều phase chứ không lặng lẽ bỏ đi."
         }
       }
     },
@@ -269,13 +269,13 @@
         "entry-cli"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 122,
-        "end": 122,
+        "file": "docs/history/claude-context-2026-08-26.md",
+        "start": 126,
+        "end": 126,
         "anchor": "ensure_schema",
         "note": {
-          "en": "Recorded as a packaging-phase concern when the schema bootstrap was written.",
-          "vi": "Được ghi nhận là việc của phase đóng gói ngay khi viết phần khởi tạo schema."
+          "en": "Historical record archived on 2026-10-25. Recorded as a packaging-phase concern when the schema bootstrap was written.",
+          "vi": "Ghi nhận lịch sử, lưu trữ ngày 2026-10-25. Được ghi nhận là việc của phase đóng gói ngay khi viết phần khởi tạo schema."
         }
       }
     },
@@ -295,13 +295,13 @@
         "memory"
       ],
       "source": {
-        "file": "CLAUDE.md",
-        "start": 282,
-        "end": 282,
+        "file": "docs/history/claude-context-2026-08-26.md",
+        "start": 286,
+        "end": 286,
         "anchor": "still not in `build_brain`",
         "note": {
-          "en": "An A/B probe is the stated precondition for enabling it.",
-          "vi": "Điều kiện tiên quyết đã nêu để bật nó lên là một phép đo A/B."
+          "en": "Historical record archived on 2026-10-25. An A/B probe is the stated precondition for enabling it.",
+          "vi": "Ghi nhận lịch sử, lưu trữ ngày 2026-10-25. Điều kiện tiên quyết đã nêu để bật nó lên là một phép đo A/B."
         }
       }
     }

@@ -1,6 +1,6 @@
 # DeClaw — Tickets
 
-> Single source of work plan. Mark `[x]` when done. Implementation order is strict: complete each phase before the next. Security phases (4, 5) gate everything after them.
+> Backlog and historical ticket ledger. Current implementation is tracked in [project status](docs/project-status.md); [active decisions](docs/architecture-decisions.md) and approved specs override superseded ticket wording. Mark `[x]` only with implementation evidence. Phase 3 is deferred for the shell-free v0.1 scope; security gates still apply. See [Phase 9 readiness](docs/phase-9-readiness.md) before starting gateway work.
 
 **Legend**: ⚠️ critical • ⭐ MVP heart • Each ticket has: ID, Title, Description, Acceptance Criteria, Dependencies, Estimate.
 
@@ -18,8 +18,8 @@
 - **Estimate**: 0.5d
 
 ### [x] DCL-002 — CLAUDE.md living context document
-- **Description**: Create `CLAUDE.md` per template in prompt; update after every ticket.
-- **Acceptance**: File exists with current state, locked decisions, 7 principles, completed/in-progress sections.
+- **Description**: Historical context entry point created. Current shared instructions live in `AGENTS.md`; `CLAUDE.md` imports them. Update the versioned status/code map/decisions after relevant changes; the former diary is archived under `docs/history/`.
+- **Acceptance**: Shared instructions and current context are discoverable from `CLAUDE.md` and the documentation index; historical completion records remain preserved.
 - **Dependencies**: DCL-001
 - **Estimate**: 0.25d
 
@@ -368,18 +368,21 @@
 - **Estimate**: 0.5d
 
 ### [ ] DCL-071 — Credential CRUD API (gated by core)
+- **Scope**: Deferred until a plugin actually needs secrets; not a Phase 9 prerequisite.
 - **Description**: Plugins access secrets only via core API.
 - **Acceptance**: Direct keyring access from plugin process fails.
 - **Dependencies**: DCL-070, DCL-090
 - **Estimate**: 0.5d
 
 ### [ ] DCL-072 — Credential access logging
+- **Scope**: Deferred with DCL-071.
 - **Description**: Which plugin, when, why; rate-limited.
 - **Acceptance**: Audit entries written per access.
 - **Dependencies**: DCL-071, DCL-061
 - **Estimate**: 0.25d
 
 ### [ ] DCL-073 — Credential scoping
+- **Scope**: Deferred with DCL-071.
 - **Description**: Only authorized plugins read specific keys.
 - **Acceptance**: Unauthorized plugin denied + logged.
 - **Dependencies**: DCL-071
@@ -404,8 +407,8 @@
 - **Estimate**: 0.5d
 
 ### [ ] DCL-082 — Permission request UI dialog
-- **Description**: Mobile-app-style prompts.
-- **Acceptance**: Decline halts install; accept stores grant.
+- **Description**: Built-in plugin consent/permission management, coordinated with DCL-134. First-run consent versus a Settings permission panel remains a Phase 9 design question.
+- **Acceptance**: Explicit denials/revocations are respected and audited. Install-time consent is deferred with third-party installation; no install flow in v0.1.
 - **Dependencies**: DCL-081, DCL-127
 - **Estimate**: 0.5d
 
@@ -626,6 +629,8 @@
 
 ## 🌐 PHASE 9 — GATEWAY & WEB UI (Week 10-11)
 
+Scope follows the approved Phase 7–9 roadmap: vanilla JS, locally vendored CSS, EN/FR, built-in plugin controls only. Estimates and the first-token latency target below are planning assumptions, not measurements. A detailed security/session/approval spec is still required; all tickets remain pending.
+
 ### [ ] DCL-120 — FastAPI app (bind 127.0.0.1 only)
 - **Description**: Hardened uvicorn config; no LAN bind.
 - **Acceptance**: External interface rejects connections.
@@ -687,8 +692,8 @@
 - **Estimate**: 0.5d
 
 ### [ ] DCL-130 — UI: Plugin manager
-- **Description**: List/install/disable/uninstall.
-- **Acceptance**: Permission dialog appears at install time.
+- **Description**: List built-in plugins, enable/disable them, inspect permissions and revoke grants. Third-party install/uninstall/update is out of scope for v0.1.
+- **Acceptance**: Built-in state and permission changes are visible, persisted and audited; no third-party installer is exposed.
 - **Dependencies**: DCL-091, DCL-082
 - **Estimate**: 0.5d
 
@@ -711,8 +716,8 @@
 - **Estimate**: 0.5d
 
 ### [ ] DCL-134 — UI: Permission dialog
-- **Description**: As specified in prompt.
-- **Acceptance**: Decline halts install.
+- **Description**: Built-in permission experience, coordinated with DCL-082; detailed presentation remains undecided in the approved roadmap.
+- **Acceptance**: Consent/denial/revocation behavior is specified and tested before implementation; install-time dialogs remain deferred with third-party installation.
 - **Dependencies**: DCL-082
 - **Estimate**: 0.5d
 

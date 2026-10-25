@@ -47,7 +47,15 @@ coverage.xml
 docs-site/node_modules/
 docs-site/dist/
 docs-site/content/repo.json
+docs-site/*.tsbuildinfo
 
 # Design drafts and local generation helpers
 .superdesign/tmp/
 .superdesign/init-context.py
+
+# Local coding-agent tools and generated Serena state
+.agent-tools/
+.serena/cache/
+.serena/logs/
+.serena/memories/
+.codex/config.toml
