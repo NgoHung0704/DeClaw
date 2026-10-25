@@ -43,4 +43,15 @@ as current validation.
 
 ## Phase 9 assessment
 
-The [2026-10-25 readiness assessment](phase-9-readiness.md) identifies reusable CLI services, missing gateway/UI contracts and a cold DB factory initialization deadlock reproduced in isolation. Phase 9 is ready for detailed design, not implemented. No product behavior changed during the documentation cleanup.
+The [2026-10-25 readiness assessment](phase-9-readiness.md) identifies reusable CLI services, missing gateway/UI contracts and a cold DB factory initialization deadlock reproduced in isolation (subsequently fixed; see maintenance below). Phase 9 is ready for detailed design, not implemented. No product behavior changed during the documentation cleanup.
+
+## Maintenance baseline — 2026-10-25
+
+`get_sessionmaker()` now initializes the engine before acquiring the shared
+factory lock. Cold startup no longer depends on callers invoking `get_engine()`
+first; the process-wide engine and session factory remain singletons. Regression
+tests cover cold factory-first access and eight concurrent callers in isolated,
+time-bounded subprocesses. No Phase 9 feature was added.
+
+See the [dated Python baseline](history/python-baseline-2026-10-25.md) for the
+red/green evidence, exact check scope and final verification results.

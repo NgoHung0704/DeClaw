@@ -40,6 +40,7 @@
 ### [x] DCL-005 — SQLite + SQLModel setup with migrations
 - **Description**: Engine, session, baseline models for tasks/audit; Alembic init.
 - **Acceptance**: `alembic upgrade head` creates schema; CRUD smoke test passes.
+- **Maintenance (2026-10-25)**: Fixed cold `get_sessionmaker()` initialization deadlock without changing its API or singleton behavior. Added bounded subprocess regressions for factory-first and concurrent startup; see [Python baseline](docs/history/python-baseline-2026-10-25.md).
 - **Dependencies**: DCL-004
 - **Estimate**: 0.5d
 

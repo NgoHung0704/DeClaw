@@ -9,6 +9,9 @@ DCL-007 / preflight) will exercise the real ``alembic upgrade head`` path.
 from __future__ import annotations
 
 import asyncio
+import subprocess
+import sys
+import textwrap
 from collections.abc import AsyncIterator
 from datetime import timezone
 from pathlib import Path
@@ -170,3 +173,73 @@ async def test_composite_index_exists_on_audit_events(engine: AsyncEngine) -> No
         )
     index_names = {idx["name"] for idx in indexes}
     assert "ix_audit_events_task_created" in index_names
+
+
+# --- Process-wide factory initialization -------------------------------------
+
+
+def _run_factory_probe(script: str, tmp_path: Path) -> None:
+    # A subprocess bounds a deadlock without leaving locked singleton state or
+    # blocked threads in pytest. The explicit engine path avoids user settings.
+    subprocess.run(
+        [sys.executable, "-c", textwrap.dedent(script), str(tmp_path)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=15,
+    )
+
+
+def test_sessionmaker_can_initialize_before_engine(tmp_path: Path) -> None:
+    _run_factory_probe(
+        """
+        import sys
+        from pathlib import Path
+        from unittest.mock import patch
+        from declaw.db import engine as db
+
+        engine = db.build_engine(Path(sys.argv[1]) / "cold.db")
+        with patch.object(db, "build_engine", return_value=engine) as build:
+            factory = db.get_sessionmaker()
+            assert factory is db.get_sessionmaker()
+            assert factory.kw["bind"] is db.get_engine() is engine
+            assert build.call_count == 1
+        """,
+        tmp_path,
+    )
+
+
+def test_concurrent_cold_factory_calls_share_one_engine_and_sessionmaker(tmp_path: Path) -> None:
+    _run_factory_probe(
+        """
+        import sys
+        from concurrent.futures import ThreadPoolExecutor
+        from pathlib import Path
+        from threading import Barrier
+        from unittest.mock import patch
+        from declaw.db import engine as db
+
+        engine = db.build_engine(Path(sys.argv[1]) / "concurrent.db")
+        barrier = Barrier(8)
+
+        def get_pair(index):
+            barrier.wait(timeout=5)
+            if index % 2:
+                factory = db.get_sessionmaker()
+                return db.get_engine(), factory
+            current_engine = db.get_engine()
+            return current_engine, db.get_sessionmaker()
+
+        with patch.object(db, "build_engine", return_value=engine) as build:
+            with patch.object(db, "build_sessionmaker", wraps=db.build_sessionmaker) as make:
+                with ThreadPoolExecutor(max_workers=8) as pool:
+                    pairs = list(pool.map(get_pair, range(8)))
+                assert all(e is engine for e, _ in pairs)
+                assert all(m is pairs[0][1] for _, m in pairs)
+                assert pairs[0][1].kw["bind"] is engine
+                assert build.call_count == 1
+                assert make.call_count == 1
+        """,
+        tmp_path,
+    )

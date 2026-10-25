@@ -2,7 +2,7 @@
 
 Reviewed: 2026-10-25 against the current working tree on `main`, including existing
 uncommitted documentation/tooling changes. This is an assessment and handoff, not
-a Phase 9 spec approval or implementation. No product code or dependencies change.
+a Phase 9 spec approval or implementation. The original cleanup changed no product code or dependencies. The later DB maintenance fix is recorded below.
 
 ## Verdict
 
@@ -68,13 +68,14 @@ REST document actions also need the same confirmation and containment policy.
    loop. Specify safe event handoff, delete/move handling, reconciliation,
    indexing/search coordination, retry and shutdown. DocumentStore calls synchronous Chroma add/query/delete inside async methods; decide how blocking work is scheduled before claiming concurrent gateway responsiveness. Existing watcher tests are
    synthetic debounce/handler tests, not a real daemon integration test.
-8. **Cold DB factory deadlock.** `get_sessionmaker` acquires `_lock`, then calls
-   `get_engine`, which acquires the same non-reentrant `threading.Lock` if the
-   engine is cold. Current chat/index initialize the engine first and mask this
-   order dependency. A bounded isolated probe, with `build_engine` stubbed and no
-   settings/DB access, left the worker blocked and `_engine` unset. Add a cold
-   initialization regression test and fix before using these factories as web
-   dependencies. This assessment does not implement the fix.
+8. **Cold DB factory deadlock (fixed after this assessment).** At assessment
+   time, `get_sessionmaker` acquired `_lock` before calling `get_engine`, which
+   tried to acquire the same non-reentrant lock when the engine was cold.
+   Chat/index initialized the engine first and masked this order dependency. A bounded isolated probe, with `build_engine` stubbed and no
+   settings/DB access, left the worker blocked and `_engine` unset.
+   Follow-up maintenance moved engine initialization outside the
+   factory lock; both factory-first and concurrent startup regressions now pass.
+   See the [dated Python baseline](history/python-baseline-2026-10-25.md).
 9. **Settings persistence and tool rebinding.** `get_settings` is process-cached
    environment configuration; no mutable persistent settings service exists.
    Define which changes require restart and how workspace/model/language changes
@@ -106,7 +107,7 @@ safe gateway slice; scope them explicitly in the detailed spec.
 ## Proposed order, awaiting detailed design
 
 1. Agree the security/session/approval/settings contracts above and write the
-   failing security and lifecycle tests. Fix the cold DB initialization defect.
+   failing security and lifecycle tests. The cold DB initialization prerequisite has since been fixed; preserve its regression tests.
 2. Extract CLI-independent application/session assembly with deterministic
    shutdown; preserve CLI behavior and safety wrappers in regression tests.
 3. Implement loopback/auth/Origin/Host/limits before enabling functional routes.
@@ -185,3 +186,8 @@ space savings would require a separate, measured cache/dependency cleanup.
   commit and rebuild before publishing. No publication was performed.
 
 - Local documentation validation: 106 Markdown link targets across 11 current documents resolved; remote URLs and heading anchors were not checked. git diff --check passed. The SHA-256 of .claude/settings.json matched the start-of-turn value.
+
+Maintenance follow-up: the documentation cleanup was committed as `5b35572`.
+The subsequent DB-only fix and full Python baseline are recorded in the
+[maintenance report](history/python-baseline-2026-10-25.md). Earlier verification
+counts above describe the assessment run, not the later full-suite result.

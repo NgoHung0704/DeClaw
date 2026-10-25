@@ -17,6 +17,7 @@ then follow dependencies and tests for the task at hand.
 | Plugin lifecycle and permissions | `declaw/plugin_host/host.py`, `process.py`, `supervisor.py`, `permissions.py`, `signing.py` | `tests/integration/test_plugin_host.py`, `test_plugin_supervision.py`, `tests/security/test_plugin_isolation.py` |
 | Plugin IPC contract | `declaw_plugin_sdk/protocol.py`, `runtime.py`, `declaw/plugin_host/ipc.py` | `tests/unit/test_plugin_protocol.py`, `test_plugin_runtime.py`, `test_plugin_ipc.py` |
 | Untrusted text | `declaw/sanitizer/pipeline.py`, `sanitizer.py`, `classifier.py`, `quarantine.py` | `tests/unit/test_sanitizer_pipeline.py`, `test_sanitizer.py`, `tests/security/test_documents_isolation.py` |
+| DB singleton initialization | `declaw/db/engine.py:get_engine`, `get_sessionmaker`, `get_session` | `tests/unit/test_db.py` (cold factory-first and concurrent initialization regression tests) |
 | State, encryption and credentials | `declaw/db/`, `declaw/memory/`, `declaw/credentials/`, `alembic/` | `tests/unit/test_db.py`, `test_memory_crypto.py`, `test_credentials_store.py`, `test_credentials_fallback.py` |
 | Audit and network observation | `declaw/audit/tooling.py`, `logger.py`, `egress.py`, `report.py` | `tests/unit/test_audit_events.py`, `test_audit_logger.py`, `test_audit_egress.py` |
 | Configuration and defaults | `declaw/config.py`, `.env.example`, `pyproject.toml`, `uv.lock` | `tests/unit/test_config.py` |
