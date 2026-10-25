@@ -1,5 +1,14 @@
 # Phase 4 — Sanitizer Layer: Hướng dẫn review cho người mới
 
+> **Historical phase review.** Reviewed for context on 2026-10-25. The body
+> preserves phase-time examples, completion claims and measurements; they
+> are not current startup instructions or fresh test results. Start with
+> [current status](project-status.md) and the [code map](code-map.md).
+> The former CLAUDE.md diary is available through
+> [historical log recovery](README.md#history), not as a current context file.
+
+**Current scope correction (2026-10-25):** Sanitizer scores and latency below are historical corpus results. The default classifier model is qwen2.5:7b; no corpus score is a guarantee for unseen attacks or a fresh benchmark.
+
 > **Đối tượng**: reviewer hoặc contributor mới, chưa biết gì về DeClaw. Đọc xong bạn sẽ hiểu **tại sao Phase 4 tồn tại**, **nó chặn cái gì**, **được implement như thế nào**, và **cách verify nó chạy đúng**.
 
 ---
@@ -252,6 +261,7 @@ cho kết quả y hệt nhau; đổi cả schema output để model trả lời 
 bại), chỉ few-shot mới hiệu quả — FP toàn corpus **17.9% → 9.0%**.
 
 Hai quy tắc khi sửa prompt về sau:
+
 - **Đừng xoá khối ví dụ khi "dọn dẹp" prompt** → FP quay lại ~18% ngay.
   `test_prompt_keeps_the_worked_examples` chặn việc này.
 - **Ví dụ không được trùng mẫu corpus** — nếu trùng thì benchmark đo trí nhớ prompt chứ
@@ -282,6 +292,7 @@ def build_ollama_classifier(*, language=None) -> Classifier:
 ```
 
 Key patterns:
+
 - `temperature=0` → cùng input, cùng output → reproducible
 - `with_structured_output` → LangChain force model trả JSON đúng schema
 - Try/except bao ngoài → fail-closed guaranteed
@@ -336,6 +347,7 @@ class QuarantineStore:
 - Store là in-memory (persistent backend sẽ có ở Phase 5 với DB-backed audit sink)
 
 **Ba sink được wire trong `declaw chat`** (Phase 5 thêm sink 2, 2026-07-25 thêm sink 3):
+
 1. `log_audit_sink` — WARNING có cấu trúc vào loguru (hash + source + reason, không content)
 2. `quarantine_db_sink` — ghi vào audit trail SQLite (DCL-060/061)
 3. `user_notice_sink` — **nói cho chính user biết**, bằng EN/FR
@@ -386,6 +398,7 @@ corpus/
 ### `benchmark.py` + `scripts/sanitizer_benchmark.py` (DCL-047/048)
 
 Harness đo:
+
 - **Detection rate**: bao nhiêu % injection UNSAFE bị catch
 - **False positive rate**: bao nhiêu % benign UNSAFE bị misclassify — target **< 2%**
 - **Latency p50/p95** — target p95 **< 500ms**
@@ -872,6 +885,7 @@ Brain: <hồi đáp về nội dung bị cách ly>
 Reviewer đi qua từng câu:
 
 ### ✅ Design correctness
+
 - [ ] Sanitizer session **tách biệt** với Brain — check `classifier.py` không dùng brain state
 - [ ] Fail-closed — mọi exception path return UNSAFE
 - [ ] Structured output `Literal["SAFE","UNSAFE"]` — không có branch nào cho "MAYBE"
@@ -880,12 +894,14 @@ Reviewer đi qua từng câu:
 - [ ] Prompt system là **module-level constant**, không assembled runtime
 
 ### ✅ Wiring
+
 - [ ] `declaw chat` build sanitizer khi `sanitizer_required` — check [main.py:166](../declaw/main.py#L166)
 - [ ] Quarantine store nhận **3 sink** (loguru + DB + user notice) — cùng chỗ, ngay phía trên
 - [ ] Registry wrap tool có `produces_external_content=True` — check `pipeline.py` + `registry.py`
 - [ ] `filesystem_read` có flag = True; `list/write/move` = False
 
 ### ✅ Corpus
+
 - [ ] `injections.py` có ≥ 60 samples, cover 10 categories, FR có accent dégradés
 - [ ] `benign.py` có ≥ 67 samples, có hard FP-prone cases **và** họ `sensitive-data`
       (mật khẩu / IBAN / API key — lớp FP từng làm hỏng sanitizer, xem mục 8)
@@ -893,21 +909,25 @@ Reviewer đi qua từng câu:
 - [ ] Không mẫu corpus nào xuất hiện trong prompt (`test_prompt_examples_are_not_corpus_samples`)
 
 ### ✅ Tests
+
 - [ ] Unit tests deterministic (dùng fake ChatOllama) — không cần daemon
 - [ ] Test fail-closed paths (exception → UNSAFE, unparseable → UNSAFE)
 - [ ] Test integration: `filesystem_read` output routed through sanitizer
 
 ### ✅ Documentation
+
 - [ ] Docstring các file `sanitizer/*.py` giải thích **why**, không chỉ **what**
 - [ ] CLAUDE.md có tickets DCL-040..048 với acceptance criteria
 - [ ] Trade-offs (in-memory quarantine, latency cost) documented
 
 ### ✅ Honest caveats
+
 - [ ] Ghi rõ **không** bảo vệ user message trực tiếp
 - [ ] Ghi rõ **chưa** verify FP/latency target trên hardware thật
 - [ ] Ghi rõ quarantine in-memory, persistent backend sẽ có ở Phase 5
 
 ### ⚠️ Red flags nếu thấy
+
 - ❌ Bất kỳ path nào return `safe_content=<actual content>` khi verdict.is_unsafe
 - ❌ Audit log/loguru gọi `logger.info(content)` — leak nội dung
 - ❌ Sanitizer prompt được build từ user input — attack surface mở
@@ -939,7 +959,7 @@ Reviewer đi qua từng câu:
 
 ## Related docs
 
-- [CLAUDE.md](../CLAUDE.md) — Living dev context, đặc biệt section "Post-Phase 1 calibration" và "Phase 4"
+- [historical log recovery](README.md#history) — Historical development context, đặc biệt section "Post-Phase 1 calibration" và "Phase 4"
 - [TICKETS.md](../TICKETS.md) — DCL-040..048 với acceptance criteria chi tiết
 - [README.md](../README.md) — High-level architecture + sanitizer summary
 - [tests/unit/test_sanitizer_*.py](../tests/unit/) — Test coverage

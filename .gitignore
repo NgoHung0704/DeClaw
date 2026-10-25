@@ -30,7 +30,6 @@ desktop.ini
 # IDE
 .vscode/
 .idea/
-.claude/settings.local.json
 *.swp
 *.swo
 
@@ -43,19 +42,15 @@ src-tauri/target/
 htmlcov/
 coverage.xml
 
-# docs-site
-docs-site/node_modules/
-docs-site/dist/
-docs-site/content/repo.json
-docs-site/*.tsbuildinfo
-
-# Design drafts and local generation helpers
-.superdesign/tmp/
-.superdesign/init-context.py
+# Generated design-tool context and local drafts
+.superdesign/
 
 # Local coding-agent tools and generated Serena state
 .agent-tools/
 .serena/cache/
 .serena/logs/
 .serena/memories/
-.codex/config.toml
+
+# Machine-local coding-agent configuration
+/.claude/
+/.codex/

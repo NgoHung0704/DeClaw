@@ -1,9 +1,18 @@
 # Phase 7 — Plugin Host: Hướng dẫn review cho người mới
 
+> **Historical phase review.** Reviewed for context on 2026-10-25. The body
+> preserves phase-time examples, completion claims and measurements; they
+> are not current startup instructions or fresh test results. Start with
+> [current status](project-status.md) and the [code map](code-map.md).
+> The former CLAUDE.md diary is available through
+> [historical log recovery](README.md#history), not as a current context file.
+
+**Current scope correction (2026-10-25):** Subprocesses provide crash/lifecycle separation, not an OS sandbox. The environment is built from an allowlist with required host variables; no core credential handle is passed. This does not prevent same-user OS/keyring access by malicious plugin code.
+
 > Branch: `feat/phase-7-plugin-host` (tách từ `main` sau khi Phase 6 merge)
 > Tickets: DCL-090..097
-> Spec: `docs/superpowers/specs/2026-08-23-phase-7-plugin-host-design.md`
-> Roadmap 3 phase: `docs/superpowers/specs/2026-08-23-phase-7-9-roadmap.md`
+> Spec: `docs/specs/2026-08-23-phase-7-plugin-host-design.md`
+> Roadmap 3 phase: `docs/specs/2026-08-23-phase-7-9-roadmap.md`
 
 ## Mục lục
 
@@ -137,7 +146,6 @@ Cộng với `manifest.py`, `permissions.py`, `signing.py` đã có từ Phase 6
 class EchoArgs(BaseModel):
     message: str
     times: int = 1
-
 
 class EchoPlugin(BasePlugin):
     name = "echo-plugin"
@@ -491,5 +499,5 @@ Hai điều đã quyết trước, đừng mở lại nếu không có dữ li�
   làm trong ticket gốc (sanitize mọi chunk lúc index) tốn 10-20 phút cho một PDF
   100 trang ở p50 4.19s của `qwen2.5:7b`.
 
-Khi bắt đầu Phase 8, nhớ đọc lại `docs/superpowers/specs/2026-08-23-phase-7-9-roadmap.md`
+Khi bắt đầu Phase 8, nhớ đọc lại `docs/specs/2026-08-23-phase-7-9-roadmap.md`
 mục "Deferred to v0.2 or later" — nhất là dòng về install-time permission dialog.

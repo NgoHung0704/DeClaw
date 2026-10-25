@@ -1,7 +1,13 @@
 # Phase 8a — doc-intel: indexing, search, citations
 
+> **Approved design record.** This file records decisions and assumptions
+> from its original date, not current implementation or a new approval.
+> Verify wiring and limitations against [current status](../project-status.md)
+> and [active decisions](../architecture-decisions.md). Historical
+> CLAUDE.md diary references can be recovered through [Git history](../README.md#history).
+
 - **Date**: 2026-08-23
-- **Status**: approved, ready for implementation planning
+- **Status**: approved design; phase implemented later (see current status for scope)
 - **Tickets**: DCL-100..112 (DCL-113..117 are Phase 8b)
 - **Branch**: `feat/phase-8-doc-intel` (from `feat/phase-7-plugin-host`)
 - **Context**: `2026-08-23-phase-7-9-roadmap.md`, `2026-08-23-phase-7-plugin-host-design.md`
@@ -231,7 +237,7 @@ context get classified, with the verdict cached by SHA-256.
   invisibly.
 - **Calls run concurrently**, so a cold query costs roughly one classification
   rather than k of them, subject to Ollama's parallelism setting.
-- **The measured number goes in `CLAUDE.md`.** Estimates in this document are
+- **Dated measurements go under `docs/history/`.** Estimates in this document are
   derived from Phase 4's p50 of 4.19 s; the real cold-query latency is measured
   on dev hardware during implementation and recorded, in the same way every
   other performance claim in this project is.

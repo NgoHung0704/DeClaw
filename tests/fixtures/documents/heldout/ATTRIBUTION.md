@@ -15,9 +15,10 @@ http://publications.europa.eu/resource/celex/{CELEX}.FRA
 Accept: application/xhtml+xml
 ```
 
-EUR-Lex's own web pages could not be used: they serve a JavaScript
-cookie-consent interstitial to every request, so an automated fetch returns a
-13 KB consent page rather than the document, whatever URL is asked for.
+During the 2026-08-26 collection session, the tested EUR-Lex page requests
+returned a JavaScript cookie-consent interstitial rather than document text.
+CELLAR was used instead. This records that retrieval environment, not a current
+claim about every EUR-Lex URL or client.
 
 **Retrieved:** 2026-08-26.
 
@@ -41,8 +42,12 @@ read `.txt` directly and committing ~3 MB of markup would serve no purpose.
 complete text. Excerpting would have meant choosing which passages survive,
 which is precisely the bias a held-out set exists to avoid.
 
-The conversion script is `scratchpad/fetch_heldout.py` from the session that
-created these files; it is reproducible from the URLs above.
+The session-local conversion script was named `scratchpad/fetch_heldout.py`;
+it is not committed in this repository. The source identifiers and conversion
+description above support recreating an extractor, but the original conversion
+cannot be rerun from a checked-in script. Preserve these committed fixtures and
+verify benchmark snippets against them rather than assuming a fresh download is
+byte-identical.
 
 ## Licence and reuse
 

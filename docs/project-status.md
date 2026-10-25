@@ -1,6 +1,8 @@
 # Current implementation status
 
-Source inspection: 2026-10-25. This snapshot is not a fresh test or benchmark run.
+Source reviewed: 2026-10-25. Runtime claims below follow the current wiring.
+The dated maintenance baseline is linked below; this Markdown review is not a
+new product-test or model-benchmark run.
 
 | Area | Evidence and current scope |
 | --- | --- |
@@ -15,11 +17,11 @@ Source inspection: 2026-10-25. This snapshot is not a fresh test or benchmark ru
 | Shell sandbox | Deferred from v0.1; no product shell tool is exposed. |
 
 Phase 0, 1, 2, 4, 5, 6 (buildable core), 7, 8a and 8b completion
-was recorded in the historical development log. Phase 9 is the next planned
+is recorded by phase reviews and the ticket ledger. Phase 9 is the next planned
 product phase, not a feature implemented by this documentation update.
 DCL-071/072/073 remain deferred until a plugin actually needs credentials;
 DCL-082 requires the future UI. The approved Phase 7–9 roadmap supersedes older
-ticket assumptions: [roadmap](superpowers/specs/2026-08-23-phase-7-9-roadmap.md).
+ticket assumptions: [roadmap](specs/2026-08-23-phase-7-9-roadmap.md).
 
 ## Limits to preserve in proposals
 
@@ -41,17 +43,21 @@ this file when executable behavior changes; put dated measurements in a separate
 report with command, environment and corpus. Do not carry forward old test counts
 as current validation.
 
-## Phase 9 assessment
+## Phase 9 readiness and maintenance
 
-The [2026-10-25 readiness assessment](phase-9-readiness.md) identifies reusable CLI services, missing gateway/UI contracts and a cold DB factory initialization deadlock reproduced in isolation (subsequently fixed; see maintenance below). Phase 9 is ready for detailed design, not implemented. No product behavior changed during the documentation cleanup.
+The [readiness assessment](phase-9-readiness.md) identifies reusable CLI services
+and the remaining gateway/UI contracts. Phase 9 is ready for detailed design;
+it has not been implemented.
 
-## Maintenance baseline — 2026-10-25
+The cold DB factory deadlock found during assessment was fixed in `5f168db`.
+`get_sessionmaker()` initializes the engine before taking the shared factory
+lock. Factory-first and concurrent cold-start regression tests preserve the
+single-engine/single-factory contract. See the
+[dated Python baseline](history/python-baseline-2026-10-25.md) for red/green
+results and the full 786-pass, one-skip suite result.
 
-`get_sessionmaker()` now initializes the engine before acquiring the shared
-factory lock. Cold startup no longer depends on callers invoking `get_engine()`
-first; the process-wide engine and session factory remain singletons. Regression
-tests cover cold factory-first access and eight concurrent callers in isolated,
-time-bounded subprocesses. No Phase 9 feature was added.
+## Documentation scope
 
-See the [dated Python baseline](history/python-baseline-2026-10-25.md) for the
-red/green evidence, exact check scope and final verification results.
+The optional architecture viewers, site-specific specification and CI site
+build/deployment jobs were removed at the owner's request. Documentation is
+maintained in Markdown. Python CI and the Phase 9 product UI scope remain.

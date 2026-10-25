@@ -1,5 +1,14 @@
 # Phase 6 — Credentials & Permissions: Hướng dẫn review cho người mới
 
+> **Historical phase review.** Reviewed for context on 2026-10-25. The body
+> preserves phase-time examples, completion claims and measurements; they
+> are not current startup instructions or fresh test results. Start with
+> [current status](project-status.md) and the [code map](code-map.md).
+> The former CLAUDE.md diary is available through
+> [historical log recovery](README.md#history), not as a current context file.
+
+**Current scope correction (2026-10-25):** Signature helpers cover manifest bytes, not plugin code; the built-in-only loader does not apply third-party runtime signature enforcement. Plugin permission revocation is now exposed by the CLI. Plugin credential APIs remain deferred. Same-user subprocesses do not establish an OS keyring security boundary.
+
 > **Đối tượng**: reviewer hoặc contributor mới. Đọc xong hiểu **cách DeClaw lưu credentials an toàn**, **plugin manifest + ed25519 signature verification**, và **permission enforcement với audited grants** — nền tảng cho Phase 7 Plugin Host.
 
 ---
@@ -26,10 +35,12 @@
 Phase 6 (buildable core) build **security perimeter cho credentials + plugins**:
 
 **Credentials** — Principle #1 (*"NEVER store credentials in plaintext"*):
+
 - **Keyring wrapper** (`store.py`, DCL-070 — landed trong Phase 5 vì Fernet cần) — CRUD over OS vault, `KNOWN_SECRET_NAMES` cho uninstaller story
 - **AES-256-GCM fallback** (`fallback.py`, DCL-074) — encrypt file khi keyring backend là `fail` (headless server, CI)
 
 **Plugin Host foundations** — cần cho Phase 7 (subprocess isolation):
+
 - **plugin.yaml schema** (DCL-080) — frozen manifest với slug/semver/bilingual descriptions/closed permission enum
 - **ed25519 verification** (DCL-083) — chống mạo danh plugin bên thứ ba
 - **Permission enforcer + grants** (DCL-081/084) — request + grant + enforce, mỗi grant audited
@@ -47,6 +58,7 @@ Phase 6 (buildable core) build **security perimeter cho credentials + plugins**:
 Nếu DeClaw có plugin doc-intel gọi Notion API → cần Notion token. Nếu ghi vào `~/.declaw/config.json` plaintext → 1 malware run `cat` là leak toàn bộ. **Không thể ship** cho luật sư.
 
 Solution:
+
 - Primary: **OS-native keyring** (Windows Credential Manager, macOS Keychain, Linux KWallet) — key encrypted at rest by OS, unlock only for authenticated user
 - Fallback: **encrypted file** (AES-256-GCM) khi keyring không có (headless server, Docker container)
 
@@ -55,6 +67,7 @@ Không có "just store in .env" option — Principle #1 enforced structurally.
 ### Plugin Host: security contract cho third-party
 
 Phase 7 (Plugin Host) sẽ load third-party plugins. Câu hỏi:
+
 - Làm sao biết plugin là chính chủ, không bị tamper? → **ed25519 signature**
 - Làm sao biết plugin cần quyền gì? → **plugin.yaml manifest**
 - Làm sao user grant/revoke quyền? → **GrantStore**
@@ -139,10 +152,12 @@ def default_credential_store() -> SecretStore:
 ### Threat model — fallback covers what?
 
 **Protects**:
+
 - File-at-rest: attacker copy file → decrypt fail (needs scrypt-derived key from user identity)
 - Tampering: AAD bind name → wrong name = auth fail
 
 **Does NOT protect**:
+
 - Compromised user account: attacker impersonate user → scrypt derive same key → decrypt works
 - Kernel-level malware: read decrypted memory
 
@@ -234,6 +249,7 @@ my-plugin/
 ```
 
 **Attacker scenarios**:
+
 - Modify code but keep manifest → **caught** (code hashes could be added, but currently manifest IS security contract; see below)
 - Modify manifest to request more permissions → **caught by signature**
 - Ship plugin without signature → **caught by `UnsignedPluginError`**
@@ -244,6 +260,7 @@ my-plugin/
 **Raw `plugin.yaml` bytes** — nothing else.
 
 Rationale: **the manifest IS the security contract**. If you can trust manifest → you can trust:
+
 - Name, version, description (identity)
 - Entrypoint path (which .py to run)
 - Requested permissions (what to grant)
@@ -274,6 +291,7 @@ def verify_signature(
 ```
 
 Two distinct errors:
+
 - `UnsignedPluginError`: file missing / empty sig → **maybe legit but unsigned**, treat as user-facing "install unsigned plugin?" prompt (later UX)
 - `SignatureError`: sig present but doesn't match any trusted key → **forged or tampered**, hard reject
 
@@ -286,12 +304,14 @@ def sign_manifest(path: Path, signing_key: SigningKey) -> str:
 ```
 
 Author workflow:
+
 1. `generate_keypair()` — save signing key privately, publish verify key
 2. Edit `plugin.yaml`
 3. `sign_manifest(path, signing_key)` — writes `plugin.sig`
 4. Ship plugin folder
 
 Verify key distribution — open decision:
+
 - Bundle với DeClaw (trusted plugin developers list)
 - Community keyserver (post-MVP)
 - User manually add — advanced
@@ -321,6 +341,7 @@ Declared in `plugin.yaml`. Immutable. Reviewer/user sees it, decides trust level
 ```
 
 **Why plain JSON, not encrypted?**
+
 - **User policy, not a secret.** Attacker knowing "user granted filesystem.write to doc-intel" doesn't leak anything sensitive.
 - User can inspect, edit manually if trusts self.
 - Audit reviewer wants transparency.
@@ -408,6 +429,7 @@ Xem [phase-5-review.md § DCL-070](./phase-5-review.md).
 `SecretStore` protocol — both stores implement same interface. `get_or_create_fernet(store, ...)` accepts either.
 
 **Threat model honest**:
+
 - Protects files-at-rest (attacker copy file → decrypt fail)
 - Does NOT protect compromised user account (attacker impersonate user → same scrypt key)
 
@@ -467,6 +489,7 @@ class PermissionEnforcer:
 Raises `PermissionDeniedError(plugin, permission, reason)` on fail.
 
 Audit events:
+
 - `denied_call`: requested-but-ungranted (normal, plugin needs to prompt)
 - `violation`: never-requested (RED FLAG, DCL-097 kill trigger)
 
@@ -653,6 +676,7 @@ Mong đợi: 445 passed, 1 skipped, ruff + mypy clean.
 ### ⚠️ Signature covers manifest only, NOT code
 
 If manifest permissions match user expectations but plugin code was swapped → verifier misses. Mitigation options for post-MVP:
+
 - Add SHA-256 of code files vào manifest → signature transitively covers code
 - Content-addressable plugin distribution (like Nix)
 
@@ -673,6 +697,7 @@ Trade-off: transparency for user > adversarial obfuscation. Not sensitive enough
 ### ⚠️ Trusted-key configuration source unresolved
 
 Open decision Phase 7: where do trusted verify keys come from?
+
 - Bundled với DeClaw (curated list, requires DeClaw update to add)
 - User-added (advanced, easy to misuse)
 - Community keyserver (post-MVP, needs infrastructure)
@@ -698,6 +723,7 @@ Backing store exists (`GrantStore.grant/revoke`), but CLI subcommand not impleme
 ## 11. Checklist review
 
 ### ✅ Credentials
+
 - [ ] `CredentialStore` uses namespace prefix — DeClaw secrets isolated
 - [ ] `KNOWN_SECRET_NAMES` extended with every new secret
 - [ ] `purge()` iterates over `KNOWN_SECRET_NAMES` — uninstaller story
@@ -708,6 +734,7 @@ Backing store exists (`GrantStore.grant/revoke`), but CLI subcommand not impleme
 - [ ] `default_credential_store()` picks keyring if backend != fail, else fallback
 
 ### ✅ Manifest
+
 - [ ] `PluginManifest` frozen (extra=forbid)
 - [ ] Slug validated `[a-z0-9-]`
 - [ ] Semver validated
@@ -718,6 +745,7 @@ Backing store exists (`GrantStore.grant/revoke`), but CLI subcommand not impleme
 - [ ] `parse_manifest` + `load_manifest` raise readable `ManifestError`
 
 ### ✅ Signature
+
 - [ ] Signs `plugin.yaml` raw bytes (not manifest object)
 - [ ] `UnsignedPluginError` for missing sig (distinct error)
 - [ ] `SignatureError` for tampered/forged
@@ -725,6 +753,7 @@ Backing store exists (`GrantStore.grant/revoke`), but CLI subcommand not impleme
 - [ ] `generate_keypair` + `sign_manifest` author tooling
 
 ### ✅ Permissions
+
 - [ ] 3-tier check: manifest → denied? → requested? → granted?
 - [ ] `violation` event on never-requested attempt (kill trigger source)
 - [ ] `denied_call` event on requested-but-ungranted (normal)
@@ -734,6 +763,7 @@ Backing store exists (`GrantStore.grant/revoke`), but CLI subcommand not impleme
 - [ ] Grants file plaintext JSON at `data_dir/plugin_grants.json`
 
 ### ⚠️ Red flags
+
 - ❌ Fernet key stored on disk (should be keyring via DCL-070)
 - ❌ Fallback used unconditionally (should only when keyring = fail)
 - ❌ `KNOWN_SECRET_NAMES` incomplete (leak on uninstall)
@@ -784,7 +814,7 @@ Backing store exists (`GrantStore.grant/revoke`), but CLI subcommand not impleme
 - [phase-2-review.md](./phase-2-review.md) — Tools
 - [phase-4-review.md](./phase-4-review.md) — Sanitizer
 - [phase-5-review.md](./phase-5-review.md) — Memory + Audit (DCL-070 landed here, audit union includes PluginPermissionEvent)
-- [CLAUDE.md](../CLAUDE.md) — Living dev context
+- [historical log recovery](README.md#history) — Historical development context
 - [TICKETS.md](../TICKETS.md) — DCL-070..084
 
 ---

@@ -1,9 +1,18 @@
 # Phase 8a — doc-intel: Hướng dẫn review cho người mới
 
+> **Historical phase review.** Reviewed for context on 2026-10-25. The body
+> preserves phase-time examples, completion claims and measurements; they
+> are not current startup instructions or fresh test results. Start with
+> [current status](project-status.md) and the [code map](code-map.md).
+> The former CLAUDE.md diary is available through
+> [historical log recovery](README.md#history), not as a current context file.
+
+**Current scope correction (2026-10-25):** The watcher remains a component, not a running CLI service. Structural source metadata does not establish answer correctness; the later held-out retrieval benchmark is in the Phase 8b review.
+
 > Branch: `feat/phase-8-doc-intel` (tách từ `feat/phase-7-plugin-host`)
 > Tickets: DCL-100..112 (DCL-113..117 là Phase 8b)
-> Spec: `docs/superpowers/specs/2026-08-23-phase-8a-doc-intel-design.md`
-> Plan: `docs/superpowers/plans/2026-08-23-phase-8a-doc-intel.md`
+> Spec: `docs/specs/2026-08-23-phase-8a-doc-intel-design.md`
+> Historical implementation plan: available in Git at `5f168db:docs/superpowers/plans/2026-08-23-phase-8a-doc-intel.md` (removed from the working tree after completion).
 
 ## Mục lục
 

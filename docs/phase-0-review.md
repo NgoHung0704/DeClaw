@@ -1,5 +1,14 @@
 # Phase 0 — Project Foundation: Hướng dẫn review cho người mới
 
+> **Historical phase review.** Reviewed for context on 2026-10-25. The body
+> preserves phase-time examples, completion claims and measurements; they
+> are not current startup instructions or fresh test results. Start with
+> [current status](project-status.md) and the [code map](code-map.md).
+> The former CLAUDE.md diary is available through
+> [historical log recovery](README.md#history), not as a current context file.
+
+**Current scope correction (2026-10-25):** Current model defaults live in config.py; migration/bootstrap examples below belong to the original phase. The later cold DB factory fix is recorded in history/python-baseline-2026-10-25.md.
+
 > **Đối tượng**: reviewer hoặc contributor mới. Đọc xong hiểu **tại sao Phase 0 tồn tại**, **cách nó chuẩn bị nền cho toàn bộ project**, và **cách verify từng ticket chạy đúng**.
 
 ---
@@ -46,6 +55,7 @@ Ví dụ: 7 Inviolable Principles có nguyên tắc #2 *"NEVER bind the gateway 
 ### Đầu tư sớm = trả giá thấp
 
 Nếu bỏ Phase 0:
+
 - Config text-based → dev quên set → prod bind sai host → **catastrophic**
 - Không có Alembic → schema đổi tay → prod database drift → **data corruption**
 - Log text-flat → grep debug production → 3 giờ thay vì 3 phút
@@ -60,6 +70,7 @@ Nếu bỏ Phase 0:
 ### (1) **`uv` cho package management**
 
 Không phải pip/poetry/conda. `uv`:
+
 - Nhanh hơn 10-100x (Rust-based)
 - **Lockfile committed** (`uv.lock`) — reproducible builds
 - Không cần activate venv thủ công — `uv run <cmd>` tự lo
@@ -91,6 +102,7 @@ Config = **class Pydantic có type + validator**. Không phải dict, không ph�
 ### (5) **Ollama client custom, không dùng SDK trực tiếp**
 
 `OllamaClient` wrapper riêng thay vì import `ollama` package. Vì sao:
+
 - **Mock được**: `httpx.MockTransport` inject vào constructor → test không cần daemon
 - **Đóng gói API surface**: chỉ expose method DeClaw dùng, không leak internal Ollama API
 - **Swap được**: mai mốt đổi backend (llama.cpp/vLLM) chỉ sửa 1 file
@@ -110,6 +122,7 @@ Config = **class Pydantic có type + validator**. Không phải dict, không ph�
 **Delivered**: uv-managed Python 3.12 project, full folder skeleton, pyproject.toml với tất cả v0.1 dependencies, `declaw` Typer CLI với 5 commands (`version`/`status`/`start`/`stop`/`chat`).
 
 **File chính**:
+
 - [pyproject.toml](../pyproject.toml) — dependencies + entry point `declaw = "declaw.main:cli"`
 - [declaw/main.py](../declaw/main.py) — Typer CLI + `console.print` Rich output
 - Folder skeleton: `declaw/{brain,tools,sanitizer,sandbox,plugin_host,memory,audit,credentials,db,gateway}/` — mỗi cái có `__init__.py` (đa số rỗng, đánh dấu package)
@@ -123,6 +136,7 @@ uv run declaw --help   # In ra 5 commands
 ### DCL-002 — CLAUDE.md living context
 
 Không phải code — là **document quan trọng nhất** của project. Ghi:
+
 - Locked architectural decisions (không đổi mà không bàn)
 - 7 Inviolable Principles
 - Phase gating rules
@@ -131,13 +145,14 @@ Không phải code — là **document quan trọng nhất** của project. Ghi:
 - **Open decisions** — deferred decisions với reasoning
 - **Notes for next session** — hand-off note
 
-Xem [CLAUDE.md](../CLAUDE.md).
+Xem [historical log recovery](README.md#history).
 
 ### DCL-003 — Ollama integration + health check
 
 **Delivered**: [declaw/brain/ollama_client.py](../declaw/brain/ollama_client.py) — async `OllamaClient` (httpx-based).
 
 3 method:
+
 - `version() -> str` — GET `/api/version`, raise on failure
 - `list_models() -> tuple[str, ...]` — GET `/api/tags`, list model đã pull
 - `health() -> OllamaHealth` — **never raises**, aggregate snapshot cho `declaw status`
@@ -161,6 +176,7 @@ Tách `version`/`list_models` (strict, raise) khỏi `health()` (lenient, aggreg
 **Delivered**: [declaw/config.py](../declaw/config.py) — pydantic-settings `Settings` class.
 
 Key features:
+
 - `env_prefix="DECLAW_"` → mọi env var có tiền tố này
 - `OLLAMA_BASE_URL` là **unprefixed alias** (Ollama chuẩn dùng tên này)
 - **Loopback validator**: `host` chỉ chấp nhận `127.0.0.1`, `localhost`, `::1` — encode Principle #2
@@ -174,6 +190,7 @@ Key features:
 ### DCL-005 — SQLite + SQLModel + Alembic
 
 **Delivered**:
+
 - [declaw/db/engine.py](../declaw/db/engine.py) — async engine + sessionmaker
 - [declaw/db/models.py](../declaw/db/models.py) — 2 model: `Task` (UUID PK, status enum, prompt/result/error) + `AuditEvent` (append-only, JSON payload, FK to task)
 - [alembic/](../alembic/) — Alembic setup + initial migration
@@ -189,6 +206,7 @@ Xem chi tiết pattern lazy singleton của engine trong `get_engine()` + double
 **Delivered**: [declaw/log.py](../declaw/log.py) — loguru wrapper.
 
 Exports:
+
 - `configure(level)` — setup once at startup
 - `logger` — global loguru logger
 - `use_request_id(rid)` — context manager set request_id cho log block
@@ -217,6 +235,7 @@ Mỗi log line:
 **Delivered**: [declaw/preflight.py](../declaw/preflight.py) — 4 check + `run_all()`.
 
 Checks:
+
 1. **Ollama reachable** — GET `/api/version` succeed
 2. **Model pulled** — configured model trong list `/api/tags`
 3. **Docker available** — `docker version` subprocess exit 0 (chú ý: dùng subprocess **không** import docker SDK, vì SDK fail-at-import khi Docker vắng mặt)
@@ -268,6 +287,7 @@ Action required:
 ```
 
 Exit code:
+
 - **0**: all pass
 - **1**: any fail
 
@@ -340,6 +360,7 @@ SQLite scale tốt đến vài GB. Nếu user có hàng chục ngàn tasks + aud
 ## 8. Checklist review
 
 ### ✅ Config
+
 - [ ] Loopback validator raise trên `host="0.0.0.0"` — check test [test_config.py](../tests/unit/test_config.py)
 - [ ] Port validator raise trên `port=80` (< 1024)
 - [ ] Path expansion `~/.declaw` → absolute
@@ -347,27 +368,32 @@ SQLite scale tốt đến vài GB. Nếu user có hàng chục ngàn tasks + aud
 - [ ] `.env` file load được — test có cover
 
 ### ✅ Ollama client
+
 - [ ] `health()` không raise trên connection error → return `reachable=False`
 - [ ] `version()` raise `httpx.HTTPStatusError` trên 5xx
 - [ ] Mock via `httpx.MockTransport` — test không cần daemon
 
 ### ✅ DB
+
 - [ ] `Task` + `AuditEvent` model có index đúng cột
 - [ ] Alembic migration chạy được (`upgrade head` không error)
 - [ ] `get_engine()` lazy + thread-safe (double-checked locking)
 - [ ] Test dùng `build_engine(tmp_path)` — không đụng singleton production
 
 ### ✅ Log
+
 - [ ] JSON output đúng shape (timestamp, level, message, request_id, logger, extra, exception)
 - [ ] request_id ContextVar propagate qua async task boundary — test có cover
 - [ ] `logger.bind(extra=...)` reflect vào `extra` field
 
 ### ✅ Preflight
+
 - [ ] Docker check dùng subprocess (NOT `import docker`)
 - [ ] Port check dùng real `socket.bind` (test negative case cần thật, không mock được)
 - [ ] `CheckResult.remedy` là field riêng — cho phép UI render khác nhau
 
 ### ⚠️ Red flags
+
 - ❌ Config value hard-coded ở nhiều nơi (should be `settings.<field>`)
 - ❌ `import docker` ở top-level module (SDK fail-at-import khi Docker vắng)
 - ❌ Log line concatenate string thay vì dùng `logger.bind(field=value)` → mất structured
@@ -398,7 +424,7 @@ SQLite scale tốt đến vài GB. Nếu user có hàng chục ngàn tasks + aud
 
 ## Related docs
 
-- [CLAUDE.md](../CLAUDE.md) — Living dev context
+- [historical log recovery](README.md#history) — Historical development context
 - [TICKETS.md](../TICKETS.md) — DCL-001..007 với acceptance criteria
 - [README.md](../README.md) — High-level project overview + quickstart
 - [phase-1-review.md](./phase-1-review.md) — Phase 1 review (Core Brain)

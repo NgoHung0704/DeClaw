@@ -21,7 +21,6 @@ then follow dependencies and tests for the task at hand.
 | State, encryption and credentials | `declaw/db/`, `declaw/memory/`, `declaw/credentials/`, `alembic/` | `tests/unit/test_db.py`, `test_memory_crypto.py`, `test_credentials_store.py`, `test_credentials_fallback.py` |
 | Audit and network observation | `declaw/audit/tooling.py`, `logger.py`, `egress.py`, `report.py` | `tests/unit/test_audit_events.py`, `test_audit_logger.py`, `test_audit_egress.py` |
 | Configuration and defaults | `declaw/config.py`, `.env.example`, `pyproject.toml`, `uv.lock` | `tests/unit/test_config.py` |
-| Architecture documentation site | `docs-site/package.json`, `docs-site/` | `npm run guards` and `npm run build` in `docs-site/` |
 
 Filenames after the first path in a cell are relative to the same directory.
 

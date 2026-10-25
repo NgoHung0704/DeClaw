@@ -1,13 +1,13 @@
 # Phase 9 readiness assessment
 
-Reviewed: 2026-10-25 against the current working tree on `main`, including existing
-uncommitted documentation/tooling changes. This is an assessment and handoff, not
-a Phase 9 spec approval or implementation. The original cleanup changed no product code or dependencies. The later DB maintenance fix is recorded below.
+Reviewed against the current source on 2026-10-25. This is a current handoff
+assessment, not a Phase 9 design approval. The cold DB initialization fix is
+committed as `5f168db`; the remaining gateway/UI gaps below are still open.
 
 ## Verdict
 
 Ready to write the detailed Phase 9 specification; not ready to expose a gateway
-by wrapping the CLI. The approved [roadmap](superpowers/specs/2026-08-23-phase-7-9-roadmap.md)
+by wrapping the CLI. The approved [roadmap](specs/2026-08-23-phase-7-9-roadmap.md)
 settles loopback access, local assets, built-in plugins and retrieval sanitization.
 Session ownership, browser authentication bootstrap and approval transport still
 need a reviewed contract before implementation. Desktop packaging remains later.
@@ -30,7 +30,7 @@ should not call Typer commands, `asyncio.run`, console input or Rich renderers.
 Keep validation, sanitizer and approval wrappers on every model-facing path.
 REST document actions also need the same confirmation and containment policy.
 
-## Missing work and prerequisites
+## Gaps and prerequisite status
 
 1. **Gateway implementation and security tests.** `declaw/gateway/` contains only
    empty package files; `main.start`/`stop` exit with an unimplemented message.
@@ -66,16 +66,15 @@ REST document actions also need the same confirmation and containment policy.
    in the CLI; its handler only implements create/modify. `ChangeBuffer` is an
    unsynchronized dictionary, while watchdog callbacks run outside the async
    loop. Specify safe event handoff, delete/move handling, reconciliation,
-   indexing/search coordination, retry and shutdown. DocumentStore calls synchronous Chroma add/query/delete inside async methods; decide how blocking work is scheduled before claiming concurrent gateway responsiveness. Existing watcher tests are
-   synthetic debounce/handler tests, not a real daemon integration test.
-8. **Cold DB factory deadlock (fixed after this assessment).** At assessment
-   time, `get_sessionmaker` acquired `_lock` before calling `get_engine`, which
-   tried to acquire the same non-reentrant lock when the engine was cold.
-   Chat/index initialized the engine first and masked this order dependency. A bounded isolated probe, with `build_engine` stubbed and no
-   settings/DB access, left the worker blocked and `_engine` unset.
-   Follow-up maintenance moved engine initialization outside the
-   factory lock; both factory-first and concurrent startup regressions now pass.
-   See the [dated Python baseline](history/python-baseline-2026-10-25.md).
+   indexing/search coordination, retry and shutdown. DocumentStore calls
+   synchronous Chroma add/query/delete inside async methods; schedule blocking
+   work deliberately before claiming concurrent gateway responsiveness. Existing
+   watcher tests are synthetic debounce/handler tests, not a daemon integration test.
+8. **Cold DB initialization — resolved.** Engine initialization now occurs
+   outside the shared factory lock. Factory-first and concurrent cold-start
+   regression tests pass without changing singleton semantics. Preserve these
+   regressions when extracting services; see the
+   [dated Python baseline](history/python-baseline-2026-10-25.md).
 9. **Settings persistence and tool rebinding.** `get_settings` is process-cached
    environment configuration; no mutable persistent settings service exists.
    Define which changes require restart and how workspace/model/language changes
@@ -83,8 +82,8 @@ REST document actions also need the same confirmation and containment policy.
    Browser folder selection must not bypass workspace containment or pretend it
    can freely read arbitrary server paths. Native selection belongs to desktop
    integration unless a browser-compatible flow is explicitly designed.
-10. **UI and runtime assets.** `ui/` has only placeholders; neither architecture
-    viewer is the product UI. Build the approved vanilla JS/local CSS/EN+FR
+10. **UI and runtime assets.** `ui/` has only placeholders. The removed
+    architecture viewers were documentation, not a product UI. Build the approved vanilla JS/local CSS/EN+FR
     surface separately. Render model/document text as untrusted content; test
     markup injection as well as prompt injection. Do not add runtime CDNs.
 
@@ -120,74 +119,19 @@ safe gateway slice; scope them explicitly in the detailed spec.
 No phase branch was created. Before implementation, identify the previous phase's
 branch/ref and follow the branch-per-phase rule; current checkout is `main`.
 
-## Repository cleanup and handoff
+## Repository and verification scope
 
-Applied here:
+Current documentation is Markdown. The optional architecture websites, their
+site-only specification, design-tool metadata and four completed execution plans
+were removed at the owner's request. This does not remove the planned product UI
+under `ui/`. See the [documentation index](README.md) for retained context and
+recovery references; do not reintroduce the sites as a Phase 9 prerequisite.
 
-- Replaced the contradictory documentation index with current-context links and
-  links to the existing Phase 7/8a/8b reviews. Removed repeated outdated security
-  and product-state claims from that index; historical reviews remain intact.
-- Synchronized backlog authority and the approved built-in-only permission/plugin
-  scope. Pending Phase 9 tickets stay unchecked; no architecture option is chosen.
-- Documented the separate architecture viewers and their build ownership. Migrated 17 stale CLAUDE.md citations: seven current principles now cite AGENTS.md and ten historical debt references cite the archive with verified anchors. Benchmark prose explicitly marks historical results.
-- Removed tracked `docs-site/tsconfig.tsbuildinfo` (1,291 bytes at inspection) and
-  ignored future copies; removed four zero-byte `.gitkeep` files in populated
-  directories (`docs`, `scripts`, `plugins/builtin`, sanitizer corpus).
+The [dated Python baseline](history/python-baseline-2026-10-25.md) records the
+full checks after the DB fix: frozen sync, Ruff and mypy passed; pytest reported
+786 passed and one environment-related symlink skip. These are dated local
+results, not a claim about remote CI or gateway security. No new product tests
+or model benchmarks were run during the subsequent Markdown consistency review.
 
-Kept deliberately:
-
-- Lockfiles, held-out fixtures/attribution, tests and dated plans/reviews: these
-  support reproducibility and rationale. File size alone is not obsolescence.
-- Empty gateway/UI/Tauri/sandbox scaffolds: recorded roadmap boundaries referenced
-  by architecture content; deleting them now would create broken references.
-- Both architecture sites: one is CI-published, one has its own publication
-  workflow. Choose a canonical viewer and migrate unique content before retiring
-  either; deletion is not safe merely because both visualize architecture.
-- The ignored original bootstrap prompt and existing `.superdesign` artifacts:
-  local/history provenance is not established as disposable. The index marks the
-  bootstrap prompt non-authoritative. No generated tool environments or user
-  caches were recursively removed.
-
-Dependency slimming candidates: direct imports of docker, playwright and apscheduler were not found under declaw, declaw_plugin_sdk, plugins, scripts or tests. The Docker preflight invokes the Docker CLI through subprocess, not the Python SDK. These declared dependencies merit a separate optional-dependency review with lockfile and full CI validation; absence of imports alone does not prove removal safe for every packaging workflow. No dependencies were removed here. Keep the FastAPI/uvicorn/websockets dependencies aligned with the approved upcoming phase rather than deleting them merely because the gateway is not built yet.
-
-The cleanup reduces ambiguity more than disk usage. The largest tracked files
-include reproducibility locks and legal benchmark fixtures; substantial local
-space savings would require a separate, measured cache/dependency cleanup.
-
-## Verification
-
-- Targeted Python checks: **153 passed** across `test_repl`, `test_loop`,
-  `test_tools_confirmation`, `test_tools_registry`, `test_documents_watcher`,
-  `test_documents_indexer`, `test_documents_search`, `test_documents_actions`,
-  `test_audit_events`, `test_audit_logger`, `test_config`, `test_db` and
-  `tests/security/test_documents_isolation.py` using the existing Python 3.12.13
-  environment. Ran `python -m pytest <those absolute test paths> -q --tb=short
-  --basetemp <fresh writable directory> -o faulthandler_timeout=30` from outside
-  the repository, with PYTHONPATH set to the checkout, to avoid loading its .env.
-- Initial sandboxed pytest was interrupted during Windows asyncio socket-pair
-  setup. The first run outside the sandbox had 95 passes and 58 fixture errors
-  due to system temp-directory access denial. A fresh writable basetemp resolved
-  that environment issue; the final targeted run had no skips or failures.
-- Cold DB initialization probe: daemon thread invokes `get_sessionmaker` with
-  both singletons reset and `build_engine` stubbed; after a one-second join,
-  `worker.is_alive()` was True and `_engine is None`. No DB/keyring/settings
-  access occurred. This is a reproduction, not a committed regression test.
-- `docs-site`: `npm ci --no-audit --no-fund` succeeded after retrying outside the
-  sandbox following EPERM. Guards initially caught 34 failures from 17 stale
-  references; after migration **2,226 tests passed** and `npm run build` passed.
-  Local Node was v24.16.0; CI specifies Node 22. Build warns about a JavaScript
-  chunk above 500 kB; no bundle optimization is claimed.
-- `architecture-site`: `npm test` passed **5 tests**. No browser interaction or
-  deployment validation was rerun; only its README changed.
-- Full Python CI (`uv sync --frozen`, Ruff, mypy and full pytest) and live Ollama
-  benchmarks were not run. These results do not certify gateway security.
-- All changes remain uncommitted. Source links generated from HEAD can point to
-  the previous commit until the new documentation and citations are committed;
-  commit and rebuild before publishing. No publication was performed.
-
-- Local documentation validation: 106 Markdown link targets across 11 current documents resolved; remote URLs and heading anchors were not checked. git diff --check passed. The SHA-256 of .claude/settings.json matched the start-of-turn value.
-
-Maintenance follow-up: the documentation cleanup was committed as `5b35572`.
-The subsequent DB-only fix and full Python baseline are recorded in the
-[maintenance report](history/python-baseline-2026-10-25.md). Earlier verification
-counts above describe the assessment run, not the later full-suite result.
+The original assessment and former site validation logs remain recoverable from
+Git commit `5f168db`. They are not part of the current build or test procedure.

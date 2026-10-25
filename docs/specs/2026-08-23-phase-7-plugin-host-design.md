@@ -1,7 +1,13 @@
 # Phase 7 — Plugin Host: Design
 
+> **Approved design record.** This file records decisions and assumptions
+> from its original date, not current implementation or a new approval.
+> Verify wiring and limitations against [current status](../project-status.md)
+> and [active decisions](../architecture-decisions.md). Historical
+> CLAUDE.md diary references can be recovered through [Git history](../README.md#history).
+
 - **Date**: 2026-08-23
-- **Status**: approved, ready for implementation planning
+- **Status**: approved design; phase implemented later (see current status for scope)
 - **Tickets**: DCL-090, 091, 092, 093, 094, 095, 096, 097
 - **Branch**: `feat/phase-7-plugin-host` (from `main`, which carries Phase 6)
 - **Context**: `2026-08-23-phase-7-9-roadmap.md`

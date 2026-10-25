@@ -12,7 +12,6 @@
 - **Workspace tools:** Typed read, list, write, and move operations stay within the configured workspace. Write-class operations require a human decision.
 - **Document questions:** The built-in `doc-intel` plugin parses PDF, DOCX, XLSX, text, and Markdown files. DeClaw indexes changed files, retrieves relevant passages, screens retrieved text, and supplies structural citations.
 - **Local state and audit:** SQLite stores structured records; ChromaDB stores document and semantic vectors. An audit trail records tool calls, permission decisions, quarantine events, and instrumented HTTP requests.
-- **Architecture explorer:** [`docs-site/`](./docs-site/) documents the system with interactive diagrams and source references. A separate [three-language Atlas](https://declaw-architecture-atlas.ngoanhhungbhmt2k4.chatgpt.site) is currently owner-private.
 
 The implementation is **pre-release**. Availability of a code path or passing tests is not a claim that the product is ready for regulated production use.
 
@@ -165,7 +164,6 @@ declaw/                 Python application
 declaw_plugin_sdk/      Protocol used by plugin subprocesses
 plugins/builtin/        Built-in doc-intel plugin
 alembic/                Database migrations
-docs-site/              Source-linked architecture documentation site
 docs/                   Phase reviews, specifications, design decisions
 ui/, tauri/             Future desktop interface scaffolding
 tests/                  Unit, integration, security and regression tests
@@ -182,7 +180,7 @@ uv run mypy declaw declaw_plugin_sdk
 uv run pytest
 ```
 
-The documentation site has its own Node project under [`docs-site/`](./docs-site/), with `npm ci`, `npm run guards`, and `npm run build`. Its guards check source references and module coverage against this repository. Agents start at [`AGENTS.md`](./AGENTS.md), then use the [current status](./docs/project-status.md), [code map](./docs/code-map.md), and [active decisions](./docs/architecture-decisions.md). Historical development context is archived under [`docs/history/`](./docs/history/).
+Project documentation is maintained as Markdown under [`docs/`](./docs/). Agents start at [`AGENTS.md`](./AGENTS.md), then use the [current status](./docs/project-status.md), [code map](./docs/code-map.md), and [active decisions](./docs/architecture-decisions.md). Dated validation reports live under [`docs/history/`](./docs/history/); removed long logs are recoverable through [Git history](./docs/README.md#history).
 
 ## License
 
