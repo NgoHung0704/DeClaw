@@ -68,7 +68,7 @@ class ToolCallEvent(_BaseAuditEvent):
     tool_name: str
     classification: str = Field(description="ToolClass value: read / write / destructive.")
     args: dict[str, Any] = Field(default_factory=dict)
-    outcome: Literal["ok", "error", "denied"]
+    outcome: Literal["ok", "error", "denied", "invalid"]
     error: str | None = None
     duration_ms: float | None = None
 

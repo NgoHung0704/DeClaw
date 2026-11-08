@@ -252,7 +252,8 @@ async def test_invalid_args_return_observation_on_the_audited_path(
 ) -> None:
     """``declaw chat`` wires the audit wrapper around the gate on the
     production path; ordering must survive that composition. No approval
-    prompt means no PermissionPromptEvent is emitted either."""
+    prompt means no PermissionPromptEvent is emitted either, and the call is
+    audited as "invalid" — forensically distinct from a call that ran ("ok")."""
 
     class _FakeAuditLogger:
         def __init__(self) -> None:
@@ -271,7 +272,82 @@ async def test_invalid_args_return_observation_on_the_audited_path(
 
     assert "Invalid arguments for recorder" in str(result)
     assert _invocations == []
-    assert [event.event_type for event in audit.events] == ["tool.call"]
+    [event] = audit.events
+    assert event.event_type == "tool.call"
+    assert event.outcome == "invalid"
+
+
+async def test_invalid_args_audited_as_invalid_in_french(
+    tool: _RecordingTool,
+) -> None:
+    """The audit classification must not be English-only: the FR validation
+    observation also audits as "invalid"."""
+
+    class _FakeAuditLogger:
+        def __init__(self) -> None:
+            self.events: list[Any] = []
+
+        async def emit(self, event: Any) -> None:
+            self.events.append(event)
+
+    from declaw.audit.tooling import wrap_tool_with_audit
+
+    audit = _FakeAuditLogger()
+    inner = wrap_tool_with_confirmation(tool, "fr", always_approve, audit=audit)
+    audited = wrap_tool_with_audit(inner, tool=tool, language="fr", audit=audit)
+
+    result = await audited.ainvoke({})
+
+    assert "Arguments invalides pour recorder" in str(result)
+    [event] = audit.events
+    assert event.outcome == "invalid"
+
+
+# --- Import guard for the langchain private-API hook (DCL-125) --------------
+
+
+def test_import_fails_loudly_if_langchain_parse_input_hook_moves(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A langchain upgrade that renames or reshapes ``BaseTool._parse_input``
+    must break the import of the gate loudly: silently continuing would put
+    langchain's own pre-validation back AHEAD of the gate (the exact ordering
+    this module pins), so absent/incompatible hooks are a hard import error."""
+    import importlib
+
+    from langchain_core.tools import BaseTool
+
+    import declaw.tools.confirmation as confirmation
+
+    # Simulate the upgrade: the hook we override is gone.
+    monkeypatch.delattr(BaseTool, "_parse_input")
+    with pytest.raises(RuntimeError, match="_parse_input"):
+        importlib.reload(confirmation)
+
+    # Restore the real module state for every other test.
+    monkeypatch.undo()
+    importlib.reload(confirmation)
+
+
+def test_import_fails_loudly_if_langchain_parse_input_signature_changes(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The same guard also catches a signature drift (renamed parameters)."""
+    import importlib
+
+    from langchain_core.tools import BaseTool
+
+    import declaw.tools.confirmation as confirmation
+
+    def reshaped_hook(self: object, raw_input: object, call_id: object) -> object:
+        return raw_input
+
+    monkeypatch.setattr(BaseTool, "_parse_input", reshaped_hook)
+    with pytest.raises(RuntimeError, match="_parse_input"):
+        importlib.reload(confirmation)
+
+    monkeypatch.undo()
+    importlib.reload(confirmation)
 
 
 # --- Provider receives the right context -----------------------------------

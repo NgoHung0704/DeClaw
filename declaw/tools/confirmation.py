@@ -30,6 +30,7 @@ invisible to the prompt.
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any
 
@@ -102,6 +103,18 @@ def validation_failure_message(
     return template.format(name=tool_name, errors=errors)
 
 
+def validation_failure_prefix(tool_name: str, language: Language) -> str:
+    """Locale-exact start-of-observation marker for invalid arguments.
+
+    Public because the audit wrapper (DCL-061) matches tool results against it
+    to record the outcome as ``invalid`` — every validation observation for a
+    given tool and locale starts with exactly this text, so the prefix
+    comparison is deterministic, like the ``denial_message`` check.
+    """
+    template = _VALIDATION_FR if language == "fr" else _VALIDATION_EN
+    return template.split("{errors}", 1)[0].format(name=tool_name)
+
+
 class RawArgsStructuredTool(StructuredTool):
     """A ``StructuredTool`` whose coroutine receives the raw, unvalidated kwargs.
 
@@ -119,6 +132,44 @@ class RawArgsStructuredTool(StructuredTool):
         self, tool_input: str | dict[str, Any], tool_call_id: str | None
     ) -> str | dict[str, Any]:
         return tool_input
+
+
+def _assert_parse_input_hook() -> None:
+    """Fail at import when the langchain-core private hook we override moves.
+
+    ``RawArgsStructuredTool._parse_input`` is an exact-signature override of a
+    private langchain-core method (``BaseTool._parse_input``; DeClaw pins
+    langchain-core 1.4.0 via uv.lock). If a dependency upgrade renames,
+    drops or reshapes that hook, the override would silently stop
+    participating in invocation and langchain's own pre-validation would run
+    AHEAD of this gate again — the exact ordering this module guards against
+    — so the import itself must fail with an actionable message instead of
+    mis-validating silently.
+    """
+    hook = getattr(StructuredTool, "_parse_input", None)
+    if hook is None:
+        raise RuntimeError(
+            "langchain-core no longer exposes BaseTool._parse_input, so "
+            "RawArgsStructuredTool's override is dead and validate-before-prompt "
+            "(spec section 7) would silently degrade. DeClaw pins "
+            "langchain-core 1.4.0 (uv.lock): re-pin it, or update "
+            "declaw/tools/confirmation.py (RawArgsStructuredTool) and its tests "
+            "for the new hook."
+        )
+    parameters = list(inspect.signature(hook).parameters)
+    if parameters != ["self", "tool_input", "tool_call_id"]:
+        raise RuntimeError(
+            f"langchain-core changed the BaseTool._parse_input signature to "
+            f"{parameters}: RawArgsStructuredTool's exact-signature override no "
+            f"longer matches, and validate-before-prompt (spec section 7) "
+            f"would silently degrade. DeClaw pins langchain-core 1.4.0 "
+            f"(uv.lock): re-pin it, or update "
+            f"declaw/tools/confirmation.py (RawArgsStructuredTool) and its "
+            f"tests for the new signature."
+        )
+
+
+_assert_parse_input_hook()
 
 
 def wrap_tool_with_confirmation(
