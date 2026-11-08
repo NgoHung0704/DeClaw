@@ -81,7 +81,8 @@ async def compact_messages(
     head: list[BaseMessage] = []
     rest = msgs
     if msgs and isinstance(msgs[0], SystemMessage):
-        head, rest = [msgs[0]], msgs[1:]
+        head.append(msgs[0])
+        rest = msgs[1:]
 
     recent: list[BaseMessage] = rest[-keep_recent:] if keep_recent > 0 else []
     old = rest[: len(rest) - len(recent)]
