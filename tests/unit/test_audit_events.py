@@ -163,3 +163,39 @@ def test_plugin_lifecycle_action_vocabulary_is_closed() -> None:
 
     with pytest.raises(ValidationError):
         PluginLifecycleEvent(plugin="p", action="exploded")  # type: ignore[arg-type]
+
+# --- AuthEvent (DCL-121/DCL-129, spec section 2) --------------------------------
+
+
+def test_auth_event_round_trips_through_a_db_row() -> None:
+    from declaw.audit.events import AuthEvent, event_from_row, to_db_row
+
+    event = AuthEvent(action="login_failure")
+    assert event.event_type == "gateway.auth"
+    assert event.task_id is None
+
+    restored = event_from_row(to_db_row(event))
+    assert isinstance(restored, AuthEvent)
+    assert restored == event
+
+
+def test_auth_event_payload_has_no_token_or_session_fields() -> None:
+    from declaw.audit.events import AuthEvent
+
+    for action in ("login_success", "login_failure", "logout"):
+        payload = AuthEvent(action=action).model_dump(mode="json")
+        assert set(payload) == {
+            "id",
+            "schema_version",
+            "task_id",
+            "created_at",
+            "event_type",
+            "action",
+        }
+
+
+def test_auth_event_action_vocabulary_is_closed() -> None:
+    from declaw.audit.events import AuthEvent
+
+    with pytest.raises(ValidationError):
+        AuthEvent(action="token_dump")  # type: ignore[arg-type]

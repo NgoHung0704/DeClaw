@@ -77,12 +77,16 @@ def test_login_rate_limited_after_five_attempts_in_a_minute() -> None:
     client = _client()
 
     for _ in range(5):
-        response = client.post("/api/auth/login", headers={"Origin": ALLOWED_ORIGIN})
-        # 404: no login route exists yet; anything but 429 proves the
-        # request passed the limiter and reached the router.
-        assert response.status_code == 404
+        response = client.post(
+            "/api/auth/login", json={"token": "wrong"}, headers={"Origin": ALLOWED_ORIGIN}
+        )
+        # The login route exists (Task 6): a bad token is a plain 401;
+        # anything but 429 proves the request passed the limiter.
+        assert response.status_code == 401
 
-    sixth = client.post("/api/auth/login", headers={"Origin": ALLOWED_ORIGIN})
+    sixth = client.post(
+        "/api/auth/login", json={"token": "wrong"}, headers={"Origin": ALLOWED_ORIGIN}
+    )
 
     assert sixth.status_code == 429
     _assert_error_shape(sixth.json())
@@ -98,11 +102,17 @@ def test_login_rate_limit_is_global_not_per_session() -> None:
     cookie_two = {"Origin": ALLOWED_ORIGIN, "Cookie": f"{SESSION_COOKIE_NAME}=s2"}
 
     for _ in range(3):
-        assert client.post("/api/auth/login", headers=cookie_one).status_code in (401, 404)
+        assert client.post(
+            "/api/auth/login", json={"token": "wrong"}, headers=cookie_one
+        ).status_code == 401
     for _ in range(2):
-        assert client.post("/api/auth/login", headers=cookie_two).status_code in (401, 404)
+        assert client.post(
+            "/api/auth/login", json={"token": "wrong"}, headers=cookie_two
+        ).status_code == 401
 
-    assert client.post("/api/auth/login", headers=cookie_two).status_code == 429
+    assert client.post(
+        "/api/auth/login", json={"token": "wrong"}, headers=cookie_two
+    ).status_code == 429
 
 
 def test_login_bucket_refills_over_time() -> None:

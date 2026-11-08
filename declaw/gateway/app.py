@@ -17,7 +17,12 @@ import logging
 import uvicorn
 from fastapi import FastAPI
 
+from declaw.audit.correlation import TaskCorrelatingAuditLogger
+from declaw.audit.logger import AuditLogger, DbAuditLogger
 from declaw.config import Settings
+from declaw.credentials.store import CredentialStore, SecretStore
+from declaw.db.engine import get_sessionmaker
+from declaw.gateway.auth import SessionRegistry
 from declaw.gateway.middleware import (
     DEFAULT_JSON_BODY_CAP_BYTES,
     SETTINGS_PUT_BODY_CAP_BYTES,
@@ -28,6 +33,8 @@ from declaw.gateway.middleware import (
     RateLimitMiddleware,
     WebSocketMessageCapMiddleware,
 )
+from declaw.gateway.routes import auth_router
+from declaw.gateway.routes.auth import register_auth_error_handlers
 from declaw.log import logger
 
 
@@ -50,14 +57,27 @@ def assert_launch_contract(settings: Settings) -> None:
         )
 
 
-def create_app(settings: Settings) -> FastAPI:
-    """Build the (currently minimal) FastAPI application for the gateway.
+def create_app(
+    settings: Settings,
+    *,
+    secret_store: SecretStore | None = None,
+    session_registry: SessionRegistry | None = None,
+    audit_logger: AuditLogger | None = None,
+) -> FastAPI:
+    """Build the FastAPI application for the gateway.
 
-    Empty besides a liveness root; further routes, auth and the Application
-    lifespan arrive in later tickets. The Host/Origin policy (DCL-122) is
-    installed first so it wraps every future route: it derives its
-    allowlist from the actual bound authority (``settings.host:port``),
-    never a hard-coded port.
+    Empty besides a liveness root and the auth surface (spec section 2);
+    further routes, chat and the ``Application`` lifespan arrive in later
+    tickets. The Host/Origin policy (DCL-122) is installed first so it
+    wraps every future route: it derives its allowlist from the actual
+    bound authority (``settings.host:port``), never a hard-coded port.
+
+    Dependencies are injectable for tests (fake vault, in-memory audit
+    logger); production takes the OS-keyring store, a fresh session
+    registry and the durable ``DbAuditLogger``. The logger is wrapped in
+    the task-correlating decorator (spec section 6): out of a turn the
+    contextvar is unset, so events pass through unchanged — every
+    gateway emitter shares this one decorated logger.
     """
     app = FastAPI(title="DeClaw gateway")
     # Task 9 (chat wiring) consumes the same limiter for the WS error
@@ -78,6 +98,17 @@ def create_app(settings: Settings) -> FastAPI:
         HostOriginMiddleware,
         bind_authority=f"{settings.host}:{settings.port}",
     )
+
+    # Auth surface (spec sections 2 and 6): one token source, one session
+    # registry and one correlating audit logger, shared by every route.
+    app.state.secret_store = secret_store if secret_store is not None else CredentialStore()
+    app.state.session_registry = (
+        session_registry if session_registry is not None else SessionRegistry()
+    )
+    inner_logger = audit_logger if audit_logger is not None else DbAuditLogger(get_sessionmaker())
+    app.state.audit = TaskCorrelatingAuditLogger(inner_logger)
+    register_auth_error_handlers(app)
+    app.include_router(auth_router)
 
     @app.get("/")
     def health_root() -> dict[str, str]:

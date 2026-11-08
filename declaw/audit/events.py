@@ -173,6 +173,21 @@ class PluginLifecycleEvent(_BaseAuditEvent):
     detail: str = ""
 
 
+class AuthEvent(_BaseAuditEvent):
+    """A gateway authentication boundary event (DCL-121/129, spec section 2).
+
+    Login success/failure and logout — the gateway's security boundary
+    is audited like any other observable action (Principle #7). The
+    payload carries NO bearer material: neither the gateway token nor
+    the session id appears in any field — a session id could be replayed
+    as the cookie value, so it is forbidden outright. Correlation goes
+    through ``task_id`` only, once turns exist.
+    """
+
+    event_type: Literal["gateway.auth"] = "gateway.auth"
+    action: Literal["login_success", "login_failure", "logout"]
+
+
 AnyAuditEvent = Annotated[
     ToolCallEvent
     | NetworkCallEvent
@@ -181,7 +196,8 @@ AnyAuditEvent = Annotated[
     | MemoryExportEvent
     | MemoryWipeEvent
     | PluginPermissionEvent
-    | PluginLifecycleEvent,
+    | PluginLifecycleEvent
+    | AuthEvent,
     Field(discriminator="event_type"),
 ]
 
