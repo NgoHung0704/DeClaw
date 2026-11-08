@@ -26,7 +26,7 @@ from declaw.audit.events import ToolCallEvent, clip_args
 from declaw.audit.logger import AuditLogger
 from declaw.config import Language
 from declaw.tools.base import DeclawTool
-from declaw.tools.confirmation import denial_message
+from declaw.tools.confirmation import RawArgsStructuredTool, denial_message
 
 
 def wrap_tool_with_audit(
@@ -73,7 +73,11 @@ def wrap_tool_with_audit(
         )
         return str(result)
 
-    return StructuredTool.from_function(
+    # RawArgsStructuredTool, like the confirmation gate it wraps: the gate
+    # owns validation (validate-before-prompt, spec section 7), so a plain
+    # StructuredTool here would re-validate in _parse_input and turn invalid
+    # model arguments back into a raised ValidationError ahead of the gate.
+    return RawArgsStructuredTool(
         coroutine=audited_coroutine,
         name=inner.name,
         description=inner.description,

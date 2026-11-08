@@ -89,6 +89,13 @@ def make_console_confirmation_provider(
     else — including EOF or Ctrl-C — denies, so the safe default when the user
     cannot answer is "no".
 
+    The wrapper guarantees validate-before-prompt (spec section 7): ``args``
+    is the canonical validated dump of the call, so the question shows
+    exactly what will run, and arguments that do not validate never reach
+    this provider at all (they become a validation observation for the
+    model instead). CLI and gateway cannot diverge because both providers
+    sit behind the same confirmation wrapper.
+
     The question shows the tool name and arguments (e.g. the target path)
     because the user needs to know what they are approving. This text is shown
     to the user and audited; it is never fed back to the model.
