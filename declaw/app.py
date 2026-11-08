@@ -33,6 +33,7 @@ from declaw.audit.sinks import composite_sink, quarantine_db_sink
 from declaw.config import Settings, get_settings
 from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
 from declaw.documents.watcher import DocumentWatcher
+from declaw.log import logger
 from declaw.plugin_host.grants_helper import load_grants, load_state
 from declaw.plugin_host.host import PluginHost
 from declaw.sanitizer.classifier import build_ollama_classifier
@@ -143,67 +144,76 @@ class Application:
         if self._started:
             return
 
-        # Principle #7: every outbound network call is audited from the first
-        # moment any service could make one; the monitor spans the whole
-        # application lifetime and is uninstalled in shutdown().
-        self.egress_monitor = EgressMonitor(
-            self.audit,
-            allowed_hosts=allowed_hosts_from_settings(self.settings.ollama_base_url),
-        )
-        self.egress_monitor.install()
-
-        await ensure_schema(self.engine)
-
-        self.host = PluginHost(
-            state=load_state(self.settings.data_dir),
-            grants=load_grants(self.settings.data_dir),
-            settings=self.settings,
-            audit=self.audit,
-        )
-        await self.host.start()
-
-        registry = default_registry()
-        for plugin_tool in self.host.model_tools():
-            registry.register_instance(plugin_tool)
-
-        # The document stack only exists when its plugin actually loaded;
-        # lazy imports keep chroma/langchain out of `declaw version`.
-        from declaw.documents.session import DOC_INTEL_PLUGIN, build_document_stack
-
-        if any(p.manifest.name == DOC_INTEL_PLUGIN for p in self.host.loaded()):
-            from declaw.documents.actions import (
-                OrganizeFilesTool,
-                build_document_summarize_tool,
+        # Failure-safe startup: a crash partway must not leak what start()
+        # already acquired (above all the httpx observer patch — the old
+        # inline CLI wiring guaranteed its removal with ``with monitor:``).
+        # Whatever exists when a step raises is torn down, then the error
+        # propagates.
+        try:
+            # Principle #7: every outbound network call is audited from the
+            # first moment any service could make one; the monitor spans the
+            # whole application lifetime and is uninstalled in shutdown().
+            self.egress_monitor = EgressMonitor(
+                self.audit,
+                allowed_hosts=allowed_hosts_from_settings(self.settings.ollama_base_url),
             )
-            from declaw.documents.tools import build_document_search_tool
+            self.egress_monitor.install()
 
-            self.stack = build_document_stack(
-                self.settings, self.host, sanitizer=self.sanitizer
+            await ensure_schema(self.engine)
+
+            self.host = PluginHost(
+                state=load_state(self.settings.data_dir),
+                grants=load_grants(self.settings.data_dir),
+                settings=self.settings,
+                audit=self.audit,
             )
-            registry.register_instance(
-                build_document_search_tool(
-                    store=self.stack.store,
-                    chunk_sanitizer=self.stack.chunk_sanitizer,
-                    language=self.settings.language,
+            await self.host.start()
+
+            registry = default_registry()
+            for plugin_tool in self.host.model_tools():
+                registry.register_instance(plugin_tool)
+
+            # The document stack only exists when its plugin actually loaded;
+            # lazy imports keep chroma/langchain out of `declaw version`.
+            from declaw.documents.session import DOC_INTEL_PLUGIN, build_document_stack
+
+            if any(p.manifest.name == DOC_INTEL_PLUGIN for p in self.host.loaded()):
+                from declaw.documents.actions import (
+                    OrganizeFilesTool,
+                    build_document_summarize_tool,
                 )
-            )
-            registry.register_instance(OrganizeFilesTool())
-            registry.register_instance(
-                build_document_summarize_tool(
-                    store=self.stack.store,
-                    chunk_sanitizer=self.stack.chunk_sanitizer,
-                    language=self.settings.language,
-                )
-            )
-        self.registry = registry
+                from declaw.documents.tools import build_document_search_tool
 
-        # Gateway-only: the watchdog fires while the CLI is not running
-        # (spec section 5 — CLI behavior unchanged).
-        if self.mode == "gateway":
-            workspace = Path(self.settings.workspace_dir)
-            workspace.mkdir(parents=True, exist_ok=True)
-            self.watcher = DocumentWatcher(workspace)
-            self.watcher.start()
+                self.stack = build_document_stack(
+                    self.settings, self.host, sanitizer=self.sanitizer
+                )
+                registry.register_instance(
+                    build_document_search_tool(
+                        store=self.stack.store,
+                        chunk_sanitizer=self.stack.chunk_sanitizer,
+                        language=self.settings.language,
+                    )
+                )
+                registry.register_instance(OrganizeFilesTool())
+                registry.register_instance(
+                    build_document_summarize_tool(
+                        store=self.stack.store,
+                        chunk_sanitizer=self.stack.chunk_sanitizer,
+                        language=self.settings.language,
+                    )
+                )
+            self.registry = registry
+
+            # Gateway-only: the watchdog fires while the CLI is not running
+            # (spec section 5 — CLI behavior unchanged).
+            if self.mode == "gateway":
+                workspace = Path(self.settings.workspace_dir)
+                workspace.mkdir(parents=True, exist_ok=True)
+                self.watcher = DocumentWatcher(workspace)
+                self.watcher.start()
+        except BaseException:
+            await self._teardown_owned()
+            raise
 
         self._started = True
 
@@ -216,26 +226,56 @@ class Application:
         not exist (CLI: no watcher, no session hooks) and the whole call is a
         no-op when the application never started or already stopped.
 
-        Task 10 extends the watcher step: drain its queue before stopping the
-        observer, between "deny approvals" and "host.stop()".
+        Every step is individually guarded: one raising step is logged and
+        the teardown continues — a failed shutdown hook must not strand the
+        remaining services. Task 10 extends the watcher step: drain its queue
+        before stopping the observer, between "deny approvals" and
+        "host.stop()".
         """
         if not self._started or self._stopped:
             return
         self._stopped = True
 
         if self._stop_accepting_sessions is not None:
-            await self._stop_accepting_sessions()
+            await self._guarded("stop accepting sessions", self._stop_accepting_sessions)
         if self._cancel_in_flight_turns is not None:
-            await self._cancel_in_flight_turns()
+            await self._guarded("cancel in-flight turns", self._cancel_in_flight_turns)
         if self._deny_pending_approvals is not None:
-            await self._deny_pending_approvals()
+            await self._guarded("deny pending approvals", self._deny_pending_approvals)
+        await self._teardown_owned()
+
+    async def _teardown_owned(self) -> None:
+        """Tear down the owned services in the spec's order.
+
+        Used by both shutdown() and the failed-start path: each step runs
+        only for a service that exists, and a raising step never stops the
+        rest.
+        """
         if self.watcher is not None:
-            self.watcher.stop()
+            self._guarded_sync("stop watcher", self.watcher.stop)
         if self.host is not None:
-            await self.host.stop()
+            await self._guarded("host.stop()", self.host.stop)
         if self.egress_monitor is not None:
-            self.egress_monitor.uninstall()
-        await self.engine.dispose()
+            self._guarded_sync("uninstall egress monitor", self.egress_monitor.uninstall)
+        await self._guarded("dispose engine", self.engine.dispose)
+
+    async def _guarded(self, step: str, action: ShutdownStep) -> None:
+        """Run one async teardown step; log a failure, never strand the rest."""
+        try:
+            await action()
+        except Exception:
+            logger.bind(event="application.shutdown_step_failed", step=step).exception(
+                "Shutdown step failed; continuing with the remaining steps"
+            )
+
+    def _guarded_sync(self, step: str, action: Callable[[], None]) -> None:
+        """Sync twin of :meth:`_guarded`."""
+        try:
+            action()
+        except Exception:
+            logger.bind(event="application.shutdown_step_failed", step=step).exception(
+                "Shutdown step failed; continuing with the remaining steps"
+            )
 
     def plugin_failures(self) -> list[str]:
         """Human-readable plugin load failures (may be empty)."""

@@ -273,3 +273,86 @@ def test_chat_builds_exactly_one_application(
     assert callable(calls[0]["kwargs"]["quarantine_notice"])
     assert callable(calls[0]["kwargs"]["confirmation_provider"])
     assert chat_ran == [True]
+
+
+async def test_failed_start_uninstalls_the_egress_monitor(
+    fakes: list[str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A startup crash partway must not leak the httpx observer.
+
+    The old inline CLI wiring guaranteed this with ``with monitor:``; the
+    Application must guarantee it too: if any start() step raises after the
+    monitor is installed, the acquired services are torn down before the
+    exception propagates.
+    """
+
+    class ExplodingHost:
+        def __init__(self, **kwargs: Any) -> None:
+            pass
+
+        async def start(self) -> None:
+            fakes.append("host.start")
+            raise RuntimeError("plugin host exploded during start")
+
+        async def stop(self) -> None:
+            fakes.append("host.stop")
+
+        def failures(self) -> list[str]:
+            return []
+
+        def model_tools(self) -> list[Any]:
+            return []
+
+        def loaded(self) -> list[Any]:
+            return []
+
+    monkeypatch.setattr("declaw.app.PluginHost", ExplodingHost)
+    from declaw.app import Application
+
+    app = Application(make_settings(tmp_path), mode="gateway")
+    with pytest.raises(RuntimeError, match="plugin host exploded"):
+        await app.start()
+
+    # Exception propagated AND the acquired services were torn down first.
+    assert fakes == [
+        "monitor.install",
+        "schema.ensure",
+        "host.start",
+        "host.stop",
+        "monitor.uninstall",
+        "engine.dispose",
+    ]
+
+
+async def test_a_failing_shutdown_step_does_not_strand_the_rest(
+    fakes: list[str], tmp_path: Path
+) -> None:
+    """One raising shutdown hook must not strand the remaining teardown."""
+
+    async def exploding_step() -> None:
+        fakes.append("sessions.stop")
+        raise RuntimeError("session gate exploded")
+
+    from declaw.app import Application
+
+    app = Application(
+        make_settings(tmp_path),
+        mode="gateway",
+        stop_accepting_sessions=exploding_step,
+    )
+    await app.start()
+    # The hook raises, but every later step still runs (and the failure is
+    # swallowed: teardown must be unstoppable).
+    await app.shutdown()
+
+    assert fakes == [
+        "monitor.install",
+        "schema.ensure",
+        "host.start",
+        "watcher.start",
+        "sessions.stop",
+        "watcher.stop",
+        "host.stop",
+        "monitor.uninstall",
+        "engine.dispose",
+    ]
