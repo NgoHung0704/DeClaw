@@ -215,6 +215,14 @@ class ApprovalBroker:
                 request_id=request_id, session_id=session_id, tool=pending.tool_name
             ).warning("Approval request denied: {}", reason)
 
+    def pending_session_ids(self) -> set[str]:
+        """Sessions that currently have an unanswered request pending.
+
+        Shutdown/status introspection (spec section 5 step 3): callers verify
+        that a disconnect or gateway shutdown left no dangling approvals.
+        """
+        return {pending.session_id for pending in self._pending.values()}
+
     def _remove(self, request_id: str) -> None:
         """Move a request from pending to the bounded answered-id memory."""
         del self._pending[request_id]

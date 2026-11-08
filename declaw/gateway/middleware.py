@@ -310,6 +310,19 @@ class RateLimiter:
             ).try_consume()
         )
 
+    def drop_connection(self, key: str) -> None:
+        """Evict one connection's scoped buckets (Task 9 session wiring).
+
+        Scoped buckets otherwise live for the process lifetime; with
+        per-connection chat keys that is unbounded growth across connections.
+        With session wiring the keys are server-minted and evicted exactly
+        when the session drops (close of the Task 4 review finding: buckets
+        keyed by untrusted cookie values no longer exist — the WS rate keys
+        are only created after cookie validation).
+        """
+        self._chat_turn_buckets.pop(key, None)
+        self._ws_message_buckets.pop(key, None)
+
 
 def _cookie_value(scope: Scope, name: str) -> str | None:
     """Return the value of cookie ``name`` from the ``Cookie`` header."""

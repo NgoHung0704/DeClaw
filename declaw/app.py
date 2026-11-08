@@ -47,6 +47,7 @@ if TYPE_CHECKING:
     from sqlmodel.ext.asyncio.session import AsyncSession
 
     from declaw.documents.session import DocumentStack
+    from declaw.gateway.session import SessionManager
 
 # A step of the deterministic shutdown sequence (spec section 5). The gateway
 # injects SessionManager/approval handlers here; the CLI leaves them unset and
@@ -246,6 +247,25 @@ class Application:
         if self._deny_pending_approvals is not None:
             await self._guarded("deny pending approvals", self._deny_pending_approvals)
         await self._teardown_owned()
+
+    def wire_gateway_shutdown(self, session_manager: SessionManager) -> None:
+        """Give the session shutdown hooks their real handlers (Task 9 wiring).
+
+        The hooks were constructor-injected seams since Task 7 because the
+        ``SessionManager`` did not exist yet; the gateway (``create_app``)
+        owns it and calls this once, so every application — however it was
+        built — shuts down in the spec's fixed order: stop accepting sessions
+        (manager), cancel in-flight turns (manager), deny pending approvals
+        (manager's sessions each carry the shared broker). Only unset hooks
+        are filled: an explicitly injected step always wins, so the Task 7
+        lifecycle tests stay the owner of theirs.
+        """
+        if self._stop_accepting_sessions is None:
+            self._stop_accepting_sessions = session_manager.stop_accepting_sessions
+        if self._cancel_in_flight_turns is None:
+            self._cancel_in_flight_turns = session_manager.cancel_in_flight_turns
+        if self._deny_pending_approvals is None:
+            self._deny_pending_approvals = session_manager.deny_pending_approvals
 
     async def _teardown_owned(self) -> None:
         """Tear down the owned services in the spec's order.

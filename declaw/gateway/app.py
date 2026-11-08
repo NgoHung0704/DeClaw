@@ -13,16 +13,18 @@ contract.
 from __future__ import annotations
 
 import logging
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
 
 import uvicorn
 from fastapi import FastAPI
 
 from declaw.app import Application
 from declaw.audit.correlation import TaskCorrelatingAuditLogger
-from declaw.audit.logger import AuditLogger, DbAuditLogger
+from declaw.audit.logger import AuditLogger, InMemoryAuditLogger
 from declaw.config import Settings
 from declaw.credentials.store import CredentialStore, SecretStore
-from declaw.db.engine import get_sessionmaker
+from declaw.gateway.approval import ApprovalBroker
 from declaw.gateway.auth import SessionRegistry
 from declaw.gateway.middleware import (
     DEFAULT_JSON_BODY_CAP_BYTES,
@@ -36,6 +38,8 @@ from declaw.gateway.middleware import (
 )
 from declaw.gateway.routes import auth_router
 from declaw.gateway.routes.auth import register_auth_error_handlers
+from declaw.gateway.session import SessionManager
+from declaw.gateway.ws import ModelFactory, router as ws_router, session_graph_factory
 from declaw.log import logger
 
 
@@ -65,31 +69,69 @@ def create_app(
     session_registry: SessionRegistry | None = None,
     audit_logger: AuditLogger | None = None,
     application: Application | None = None,
+    approval_broker: ApprovalBroker | None = None,
+    model_factory: ModelFactory | None = None,
+    rate_limiter: RateLimiter | None = None,
 ) -> FastAPI:
     """Build the FastAPI application for the gateway.
 
-    Empty besides a liveness root and the auth surface (spec section 2);
-    further routes, chat and the ``Application`` lifespan arrive in later
-    tickets. The Host/Origin policy (DCL-122) is installed first so it
-    wraps every future route: it derives its allowlist from the actual
-    bound authority (``settings.host:port``), never a hard-coded port.
+    The Host/Origin policy (DCL-122) is installed outermost so it wraps every
+    route, then rate limits, then WS message caps, then body caps (innermost,
+    so byte counting wraps the router's receive). The limiter is shared with
+    the WS chat endpoint so the bucket helpers (chat-turn 10/min per session,
+    other WS messages 30/s per connection) are enforced from one state.
 
-    Dependencies are injectable for tests (fake vault, in-memory audit
-    logger); production passes the OS-keyring store, a fresh session
-    registry and the ``Application`` (spec section 5), which owns the
-    engine and ``DbAuditLogger`` wiring. The logger is wrapped in the
-    task-correlating decorator (spec section 6): out of a turn the
-    contextvar is unset, so events pass through unchanged — every
-    gateway emitter shares this one decorated logger.
+    With an ``application`` (spec section 5 — the production path), the app
+    owns the full chat wiring: the Application is started by the lifespan,
+    its session shutdown hooks get the real handlers, and every chat session
+    runs ``/ws/chat`` with per-session tools. Without one, the app serves the
+    auth surface and middleware only (chats close 1011): the old bare
+    ``DbAuditLogger(get_sessionmaker())`` fallback is gone — an eager engine
+    on an unconfigured data_dir is not something a "bare" app should create.
+    Tests keep using injected fakes or the in-memory capture logger.
+
+    ``model_factory`` is the deterministic-fake seam for the chat flow tests;
+    production leaves it None and the session graph builds the Ollama stack
+    from the effective-settings snapshot.
     """
-    app = FastAPI(title="DeClaw gateway")
-    # Task 9 (chat wiring) consumes the same limiter for the WS error
-    # frames; the buckets live on the app so the whole stack shares them.
-    limiter = RateLimiter()
+    limiter = rate_limiter if rate_limiter is not None else RateLimiter()
+    broker = approval_broker if approval_broker is not None else ApprovalBroker()
+    audit = TaskCorrelatingAuditLogger(_resolve_audit_logger(audit_logger, application))
+    graph_factory = (
+        session_graph_factory(
+            application=application, audit=audit, broker=broker, model_factory=model_factory
+        )
+        if application is not None
+        else None
+    )
+    manager = SessionManager(
+        broker=broker,
+        limiter=limiter,
+        sessionmaker=application.sessionmaker if application is not None else None,
+        graph_factory=graph_factory,
+    )
+
+    if application is not None:
+        # Task 9 wiring (spec sections 5/6): the constructor-injected hooks
+        # from Task 7 get their real handlers — the manager and broker above.
+        application.wire_gateway_shutdown(manager)
+
+        @asynccontextmanager
+        async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+            # The gateway starts the Application on startup and stops it
+            # deterministically on shutdown — it must serve the rest of the
+            # API even when Ollama is down; chat turns then fail typed.
+            await application.start()
+            try:
+                yield
+            finally:
+                await application.shutdown()
+
+        app = FastAPI(title="DeClaw gateway", lifespan=lifespan)
+    else:
+        app = FastAPI(title="DeClaw gateway")
+
     app.state.rate_limiter = limiter
-    # Last-added runs outermost: Host/Origin rejects before anything else,
-    # then rate limits, then WS message caps, then body caps (innermost,
-    # so byte counting wraps the router's receive).
     app.add_middleware(
         BodyCapMiddleware,
         default_cap=DEFAULT_JSON_BODY_CAP_BYTES,
@@ -108,20 +150,14 @@ def create_app(
     app.state.session_registry = (
         session_registry if session_registry is not None else SessionRegistry()
     )
-    # Engine/logger wiring has a single owner: the Application (spec section
-    # 5). An injected audit_logger still wins so tests keep using fakes.
-    if audit_logger is not None:
-        inner_logger: AuditLogger = audit_logger
-    elif application is not None:
-        inner_logger = application.audit
-    else:
-        inner_logger = DbAuditLogger(get_sessionmaker())
-    app.state.audit = TaskCorrelatingAuditLogger(inner_logger)
+    app.state.audit = audit
+    app.state.approval_broker = broker
+    app.state.session_manager = manager
     if application is not None:
-        # Later tickets hang the lifespan and the WS chat wiring off this.
         app.state.application = application
     register_auth_error_handlers(app)
     app.include_router(auth_router)
+    app.include_router(ws_router)
 
     @app.get("/")
     def health_root() -> dict[str, str]:
@@ -129,6 +165,20 @@ def create_app(
         return {"status": "ok"}
 
     return app
+
+
+def _resolve_audit_logger(
+    audit_logger: AuditLogger | None, application: Application | None
+) -> AuditLogger:
+    """Injected fake wins; the Application owns the real DbAuditLogger."""
+    if audit_logger is not None:
+        return audit_logger
+    if application is not None:
+        return application.audit
+    # Bare apps (auth/middleware surface only) capture in memory: the
+    # deleted Task 7 fallback eagerly built a real engine on the default
+    # data_dir, which a test or boot-time app must never do.
+    return InMemoryAuditLogger()
 
 
 class _LoguruAccessLogHandler(logging.Handler):
@@ -162,12 +212,16 @@ def run_gateway(settings: Settings) -> None:
 
     Blocking on purpose: Ctrl-C is the stop mechanism until DCL-234. No
     reload, ``proxy_headers`` off, ``forwarded_allow_ips`` never set — there
-    is no proxy, ever.
+    is no proxy, ever. The Application (spec section 5) is constructed here
+    and started by the app lifespan; the gateway therefore starts and serves
+    even when Ollama is down — chat turns fail with a typed error instead
+    of taking the process down.
     """
     assert_launch_contract(settings)
     _route_access_log_into_loguru()
+    application = Application(settings, mode="gateway")
     config = uvicorn.Config(
-        app=create_app(settings),
+        app=create_app(settings, application=application),
         host=settings.host,
         port=settings.port,
         log_config=None,  # keep uvicorn away from stdlib logging setup
