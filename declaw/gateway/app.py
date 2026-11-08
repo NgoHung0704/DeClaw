@@ -18,6 +18,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from declaw.config import Settings
+from declaw.gateway.middleware import HostOriginMiddleware
 from declaw.log import logger
 
 
@@ -43,10 +44,17 @@ def assert_launch_contract(settings: Settings) -> None:
 def create_app(settings: Settings) -> FastAPI:
     """Build the (currently minimal) FastAPI application for the gateway.
 
-    Empty besides a liveness root; middleware, auth and the Application
-    lifespan arrive in later tickets.
+    Empty besides a liveness root; further routes, auth and the Application
+    lifespan arrive in later tickets. The Host/Origin policy (DCL-122) is
+    installed first so it wraps every future route: it derives its
+    allowlist from the actual bound authority (``settings.host:port``),
+    never a hard-coded port.
     """
     app = FastAPI(title="DeClaw gateway")
+    app.add_middleware(
+        HostOriginMiddleware,
+        bind_authority=f"{settings.host}:{settings.port}",
+    )
 
     @app.get("/")
     def health_root() -> dict[str, str]:

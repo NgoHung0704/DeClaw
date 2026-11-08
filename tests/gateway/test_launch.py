@@ -96,7 +96,11 @@ def test_create_app_returns_fastapi() -> None:
 
 
 def test_create_app_serves_health_root() -> None:
-    response = TestClient(create_app(_fresh())).get("/")
+    # Host must equal the bound authority once the DCL-122 policy is
+    # installed (TestClient defaults to "testserver", which is forbidden).
+    response = TestClient(create_app(_fresh())).get(
+        "/", headers={"Host": "127.0.0.1:7842"}
+    )
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
