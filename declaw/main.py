@@ -87,15 +87,31 @@ def _format_reachable(health: OllamaHealth) -> str:
 
 @cli.command()
 def start() -> None:
-    """Start the DeClaw gateway. (Implemented in DCL-120.)"""
-    console.print("[yellow]start[/yellow]: gateway not implemented yet (DCL-120).")
-    raise typer.Exit(code=1)
+    """Start the DeClaw gateway (loopback only, Ctrl-C to stop)."""
+    # Imported lazily so `version`/`status` don't pay the FastAPI import cost.
+    from declaw.gateway.app import GatewayLaunchError, assert_launch_contract, run_gateway
+    from declaw.log import configure
+
+    settings = get_settings()
+    try:
+        assert_launch_contract(settings)
+    except GatewayLaunchError as error:
+        console.print(f"[red]{error}[/red]")
+        raise typer.Exit(code=1) from error
+    configure()
+    console.print(
+        f"[bold]gateway[/bold] listening on http://{settings.host}:{settings.port} — Ctrl-C to stop"
+    )
+    run_gateway(settings)
 
 
 @cli.command()
 def stop() -> None:
-    """Stop a running DeClaw gateway. (Implemented in DCL-120.)"""
-    console.print("[yellow]stop[/yellow]: gateway not implemented yet (DCL-120).")
+    """Stop a running DeClaw gateway (deferred to DCL-234)."""
+    console.print(
+        "[yellow]stop[/yellow]: not implemented yet — press Ctrl-C in the "
+        "gateway terminal (DCL-234)."
+    )
     raise typer.Exit(code=1)
 
 
