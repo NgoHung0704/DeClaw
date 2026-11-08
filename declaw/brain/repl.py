@@ -65,17 +65,28 @@ _MAX_REASON_CHARS = 200
 AgentGraph = CompiledStateGraph[AgentState, Any, Any, Any]
 
 
-def build_brain(tools: Sequence[BaseTool] | None = None) -> AgentGraph:
+def build_brain(
+    tools: Sequence[BaseTool] | None = None,
+    *,
+    model: str | None = None,
+    language: Language | None = None,
+) -> AgentGraph:
     """Assemble the agentic loop on a real Ollama model.
 
     The default stack is ``build_ollama_model`` + ``with_context_window``. See
     the module docstring for why ``with_tool_call_repair`` and
     ``with_compaction`` are not in the default — callers can layer them in.
+
+    ``model`` and ``language`` are explicit so the gateway can feed them from
+    its effective-settings snapshot per new session (spec section 12) instead
+    of the process-wide ``get_settings()`` cache. Both default to the
+    configured Settings values, which is exactly the CLI behavior —
+    ``main.chat`` passes nothing and works as before.
     """
     selected = list(tools) if tools is not None else [echo]
-    model = build_ollama_model(selected)
-    model = with_context_window(model)
-    return build_agent_graph(model=model, tools=selected)
+    model_callable = build_ollama_model(selected, model=model, language=language)
+    model_callable = with_context_window(model_callable)
+    return build_agent_graph(model=model_callable, tools=selected)
 
 
 def make_console_confirmation_provider(

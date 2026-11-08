@@ -39,6 +39,7 @@ from declaw.plugin_host.host import PluginHost
 from declaw.sanitizer.classifier import build_ollama_classifier
 from declaw.sanitizer.quarantine import QuarantineStore, log_audit_sink, user_notice_sink
 from declaw.sanitizer.sanitizer import Sanitizer
+from declaw.settings_service import SettingsService
 from declaw.tools.confirmation import ConfirmationProvider
 from declaw.tools.registry import ToolRegistry, default_registry
 
@@ -118,9 +119,11 @@ class Application:
         self.stack: DocumentStack | None = None
         self.watcher: DocumentWatcher | None = None
         self.egress_monitor: EgressMonitor | None = None
-        # The SettingsService (spec section 12) is owned here; its
-        # implementation lands with the settings task.
-        self.settings_service: object | None = None
+        # The SettingsService (spec section 12) is owned here: it composes
+        # this env layer with data_dir/settings.json into per-session
+        # snapshots and owns every write to that file. Constructing it does
+        # no I/O; the gateway settings routes read it off the Application.
+        self.settings_service = SettingsService(self.settings)
 
         # Hooks slotted into the fixed shutdown order below. The CLI leaves
         # them unset: it has no sessions, no in-flight turns, no pending
