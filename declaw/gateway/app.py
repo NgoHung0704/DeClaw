@@ -18,7 +18,16 @@ import uvicorn
 from fastapi import FastAPI
 
 from declaw.config import Settings
-from declaw.gateway.middleware import HostOriginMiddleware
+from declaw.gateway.middleware import (
+    DEFAULT_JSON_BODY_CAP_BYTES,
+    SETTINGS_PUT_BODY_CAP_BYTES,
+    WS_MESSAGE_CAP_BYTES,
+    BodyCapMiddleware,
+    HostOriginMiddleware,
+    RateLimiter,
+    RateLimitMiddleware,
+    WebSocketMessageCapMiddleware,
+)
 from declaw.log import logger
 
 
@@ -51,6 +60,20 @@ def create_app(settings: Settings) -> FastAPI:
     never a hard-coded port.
     """
     app = FastAPI(title="DeClaw gateway")
+    # Task 9 (chat wiring) consumes the same limiter for the WS error
+    # frames; the buckets live on the app so the whole stack shares them.
+    limiter = RateLimiter()
+    app.state.rate_limiter = limiter
+    # Last-added runs outermost: Host/Origin rejects before anything else,
+    # then rate limits, then WS message caps, then body caps (innermost,
+    # so byte counting wraps the router's receive).
+    app.add_middleware(
+        BodyCapMiddleware,
+        default_cap=DEFAULT_JSON_BODY_CAP_BYTES,
+        overrides={"PUT /api/settings": SETTINGS_PUT_BODY_CAP_BYTES},
+    )
+    app.add_middleware(WebSocketMessageCapMiddleware)
+    app.add_middleware(RateLimitMiddleware, limiter=limiter)
     app.add_middleware(
         HostOriginMiddleware,
         bind_authority=f"{settings.host}:{settings.port}",
@@ -105,5 +128,9 @@ def run_gateway(settings: Settings) -> None:
         port=settings.port,
         log_config=None,  # keep uvicorn away from stdlib logging setup
         proxy_headers=False,
+        # Server-side frame limit (spec section 4): the protocol layer
+        # refuses a single oversized WS message before it reaches ASGI,
+        # complementing the in-app WebSocketMessageCapMiddleware.
+        ws_max_size=WS_MESSAGE_CAP_BYTES,
     )
     uvicorn.Server(config).run()
