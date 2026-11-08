@@ -72,7 +72,8 @@ async def compact_messages(
     No-op while under ``threshold`` or when there is nothing older than the
     ``keep_recent`` most recent messages. A leading ``SystemMessage`` and the
     recent tail are kept verbatim; a leading orphan ``ToolMessage`` in the tail
-    is dropped to keep the prompt valid.
+    is shifted into the summarized head so its result is preserved while keeping
+    the prompt valid.
     """
     msgs = list(messages)
     if counter(msgs) <= threshold:
@@ -86,14 +87,18 @@ async def compact_messages(
 
     recent: list[BaseMessage] = rest[-keep_recent:] if keep_recent > 0 else []
     old = rest[: len(rest) - len(recent)]
+
+    # If the recent tail begins with an orphan ToolMessage (its requesting
+    # AIMessage was sliced into old), shift it into old so its result is
+    # preserved in the summary rather than dropped, keeping recent valid.
+    while recent and isinstance(recent[0], ToolMessage):
+        old.append(recent.pop(0))
+
     if not old:
         return msgs  # nothing old enough to compact
 
     summary = await summarize(old)
     note = SystemMessage(content=f"Summary of earlier conversation:\n{summary}")
-
-    while len(recent) > 1 and isinstance(recent[0], ToolMessage):
-        recent.pop(0)
 
     return [*head, note, *recent]
 
