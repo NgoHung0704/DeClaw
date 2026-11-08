@@ -17,6 +17,7 @@ import logging
 import uvicorn
 from fastapi import FastAPI
 
+from declaw.app import Application
 from declaw.audit.correlation import TaskCorrelatingAuditLogger
 from declaw.audit.logger import AuditLogger, DbAuditLogger
 from declaw.config import Settings
@@ -63,6 +64,7 @@ def create_app(
     secret_store: SecretStore | None = None,
     session_registry: SessionRegistry | None = None,
     audit_logger: AuditLogger | None = None,
+    application: Application | None = None,
 ) -> FastAPI:
     """Build the FastAPI application for the gateway.
 
@@ -73,9 +75,10 @@ def create_app(
     bound authority (``settings.host:port``), never a hard-coded port.
 
     Dependencies are injectable for tests (fake vault, in-memory audit
-    logger); production takes the OS-keyring store, a fresh session
-    registry and the durable ``DbAuditLogger``. The logger is wrapped in
-    the task-correlating decorator (spec section 6): out of a turn the
+    logger); production passes the OS-keyring store, a fresh session
+    registry and the ``Application`` (spec section 5), which owns the
+    engine and ``DbAuditLogger`` wiring. The logger is wrapped in the
+    task-correlating decorator (spec section 6): out of a turn the
     contextvar is unset, so events pass through unchanged — every
     gateway emitter shares this one decorated logger.
     """
@@ -105,8 +108,18 @@ def create_app(
     app.state.session_registry = (
         session_registry if session_registry is not None else SessionRegistry()
     )
-    inner_logger = audit_logger if audit_logger is not None else DbAuditLogger(get_sessionmaker())
+    # Engine/logger wiring has a single owner: the Application (spec section
+    # 5). An injected audit_logger still wins so tests keep using fakes.
+    if audit_logger is not None:
+        inner_logger: AuditLogger = audit_logger
+    elif application is not None:
+        inner_logger = application.audit
+    else:
+        inner_logger = DbAuditLogger(get_sessionmaker())
     app.state.audit = TaskCorrelatingAuditLogger(inner_logger)
+    if application is not None:
+        # Later tickets hang the lifespan and the WS chat wiring off this.
+        app.state.application = application
     register_auth_error_handlers(app)
     app.include_router(auth_router)
 

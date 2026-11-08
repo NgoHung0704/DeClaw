@@ -121,23 +121,12 @@ def chat(
 ) -> None:
     """Start an interactive chat REPL backed by the local brain."""
     # Imported lazily so `version`/`status` don't pay the langchain import cost.
-    from declaw.audit.egress import EgressMonitor, allowed_hosts_from_settings
-    from declaw.audit.logger import DbAuditLogger
-    from declaw.audit.sinks import composite_sink, quarantine_db_sink
+    from declaw.app import Application
     from declaw.brain.repl import (
         build_brain,
         make_console_confirmation_provider,
         run_chat,
     )
-    from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
-    from declaw.sanitizer.classifier import build_ollama_classifier
-    from declaw.sanitizer.quarantine import (
-        QuarantineStore,
-        log_audit_sink,
-        user_notice_sink,
-    )
-    from declaw.sanitizer.sanitizer import Sanitizer
-    from declaw.tools.registry import default_registry
 
     settings = get_settings()
     health = asyncio.run(OllamaClient().health())
@@ -172,40 +161,19 @@ def chat(
     settings.workspace_dir.mkdir(parents=True, exist_ok=True)
 
     # WRITE/DESTRUCTIVE tools are gated behind a console confirmation prompt;
-    # READ tools auto-run. markup=False so the "[y/N]" hint and any "[" in the
-    # rendered args are not parsed as Rich tags.
+    # READ tools auto-run. markup=False so the "DeClaw wants to call ..." part
+    # and any "[" in the rendered args are not parsed as Rich tags.
     def confirm_prompt(question: str) -> str:
         return console.input(question, markup=False, emoji=False)
 
     approve = make_console_confirmation_provider(confirm_prompt, settings.language)
 
-    # Principle #7: every tool call / confirmation decision / quarantine lands
-    # in the durable audit trail (SQLite, DCL-060/061).
-    engine = get_engine()
-    audit = DbAuditLogger(get_sessionmaker())
-
-    # Principle #4: external content (file reads) must pass the sanitizer before
-    # the brain sees it. A separate session (sanitizer_model) classifies the
-    # output; UNSAFE content is quarantined and never reaches the model. The
-    # quarantine store reports to the operational log, the audit DB, and the user
-    # directly — the last one matters because the model only receives a neutral
-    # placeholder and paraphrases it unreliably (see user_notice_sink).
+    # Quarantine notices are printed straight to the user's console: the
+    # application says what was withheld, the model would paraphrase it.
     def notice(line: str) -> None:
         console.print(line, markup=False, emoji=False)
 
-    quarantine = QuarantineStore(
-        audit_sink=composite_sink(
-            log_audit_sink,
-            quarantine_db_sink(audit),
-            user_notice_sink(notice, settings.language),
-        )
-    )
-    sanitizer = (
-        Sanitizer(build_ollama_classifier(language=settings.language), quarantine=quarantine)
-        if settings.sanitizer_required
-        else None
-    )
-    sanitizer_state = "on" if sanitizer is not None else "off"
+    sanitizer_state = "on" if settings.sanitizer_required else "off"
     console.print(
         f"[green]DeClaw chat[/green] - model [bold]{settings.model}[/bold], "
         f"workspace [bold]{settings.workspace_dir}[/bold], "
@@ -230,76 +198,30 @@ def chat(
     # A/B probe first - see CLAUDE.md Open decision "System prompt x tool-calling".
     # DCL-017's system_message() stays available for compositions that don't bind tools.
     async def _session() -> None:
-        # Schema, plugin subprocesses and the chat all share one event loop:
-        # aiosqlite connections and asyncio subprocess transports are both
-        # bound to the loop that created them. That is why the registry, the
-        # host and the graph are all assembled in here rather than above.
-        await ensure_schema(engine)
-
-        from declaw.plugin_host.grants_helper import load_grants, load_state
-        from declaw.plugin_host.host import PluginHost
-
-        host = PluginHost(
-            state=load_state(settings.data_dir),
-            grants=load_grants(settings.data_dir),
-            settings=settings,
-            audit=audit,
+        # One event loop for schema, plugin subprocesses and the chat (spec
+        # section 5): aiosqlite connections and asyncio subprocess transports
+        # bind to the creating loop, so the CLI assembles the same Application
+        # the gateway runs on the uvicorn loop — inside asyncio.run.
+        application = Application(
+            settings,
+            mode="cli",
+            quarantine_notice=notice,
+            confirmation_provider=approve,
         )
-        await host.start()
-        for failure in host.failures():
+        await application.start()
+        for failure in application.plugin_failures():
             console.print(f"[yellow]Plugin not loaded -[/yellow] {failure}")
-
-        registry = default_registry()
-        for plugin_tool in host.model_tools():
-            registry.register_instance(plugin_tool)
-
-        from declaw.documents.session import DOC_INTEL_PLUGIN, build_document_stack
-        from declaw.documents.tools import build_document_search_tool
-
-        if any(p.manifest.name == DOC_INTEL_PLUGIN for p in host.loaded()):
-            from declaw.documents.actions import (
-                OrganizeFilesTool,
-                build_document_summarize_tool,
-            )
-
-            stack = build_document_stack(settings, host, sanitizer=sanitizer)
-            registry.register_instance(
-                build_document_search_tool(
-                    store=stack.store,
-                    chunk_sanitizer=stack.chunk_sanitizer,
-                    language=settings.language,
-                )
-            )
-            registry.register_instance(OrganizeFilesTool())
-            registry.register_instance(
-                build_document_summarize_tool(
-                    store=stack.store,
-                    chunk_sanitizer=stack.chunk_sanitizer,
-                    language=settings.language,
-                )
-            )
-
-        tools = registry.langchain_tools(
-            settings.language, approve, sanitizer=sanitizer, audit=audit
-        )
-        graph = build_brain(tools)
-
-        loaded = ", ".join(p.manifest.name for p in host.loaded()) or "none"
-        console.print(f"[dim]plugins: {loaded}[/dim]")
         try:
+            graph = build_brain(application.langchain_tools())
+            loaded = ", ".join(application.loaded_plugin_names()) or "none"
+            console.print(f"[dim]plugins: {loaded}[/dim]")
             await run_chat(
                 graph, read=read, write=write, debug=debug, language=settings.language
             )
         finally:
-            await host.stop()
+            await application.shutdown()
 
-    # Principle #7: every outbound network call (incl. each Ollama request) is
-    # audited; anything outside the local allowlist is flagged (DCL-064).
-    monitor = EgressMonitor(
-        audit, allowed_hosts=allowed_hosts_from_settings(settings.ollama_base_url)
-    )
-    with monitor:
-        asyncio.run(_session())
+    asyncio.run(_session())
     console.print("[dim]bye[/dim]")
 
 
