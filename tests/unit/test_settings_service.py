@@ -23,7 +23,7 @@ from declaw.brain.chat_model import build_ollama_model
 from declaw.brain.repl import build_brain
 from declaw.brain.stub_tools import echo
 from declaw.config import Settings, get_settings
-from declaw.settings_service import SettingsService
+from declaw.settings_service import InvalidSettingsFileError, SettingsService
 
 
 # The env layer must be deterministic: no ambient DECLAW_* variables and no
@@ -136,6 +136,30 @@ def test_update_creates_workspace_under_missing_parents(tmp_path: Path) -> None:
 
     assert applied == {"workspace_dir": "restart_required"}
     assert deep.is_dir()
+
+
+def test_update_rejects_empty_or_whitespace_workspace_dir(tmp_path: Path) -> None:
+    # "" becomes Path(".") — the CWD, a containment bypass — and a
+    # whitespace-only value would round-trip into a dropped file value whose
+    # "restart_required" never applies. Both are rejected at the door.
+    with pytest.raises(ValueError, match="workspace_dir"):
+        _service(tmp_path).update(workspace_dir="")
+    with pytest.raises(ValueError, match="workspace_dir"):
+        _service(tmp_path).update(workspace_dir="   ")
+
+    assert not (tmp_path / "settings.json").exists()
+
+
+def test_effective_fails_closed_when_file_workspace_equals_data_dir(
+    tmp_path: Path,
+) -> None:
+    # update() refuses to store workspace_dir == data_dir, but the file can
+    # be hand-edited: composing the snapshot must fail closed, not serve a
+    # workspace that would feed application state to the indexer.
+    _write_file(tmp_path, {"workspace_dir": str(tmp_path)})
+
+    with pytest.raises(InvalidSettingsFileError, match="data_dir"):
+        _service(tmp_path).effective()
 
 
 def test_update_rejects_invalid_language_without_writing(tmp_path: Path) -> None:

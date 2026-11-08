@@ -47,6 +47,16 @@ APPLIED_NEW_SESSION = "new_session"
 APPLIED_RESTART_REQUIRED = "restart_required"
 
 
+class InvalidSettingsFileError(RuntimeError):
+    """The stored settings file violates a hard rule (fail closed).
+
+    Raised by :meth:`SettingsService.effective` when a stored value must not
+    be served — e.g. a hand-edited ``workspace_dir`` equal to ``data_dir``.
+    Fail closed: no snapshot is composed from an unsafe file, and callers
+    (session start, settings routes) can catch this typed error to report it.
+    """
+
+
 class EffectiveSettings(BaseModel):
     """Immutable per-session snapshot of the three mutable keys.
 
@@ -71,7 +81,13 @@ class SettingsService:
         self.path = self._settings.data_dir / _SETTINGS_FILENAME
 
     def effective(self) -> EffectiveSettings:
-        """Build the immutable effective-settings snapshot (env > file > defaults)."""
+        """Build the immutable effective-settings snapshot (env > file > defaults).
+
+        Fails closed with :class:`InvalidSettingsFileError` when the composed
+        workspace violates the ``workspace_dir != data_dir`` rule
+        (:meth:`update` refuses to store such a value, but the file can be
+        hand-edited — isolation rules hold regardless of the write path).
+        """
         file_values = self._file_values()
         composed: dict[str, Any] = {}
         for key in MUTABLE_KEYS:
@@ -84,6 +100,12 @@ class SettingsService:
                 composed[key] = Path(str(file_value)).expanduser()
             else:
                 composed[key] = file_value
+        workspace = Path(composed["workspace_dir"])
+        if _same_path(workspace, self._settings.data_dir):
+            raise InvalidSettingsFileError(
+                f"{self.path}: workspace_dir must not equal data_dir "
+                f"({self._settings.data_dir}); fix or delete the settings file."
+            )
         return EffectiveSettings(**composed)
 
     def update(
@@ -187,7 +209,14 @@ def _resolve_workspace(workspace_dir: str, data_dir: Path) -> Path:
     workspace as untrusted user content while ``data_dir`` holds the database
     and this settings file — a workspace equal to the data directory would
     feed application state to the indexer.
+
+    Empty or whitespace-only values are rejected before any path math: ""
+    would become ``Path(".")`` (the CWD — a containment bypass) and a
+    whitespace-only value would round-trip into a file value the read path
+    drops, reporting "restart_required" for a setting that never applies.
     """
+    if not workspace_dir.strip():
+        raise ValueError("workspace_dir must be a non-empty string.")
     path = Path(workspace_dir).expanduser()
     if _same_path(path, data_dir):
         raise ValueError(f"workspace_dir must not equal data_dir ({data_dir}).")
