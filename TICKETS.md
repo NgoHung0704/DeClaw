@@ -729,7 +729,7 @@ Deferred for shell-free v0.1. These pending tickets do not block Phase 9 under t
 
 ## 🌐 PHASE 9 — GATEWAY & WEB UI (Week 10-11)
 
-Scope follows the approved Phase 7–9 roadmap: vanilla JS, locally vendored CSS, EN/FR, built-in plugin controls only. Estimates and the first-token latency target below are planning assumptions, not measurements. A detailed security/session/approval spec is still required; all tickets remain pending.
+Scope follows the approved Phase 7–9 roadmap: vanilla JS, locally vendored CSS, EN/FR, built-in plugin controls only. Estimates and the first-token latency target below are planning assumptions, not measurements. A [draft Phase 9 design](docs/specs/2026-11-08-phase-9-gateway-web-ui-design.md) covers the security/session/approval contracts and is awaiting review; all tickets remain pending.
 
 ### [ ] DCL-120 — FastAPI app (bind 127.0.0.1 only)
 

@@ -46,8 +46,10 @@ as current validation.
 ## Phase 9 readiness and maintenance
 
 The [readiness assessment](phase-9-readiness.md) identifies reusable CLI services
-and the remaining gateway/UI contracts. Phase 9 is ready for detailed design;
-it has not been implemented.
+and the remaining gateway/UI contracts. A
+[draft Phase 9 design](specs/2026-11-08-phase-9-gateway-web-ui-design.md) exists
+on `feat/phase-9-gateway-web-ui` and is awaiting review; the gateway/UI is not
+implemented.
 
 The cold DB factory deadlock found during assessment was fixed in `5f168db`.
 `get_sessionmaker()` initializes the engine before taking the shared factory

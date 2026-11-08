@@ -116,8 +116,10 @@ safe gateway slice; scope them explicitly in the detailed spec.
    audit/settings/status and the local EN/FR UI. Measure latency rather than
    treating the historical estimates as commitments.
 
-No phase branch was created. Before implementation, identify the previous phase's
-branch/ref and follow the branch-per-phase rule; current checkout is `main`.
+Update 2026-11-08: branch `feat/phase-9-gateway-web-ui` was created from `main`
+(`d1fd05a`), and a
+[draft Phase 9 design](specs/2026-11-08-phase-9-gateway-web-ui-design.md)
+answering the contracts above is awaiting review on that branch.
 
 ## Repository and verification scope
 
