@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
@@ -30,7 +31,7 @@ from starlette.websockets import WebSocketDisconnect
 
 from declaw.app import Application
 from declaw.config import Settings, get_settings
-from declaw.db.engine import build_engine, build_sessionmaker
+from declaw.db.engine import build_engine, build_sessionmaker, ensure_schema
 from declaw.db.models import AuditEvent, Episode, Task, TaskStatus
 from declaw.gateway.app import create_app
 from declaw.gateway.approval import ApprovalBroker, APPROVAL_REQUEST_TYPE
@@ -42,6 +43,7 @@ from declaw.gateway.session import (
     MESSAGE_TYPE,
     TURN_CANCELLED_TYPE,
     TURN_STARTED_TYPE,
+    GatewaySession,
 )
 TEST_PORT = 9000  # never the default 7842 (same convention as test_host_origin)
 BIND_AUTHORITY = f"127.0.0.1:{TEST_PORT}"
@@ -584,6 +586,97 @@ def test_disconnect_cancels_turn_and_denies_pending(tmp_path: Path, monkeypatch:
     # Session-scoped rate buckets are evicted when the connection drops.
     assert stack.limiter._chat_turn_buckets == {}  # noqa: SLF001 - Task 4 handoff
     assert stack.limiter._ws_message_buckets == {}  # noqa: SLF001 - Task 4 handoff
+
+
+# --- A late cancel cannot overwrite a finished turn --------------------------
+
+
+class FinalAnswerGraph:
+    """A graph whose model already answered: the turn is in its terminal
+    commit window (Task COMPLETED + Episode writes) the moment ainvoke
+    returns — exactly where a late cancel can land."""
+
+    def __init__(self, answer: str) -> None:
+        self.answer = answer
+
+    async def ainvoke(self, state: dict[str, Any]) -> dict[str, Any]:
+        return {"messages": [*state["messages"], AIMessage(content=self.answer)]}
+
+
+def test_late_cancel_in_commit_window_keeps_completed_turn(tmp_path: Path) -> None:
+    # The terminal state of a turn is decided exactly once. A cancel landing
+    # while the COMPLETED/Episode writes are already in flight must be a
+    # no-op on the Task row: overwriting a finished turn to FAILED
+    # "cancelled by user" contradicts the Episode and audit rows.
+    asyncio.run(_late_cancel_in_commit_window(tmp_path))
+
+
+async def _late_cancel_in_commit_window(tmp_path: Path) -> None:
+    engine = build_engine(tmp_path / "declaw.db")
+    maker = build_sessionmaker(engine)
+    await ensure_schema(engine)
+
+    session = GatewaySession(
+        "session-1",
+        language="en",
+        broker=ApprovalBroker(timeout_seconds=60),
+        limiter=RateLimiter(),
+        sessionmaker=maker,
+    )
+    session.attach_graph(FinalAnswerGraph("all finished"))
+
+    # The cancel is delivered reader-shaped (its own task, like the frame
+    # loop in production) and released by an event set exactly when the
+    # terminal COMPLETED write starts — deterministic, no sleeps.
+    window = asyncio.Event()
+
+    async def late_cancel_reader() -> None:
+        await window.wait()
+        assert isinstance(session.active_turn_id, str)
+        await session._handle_cancel(session.active_turn_id)
+
+    reader = asyncio.create_task(late_cancel_reader())
+    real_update = session._update_task
+
+    async def update_releasing_the_late_cancel(turn_id: str, **values: Any) -> None:
+        if values.get("status") is TaskStatus.COMPLETED:
+            window.set()
+        await real_update(turn_id, **values)
+
+    session._update_task = update_releasing_the_late_cancel
+
+    await session._handle_message("do it")
+    turn_task = session._turn_task
+    turn_id = session.active_turn_id
+    assert isinstance(turn_task, asyncio.Task)
+    assert isinstance(turn_id, str)
+
+    with suppress(asyncio.CancelledError):
+        await turn_task
+    await reader
+
+    # The cancel ack frame still goes out (frame emission is fine).
+    frames: list[dict[str, Any]] = []
+    while True:
+        try:
+            frames.append(session.outbound.get_nowait())
+        except asyncio.QueueEmpty:
+            break
+    assert {"type": TURN_CANCELLED_TYPE, "turn_id": turn_id} in frames
+
+    try:
+        async with maker() as db:
+            task = await db.get(Task, turn_id)
+            episodes = list((await db.exec(sm_select(Episode))).all())
+    finally:
+        await engine.dispose()
+
+    assert task is not None
+    assert task.status == TaskStatus.COMPLETED
+    assert task.result == "all finished"
+    assert task.error is None
+    assert [episode.task_id for episode in episodes] == [turn_id]
+    assert episodes[0].summary == "all finished"
 
 
 def test_two_connections_have_isolated_histories(tmp_path: Path, monkeypatch: Any) -> None:

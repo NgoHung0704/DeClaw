@@ -145,6 +145,10 @@ class GatewaySession:
         self._graph: AgentGraph | None = None
         self._turn_task: asyncio.Task[None] | None = None
         self.active_turn_id: str | None = None
+        # The turn's terminal state, decided exactly once (see
+        # ``_decide_terminal``): ``None`` while the turn is still in
+        # flight, COMPLETED/FAILED once the single decision was made.
+        self._terminal_state: TaskStatus | None = None
         self._writer_task: asyncio.Task[None] | None = None
         self._closed = False
         self._writer_stopped = False
@@ -282,6 +286,21 @@ class GatewaySession:
 
     # --- turn lifecycle ------------------------------------------------------
 
+    def _decide_terminal(self, state: TaskStatus) -> bool:
+        """Decide the turn's terminal state exactly once (loop-atomic).
+
+        Both decision points — the turn deciding COMPLETED/FAILED on
+        itself, and ``abort_active`` deciding FAILED on a cancel,
+        disconnect or shutdown — run on the session's own loop with no
+        await between the check and the set, so exactly one of them wins.
+        The winner is the only writer of the Task row's terminal state;
+        every loser must leave the row alone.
+        """
+        if self._terminal_state is not None:
+            return False
+        self._terminal_state = state
+        return True
+
     async def _run_turn(self, turn_id: str, text: str) -> None:
         """One turn: Task row lifecycle + graph invocation (spec section 6)."""
         graph = self._graph
@@ -304,6 +323,11 @@ class GatewaySession:
             reply = list(result["messages"])
             self.history = reply
             answer = _reply_text(reply)
+            # The model finished: the turn's terminal state is decided right
+            # here — synchronously, since no await happened between the
+            # ainvoke return and this line — so a cancel landing in the
+            # commit window below can no longer flip the finished turn.
+            self._decide_terminal(TaskStatus.COMPLETED)
             await self._update_task(turn_id, status=TaskStatus.COMPLETED, result=answer)
             await self._insert_episode(turn_id, answer)
             # Clear the busy marker before the terminal frame so the next
@@ -316,6 +340,7 @@ class GatewaySession:
         except Exception as exc:
             self.history = completed
             logger.bind(session_id=self.id, turn_id=turn_id).exception("Chat turn failed")
+            self._decide_terminal(TaskStatus.FAILED)
             await self._fail_quietly(turn_id, _turn_error_summary(exc))
             self._clear_turn(turn_id)
             self.enqueue(
@@ -333,13 +358,29 @@ class GatewaySession:
         """Cancel the in-flight turn, mark it FAILED and deny its approvals.
 
         Called on client cancel, on disconnect, and (bridged) on gateway
-        shutdown. Always runs on the session's own loop; Default deny (spec
+        shutdown. Always runs on the session's own loop; default deny (spec
         sections 6-7): nobody can answer a cancelled turn's approval.
+
+        A turn that already decided its terminal state (COMPLETED or
+        FAILED) is not aborted: its task row keeps the decided state. A
+        late cancel/disconnect is a no-op on the row — only the cancel-ack
+        frame and the default-deny of pending approvals still happen.
         """
         task = self._turn_task
         turn_id = self.active_turn_id
         if task is None or task.done() or turn_id is None:
             return
+        if self._terminal_state is not None:
+            # The turn decided its own terminal state (the model finished or
+            # the turn failed): let the decided task/episode writes land and
+            # do not overwrite them with "cancelled by user".
+            with suppress(asyncio.CancelledError, Exception):
+                await task
+            self._broker.deny_all(self.id, "turn cancelled")
+            self._clear_turn(turn_id)
+            return
+        # No terminal state yet: the abort owns the FAILED decision.
+        self._decide_terminal(TaskStatus.FAILED)
         task.cancel()
         with suppress(asyncio.CancelledError):
             await task
@@ -372,6 +413,7 @@ class GatewaySession:
         if self.active_turn_id == turn_id:
             self.active_turn_id = None
             self._turn_task = None
+            self._terminal_state = None
 
     # --- Task/Episode persistence -------------------------------------------
 
@@ -402,7 +444,15 @@ class GatewaySession:
             await session.commit()
 
     async def _fail_quietly(self, turn_id: str, error: str) -> None:
-        """Best-effort FAILED write; auditing must not take the agent down."""
+        """Best-effort FAILED write; auditing must not take the agent down.
+
+        The write observes the single terminal decision: a turn that
+        already decided a different terminal state is never overwritten
+        here (the FAILED decision owner reaches this only with the row
+        still in flight, abort-active above enforces it).
+        """
+        if self._terminal_state not in (None, TaskStatus.FAILED):
+            return
         try:
             await self._update_task(turn_id, status=TaskStatus.FAILED, error=error)
         except Exception:
