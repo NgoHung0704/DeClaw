@@ -120,6 +120,14 @@ class Application:
         self.stack: DocumentStack | None = None
         self.watcher: DocumentWatcher | None = None
         self.egress_monitor: EgressMonitor | None = None
+        # User-owned plugin policy (spec section 11): one PluginStateStore and
+        # one GrantStore per Application, owned here so the gateway's REST
+        # surface mutates THE objects the PluginHost and its PermissionEnforcer
+        # read (a second store reloaded from the file would let the host and
+        # the /api/plugins routes disagree about grants). File reads happen
+        # once, here; the host receives these instances in start().
+        self.plugin_state = load_state(self.settings.data_dir)
+        self.plugin_grants = load_grants(self.settings.data_dir)
         # The SettingsService (spec section 12) is owned here: it composes
         # this env layer with data_dir/settings.json into per-session
         # snapshots and owns every write to that file. Constructing it does
@@ -166,8 +174,8 @@ class Application:
             await ensure_schema(self.engine)
 
             self.host = PluginHost(
-                state=load_state(self.settings.data_dir),
-                grants=load_grants(self.settings.data_dir),
+                state=self.plugin_state,
+                grants=self.plugin_grants,
                 settings=self.settings,
                 audit=self.audit,
             )

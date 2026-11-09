@@ -13,8 +13,8 @@ contract.
 from __future__ import annotations
 
 import logging
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 import uvicorn
 from fastapi import FastAPI
@@ -22,6 +22,7 @@ from fastapi import FastAPI
 from declaw.app import Application
 from declaw.audit.correlation import TaskCorrelatingAuditLogger
 from declaw.audit.logger import AuditLogger, InMemoryAuditLogger
+from declaw.brain.ollama_client import OllamaHealth
 from declaw.config import Settings
 from declaw.credentials.store import CredentialStore, SecretStore
 from declaw.gateway.approval import ApprovalBroker
@@ -36,8 +37,21 @@ from declaw.gateway.middleware import (
     RateLimitMiddleware,
     WebSocketMessageCapMiddleware,
 )
-from declaw.gateway.routes import auth_router
+from declaw.gateway.routes import (
+    audit_router,
+    auth_router,
+    documents_router,
+    plugins_router,
+    settings_router,
+    status_router,
+    tasks_router,
+)
 from declaw.gateway.routes.auth import register_auth_error_handlers
+from declaw.gateway.routes.errors import register_rest_error_handlers
+from declaw.gateway.routes.status import (
+    LatchedOllamaHealth,
+    default_health_check,
+)
 from declaw.gateway.session import SessionManager
 from declaw.gateway.ws import ModelFactory, router as ws_router, session_graph_factory
 from declaw.log import logger
@@ -72,6 +86,7 @@ def create_app(
     approval_broker: ApprovalBroker | None = None,
     model_factory: ModelFactory | None = None,
     rate_limiter: RateLimiter | None = None,
+    status_health_check: Callable[[], Awaitable[OllamaHealth]] | None = None,
 ) -> FastAPI:
     """Build the FastAPI application for the gateway.
 
@@ -153,11 +168,25 @@ def create_app(
     app.state.audit = audit
     app.state.approval_broker = broker
     app.state.session_manager = manager
+    # /api/status (spec section 9): latched Ollama health so the route never
+    # waits on the daemon; tests inject the deterministic health check.
+    app.state.ollama_status = LatchedOllamaHealth(
+        status_health_check
+        if status_health_check is not None
+        else default_health_check(settings.ollama_base_url)
+    )
     if application is not None:
         app.state.application = application
     register_auth_error_handlers(app)
+    register_rest_error_handlers(app)
     app.include_router(auth_router)
     app.include_router(ws_router)
+    app.include_router(status_router)
+    app.include_router(tasks_router)
+    app.include_router(audit_router)
+    app.include_router(plugins_router)
+    app.include_router(settings_router)
+    app.include_router(documents_router)
 
     @app.get("/")
     def health_root() -> dict[str, str]:

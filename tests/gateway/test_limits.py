@@ -138,7 +138,9 @@ def test_rest_reads_limited_to_120_per_minute_per_session() -> None:
     # The bucket refills 2 tokens/second while the loop runs, so the
     # denial point can shift a little past 120; what must hold is that
     # it arrives (bounded by 200 attempts) and that everything before it
-    # reached the router.
+    # reached the router. Since Task 11 the route exists and answers 401
+    # (the cookie value is not a registered session on this bare app) —
+    # that is the "reached the router" signal.
     statuses = []
     blocked_payload: object = None
     for _ in range(200):
@@ -147,7 +149,7 @@ def test_rest_reads_limited_to_120_per_minute_per_session() -> None:
         if response.status_code == 429:
             blocked_payload = response.json()
             break
-        assert statuses[-1] == 404
+        assert statuses[-1] == 401
 
     assert statuses[-1] == 429
     assert len(statuses) > 120  # a full bucket was consumed first
@@ -221,8 +223,9 @@ def test_body_at_default_cap_reaches_the_router() -> None:
         headers={"Origin": ALLOWED_ORIGIN},
     )
 
-    # Exactly at the cap passes; 404 because the route does not exist yet.
-    assert response.status_code == 404
+    # Exactly at the cap passes the cap layer and dies at the router:
+    # since Task 11, /api/documents exists (GET) and POST on it is 405.
+    assert response.status_code == 405
 
 
 def test_settings_put_body_capped_at_16_kib() -> None:
@@ -241,21 +244,25 @@ def test_settings_put_body_capped_at_16_kib() -> None:
 
     assert over.status_code == 413
     _assert_error_shape(over.json())
-    assert at_cap.status_code == 404
+    # At the cap the body reaches the router; since Task 11 the settings
+    # route's session-cookie check answers 401 (canonical shape) on this
+    # bare app, which is the "cap layer passed" signal.
+    assert at_cap.status_code == 401
 
 
 def test_settings_tight_cap_applies_only_to_put_settings() -> None:
     client = _client()
 
     # POST to any path keeps the 64 KiB default: a body just above 16 KiB
-    # passes the cap and dies at the (absent) route instead of 413.
+    # passes the cap and dies at the router (405: POST is not a verb of
+    # /api/settings) instead of 413.
     response = client.post(
         "/api/settings",
         content=b"x" * (SETTINGS_PUT_BODY_CAP_BYTES + 1),
         headers={"Origin": ALLOWED_ORIGIN},
     )
 
-    assert response.status_code == 404
+    assert response.status_code == 405
 
 
 # --- body caps: chunked requests with no Content-Length ---------------------
