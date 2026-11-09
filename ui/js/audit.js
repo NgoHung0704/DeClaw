@@ -16,9 +16,19 @@ const mount = async (main) => {
   const clear = el("button", { attrs: { type: "button" }, text: t("audit.clear") });
   form.replaceChildren(eventType, taskId, from, to, apply, clear);
 
+  // GET /api/audit/export requires day + format (typed Query): the export
+  // row always carries both, else the route answers 422.
+  const dayInput = el("input", { attrs: { type: "date", value: new Date().toISOString().slice(0, 10) } });
+  const exportMd = el("button", { text: `${t("audit.export")} md` });
+  const exportJson = el("button", { text: `${t("audit.export")} json` });
+  const openExport = (format) => {
+    const day = dayInput.value || new Date().toISOString().slice(0, 10);
+    window.open(`/api/audit/export?day=${day}&format=${format}`, "_blank");
+  };
+  exportMd.addEventListener("click", () => openExport("md"));
+  exportJson.addEventListener("click", () => openExport("json"));
   const exportLinks = el("div", { cls: "chat-composer" });
-  const exportJson = el("a", { attrs: { href: "/api/audit/export", target: "_blank" }, text: t("audit.export") });
-  exportLinks.appendChild(exportJson);
+  exportLinks.replaceChildren(dayInput, exportMd, exportJson);
 
   const table = el("table");
   const thead = el("thead");
