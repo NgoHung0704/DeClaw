@@ -54,3 +54,4 @@ coverage.xml
 # Machine-local coding-agent configuration
 /.claude/
 /.codex/
+/.superpowers/
