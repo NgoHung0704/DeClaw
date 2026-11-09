@@ -161,3 +161,102 @@ def test_locale_files_have_identical_key_sets() -> None:
         f"only-fr={sorted(fr_keys - en_keys)}"
     )
     assert en_keys, "locale files are not empty"
+
+
+# --- Functional-page copy (Task 15) --------------------------------------------
+
+# Every canonical error code the gateway can emit (inventory mirrored from
+# declaw/gateway): each must have localized copy in BOTH locales.
+GATEWAY_ERROR_CODES = {
+    "unauthorized",
+    "not_found",
+    "reindex_in_progress",
+    "documents_unavailable",
+    "invalid_settings",
+    "invalid_settings_file",
+    "invalid_cursor",
+    "invalid_request",
+    "service_unavailable",
+    "rate_limited",
+    "payload_too_large",
+    "busy",
+    "bad_frame",
+    "turn_failed",
+    "backpressure",
+}
+
+# Approval-modal chrome (spec section 13: localized, including the modal)
+# and the settings PUT applied-flag labels (spec section 12).
+UI_KEY_SETS = {
+    "approval": {
+        "approval.title",
+        "approval.tool",
+        "approval.args",
+        "approval.approve",
+        "approval.deny",
+    },
+    "settings_flags": {
+        "settings.applied.new_session",
+        "settings.applied.restart_required",
+    },
+    "chat": {
+        "chat.placeholder",
+        "chat.send",
+        "chat.cancel",
+        "chat.disconnected",
+    },
+    "connect": {"connect.token.label", "connect.submit"},
+    "status": {"status.refresh", "status.ollama", "status.watcher"},
+    "documents": {"documents.reindex", "documents.workspace"},
+    "audit": {"audit.export", "audit.filter"},
+    "plugins": {"plugins.enable", "plugins.disable", "plugins.permissions"},
+}
+
+
+def _load_locales() -> tuple[dict[str, Any], dict[str, Any]]:
+    en = json.loads((UI_DIR / "locales" / "en.json").read_text(encoding="utf-8"))
+    fr = json.loads((UI_DIR / "locales" / "fr.json").read_text(encoding="utf-8"))
+    return en, fr
+
+
+def _lookup(table: dict[str, Any], dotted: str) -> Any:
+    node: Any = table
+    for part in dotted.split("."):
+        if not isinstance(node, dict) or part not in node:
+            return None
+        node = node[part]
+    return node
+
+
+def test_every_gateway_error_code_has_locale_copy() -> None:
+    en, fr = _load_locales()
+    missing: list[str] = []
+    for code in GATEWAY_ERROR_CODES:
+        for name, table in (("en", en), ("fr", fr)):
+            entry = _lookup(table, f"error.{code}")
+            if not isinstance(entry, str) or not entry:
+                missing.append(f"{name}:{code}")
+    assert not missing, f"error codes without locale copy: {missing}"
+
+
+def test_approval_modal_and_settings_flag_copy_exists() -> None:
+    en, fr = _load_locales()
+    missing: list[str] = []
+    for keys in UI_KEY_SETS.values():
+        for key in keys:
+            for name, table in (("en", en), ("fr", fr)):
+                if not isinstance(_lookup(table, key), str) or not _lookup(table, key):
+                    missing.append(f"{name}:{key}")
+    assert not missing, f"UI keys without locale copy: {missing}"
+
+
+def test_chat_page_wires_approval_and_cancel_in_js() -> None:
+    # The modules are static files: the server-verifiable part of the UI
+    # slice is their presence and protocol usage (the DOM behavior is the
+    # manual checklist in docs/phase-9-review.md).
+    chat_js = (UI_DIR / "js" / "chat.js").read_text(encoding="utf-8")
+    assert "approval.response" in chat_js
+    assert "cancel" in chat_js
+    assert "textContent" in chat_js or "el(" in chat_js or 'import { el }' in chat_js
+    connect_js = (UI_DIR / "js" / "connect.js").read_text(encoding="utf-8")
+    assert "/api/auth/login" in connect_js
