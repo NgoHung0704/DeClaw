@@ -98,12 +98,17 @@ def test_create_app_returns_fastapi() -> None:
 def test_create_app_serves_health_root() -> None:
     # Host must equal the bound authority once the DCL-122 policy is
     # installed (TestClient defaults to "testserver", which is forbidden).
-    response = TestClient(create_app(_fresh())).get(
-        "/", headers={"Host": "127.0.0.1:7842"}
-    )
+    # The site root serves the static UI (spec section 13, Task 14); the
+    # JSON liveness probe lives at /healthz.
+    client = TestClient(create_app(_fresh()))
 
-    assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    root = client.get("/", headers={"Host": "127.0.0.1:7842"})
+    assert root.status_code == 200
+    assert "text/html" in root.headers["content-type"]
+
+    healthz = client.get("/healthz", headers={"Host": "127.0.0.1:7842"})
+    assert healthz.status_code == 200
+    assert healthz.json() == {"status": "ok"}
 
 
 # --- Hardened uvicorn wiring (spec section 1) --------------------------------

@@ -1,0 +1,34 @@
+{
+  "nav": {
+    "connect": "Connect",
+    "chat": "Chat",
+    "documents": "Documents",
+    "audit": "Audit",
+    "plugins": "Plugins",
+    "settings": "Settings",
+    "status": "Status"
+  },
+  "page": {
+    "connect": {
+      "title": "Connect"
+    },
+    "chat": {
+      "title": "Chat"
+    },
+    "documents": {
+      "title": "Documents"
+    },
+    "audit": {
+      "title": "Audit trail"
+    },
+    "plugins": {
+      "title": "Plugins"
+    },
+    "settings": {
+      "title": "Settings"
+    },
+    "status": {
+      "title": "System status"
+    }
+  }
+}

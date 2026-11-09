@@ -15,9 +15,11 @@ from __future__ import annotations
 import logging
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
+from starlette.staticfiles import StaticFiles
 
 from declaw.app import Application
 from declaw.audit.correlation import TaskCorrelatingAuditLogger
@@ -36,6 +38,7 @@ from declaw.gateway.middleware import (
     HostOriginMiddleware,
     RateLimiter,
     RateLimitMiddleware,
+    SecurityHeadersMiddleware,
     WebSocketMessageCapMiddleware,
 )
 from declaw.gateway.routes import (
@@ -56,6 +59,11 @@ from declaw.gateway.routes.status import (
 from declaw.gateway.session import SessionManager
 from declaw.gateway.ws import ModelFactory, router as ws_router, session_graph_factory
 from declaw.log import logger
+
+# The local web UI (spec section 13): static vanilla-JS assets served at
+# "/", CSP-locked to same-origin. Path is resolved relative to the source
+# tree — packaging (wheel) is the recorded Phase 14 gate, not handled here.
+UI_DIR = Path(__file__).resolve().parents[2] / "ui"
 
 
 class GatewayLaunchError(RuntimeError):
@@ -159,6 +167,12 @@ def create_app(
         HostOriginMiddleware,
         bind_authority=f"{settings.host}:{settings.port}",
     )
+    # Strict CSP + nosniff OUTERMOST (added last): even a 403 from the
+    # Host/Origin policy carries the security headers (spec section 13).
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        bind_authority=f"{settings.host}:{settings.port}",
+    )
 
     # Auth surface (spec sections 2 and 6): one token source, one session
     # registry and one correlating audit logger, shared by every route.
@@ -198,10 +212,18 @@ def create_app(
     app.include_router(settings_router)
     app.include_router(documents_router)
 
-    @app.get("/")
+    # The JSON liveness probe moves off the root: / serves the UI (spec
+    # section 13). It must register BEFORE the "/" static mount — Starlette
+    # matches in registration order.
+    @app.get("/healthz")
     def health_root() -> dict[str, str]:
-        """Liveness probe served at the site root."""
+        """JSON liveness probe (the site root serves the UI)."""
         return {"status": "ok"}
+
+    # Spec section 13: the UI is served as static files by FastAPI at "/"
+    # (registered after the /api routers, so API routes win the match).
+    if UI_DIR.is_dir():
+        app.mount("/", StaticFiles(directory=UI_DIR, html=True), name="ui")
 
     return app
 

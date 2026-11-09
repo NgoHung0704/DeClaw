@@ -21,7 +21,6 @@ from collections.abc import Iterator
 from typing import Any
 
 import pytest
-from fastapi import Depends
 from loguru import logger as loguru_logger
 from starlette.testclient import TestClient
 
@@ -35,7 +34,6 @@ from declaw.gateway.auth import (
     clear_session_cookie,
     mint_gateway_token,
 )
-from declaw.gateway.routes.auth import require_session
 
 TEST_PORT = 9000  # never the default 7842 (same convention as test_host_origin)
 BIND_AUTHORITY = f"127.0.0.1:{TEST_PORT}"
@@ -282,19 +280,17 @@ def test_unauthenticated_api_access_gets_401_canonical_error(
 ) -> None:
     app = _app(store, audit)
     token = mint_gateway_token(store)
-
-    @app.get("/api/probe")  # stand-in for a future protected route
-    async def probe(session_id: str = Depends(require_session)) -> dict[str, str]:
-        return {"session_id": session_id}
-
     client = _client(app)
 
-    response = client.get("/api/probe")
+    # /api/settings is a real protected route (DCL-126/131): the static UI
+    # mount at "/" (Task 14) answers unmatched paths, so the canonical-401
+    # pin rides an actual API route instead of a post-factory probe.
+    response = client.get("/api/settings")
 
     assert response.status_code == 401
     assert response.json() == {"error": {"code": "unauthorized", "message": "Authentication required"}}
 
     _login(client, token)
-    allowed = client.get("/api/probe")
+    allowed = client.get("/api/auth/status")
     assert allowed.status_code == 200
-    assert allowed.json()["session_id"] == client.cookies[SESSION_COOKIE_NAME]
+    assert allowed.json() == {"authenticated": True}

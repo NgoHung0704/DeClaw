@@ -24,6 +24,7 @@ import math
 import time
 from collections.abc import Callable, Mapping
 
+from starlette.datastructures import MutableHeaders
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from declaw.gateway.auth import SESSION_COOKIE_NAME
@@ -67,6 +68,38 @@ _WS_MESSAGE_TOO_BIG_CLOSE_REASON = "Message too big"
 
 _RATE_LIMIT_ERROR_CODE = "rate_limited"
 _BODY_TOO_LARGE_ERROR_CODE = "payload_too_large"
+
+
+class SecurityHeadersMiddleware:
+    """Strict content-security policy + nosniff on EVERY response (spec 13).
+
+    Installed OUTERMOST so even a 403 from the Host/Origin policy carries
+    the headers. The CSP's ``connect-src`` WebSocket authority is derived
+    from the actual bind authority (the port is configurable — never a
+    hard-coded 7842): same-source scripts and styles only, no inline
+    executable or styling surface anywhere in the markup.
+    """
+
+    def __init__(self, app: ASGIApp, bind_authority: str) -> None:
+        self.app = app
+        self._csp = (
+            "default-src 'self'; "
+            f"connect-src 'self' ws://{bind_authority}; "
+            "img-src 'self' data:; "
+            "style-src 'self'; "
+            "script-src 'self'; "
+            "frame-ancestors 'none'"
+        )
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        async def send_with_headers(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(scope=message)
+                headers["content-security-policy"] = self._csp
+                headers["x-content-type-options"] = "nosniff"
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)
 
 
 

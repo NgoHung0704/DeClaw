@@ -49,7 +49,7 @@ def test_foreign_host_is_forbidden() -> None:
 
 
 def test_bound_host_passes_get() -> None:
-    response = _client().get("/", headers={"Host": BIND_AUTHORITY})
+    response = _client().get("/healthz", headers={"Host": BIND_AUTHORITY})
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
@@ -122,14 +122,15 @@ def test_post_with_null_origin_is_forbidden() -> None:
 
 
 def test_post_with_bound_origin_passes_policy() -> None:
-    # No POST route exists yet; 404 from the router proves the request got
-    # past the policy (anything but 403).
+    # No POST route matches; with the static UI mount at "/") unmatched
+    # paths reach it and answer 405 Method Not Allowed. Anything but 403
+    # proves the request got past the policy.
     response = _client().post(
         "/api/nothing",
         headers={"Host": BIND_AUTHORITY, "Origin": ALLOWED_ORIGIN},
     )
 
-    assert response.status_code == 404
+    assert response.status_code == 405
 
 
 def test_get_origin_exempt() -> None:
@@ -143,9 +144,9 @@ def test_get_origin_exempt() -> None:
 def test_head_origin_exempt() -> None:
     response = _client().head("/", headers={"Host": BIND_AUTHORITY})
 
-    # 405 because only the GET route exists; the point is that the policy
-    # did not reject the Origin-less HEAD request.
-    assert response.status_code == 405
+    # 200 because the static UI mount answers HEAD at the root; the point
+    # is that the policy did not reject the Origin-less HEAD request.
+    assert response.status_code == 200
 
 
 # --- WebSocket: handshake checks close with 4403 ----------------------------
