@@ -27,6 +27,7 @@ from declaw.config import Settings
 from declaw.credentials.store import CredentialStore, SecretStore
 from declaw.gateway.approval import ApprovalBroker
 from declaw.gateway.auth import SessionRegistry
+from declaw.gateway.events import EventBroadcaster, router as events_router
 from declaw.gateway.middleware import (
     DEFAULT_JSON_BODY_CAP_BYTES,
     SETTINGS_PUT_BODY_CAP_BYTES,
@@ -168,6 +169,14 @@ def create_app(
     app.state.audit = audit
     app.state.approval_broker = broker
     app.state.session_manager = manager
+    # /ws/events (DCL-133): ONE broadcaster serves the event stream, the
+    # reindex progress seam (Task 11/12) and the plugin confirmations. It is
+    # also the Application's document-event sink, so worker/watcher frames
+    # reach subscribers without a second owner.
+    broadcaster = EventBroadcaster()
+    app.state.event_broadcaster = broadcaster
+    if application is not None:
+        application.set_document_event_broadcaster(broadcaster)
     # /api/status (spec section 9): latched Ollama health so the route never
     # waits on the daemon; tests inject the deterministic health check.
     app.state.ollama_status = LatchedOllamaHealth(
@@ -181,6 +190,7 @@ def create_app(
     register_rest_error_handlers(app)
     app.include_router(auth_router)
     app.include_router(ws_router)
+    app.include_router(events_router)
     app.include_router(status_router)
     app.include_router(tasks_router)
     app.include_router(audit_router)

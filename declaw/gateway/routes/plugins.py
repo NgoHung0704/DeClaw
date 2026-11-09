@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING, Any
 from fastapi import APIRouter, Depends, Request
 
 from declaw.config import Language
+from declaw.gateway.events import plugin_state_change_frame
 from declaw.gateway.routes.auth import require_session
 from declaw.gateway.routes.errors import ApiError, application_from
 from declaw.gateway.routes.settings import effective_language
@@ -120,6 +121,7 @@ async def enable_plugin(name: str, request: Request) -> dict[str, str]:
     application = application_from(request)
     _known_manifest(application, name)
     await _require_host(application).enable(name)
+    await _broadcast_state_change(request, name, "enabled")
     return {
         "name": name,
         "state": _state_of(application.plugin_state.record(name)),
@@ -132,11 +134,24 @@ async def disable_plugin(name: str, request: Request) -> dict[str, str]:
     application = application_from(request)
     _known_manifest(application, name)
     await _require_host(application).disable(name)
+    await _broadcast_state_change(request, name, "disabled")
     return {
         "name": name,
         "state": _state_of(application.plugin_state.record(name)),
         "takes_effect": _TAKES_EFFECT_IMMEDIATE,
     }
+
+
+async def _broadcast_state_change(request: Request, name: str, action: str) -> None:
+    """Fan the plugin state change out to /ws/events subscribers (Task 13).
+
+    The broadcaster is the same EventBroadcaster the reindex seam uses; it
+    is optional only in the sense that a bare test app may omit state.
+    """
+    broadcaster = getattr(request.app.state, "event_broadcaster", None)
+    if broadcaster is None:
+        return
+    await broadcaster.broadcast(plugin_state_change_frame(name=name, action=action))
 
 
 @router.get("/{name}/permissions")
