@@ -310,11 +310,28 @@ def _send_message(ws: Any, text: str) -> dict[str, Any]:
     return started
 
 
+def _next_frame_of(ws: Any, *types: str) -> dict[str, Any]:
+    """Read frames until one of ``types`` arrives.
+
+    M4 made turns stream ``tool.start``/``tool.end``/``chat.delta`` frames on
+    the same socket (spec section 8); callers that only care about a
+    specific frame type drain past the streaming frames here.
+    """
+    while True:
+        frame = ws.receive_json()
+        if frame["type"] in types:
+            return frame
+
+
+def _final(ws: Any) -> dict[str, Any]:
+    """The turn's chat.final (draining any tool.end that precedes it)."""
+    return _next_frame_of(ws, CHAT_FINAL_TYPE)
+
+
 def _write_turn(ws: Any, text: str) -> tuple[dict[str, Any], dict[str, Any]]:
     """Drive one turn into a pending WRITE-tool approval request."""
     started = _send_message(ws, text)
-    approval = ws.receive_json()
-    assert approval["type"] == APPROVAL_REQUEST_TYPE
+    approval = _next_frame_of(ws, APPROVAL_REQUEST_TYPE)
     assert approval["tool"] == WRITE_TOOL
     return started, approval
 
@@ -445,7 +462,7 @@ def test_write_tool_approval_end_to_end(tmp_path: Path, monkeypatch: Any) -> Non
             ws.send_json(
                 {"type": "approval.response", "id": approval["id"], "approved": True}
             )
-            final = ws.receive_json()
+            final = _final(ws)
             assert final["type"] == CHAT_FINAL_TYPE
             assert final["turn_id"] == turn_id
 
@@ -476,7 +493,7 @@ def test_denied_approval_executes_nothing(tmp_path: Path, monkeypatch: Any) -> N
             ws.send_json(
                 {"type": "approval.response", "id": approval["id"], "approved": False}
             )
-            final = ws.receive_json()
+            final = _final(ws)
             assert final["type"] == CHAT_FINAL_TYPE
 
     assert not (stack.workspace / WRITE_PATH).exists()
@@ -504,7 +521,7 @@ def test_approval_timeout_denies_by_default(tmp_path: Path, monkeypatch: Any) ->
         cookie = stack.login(client)
         with stack.connect(client, cookie) as ws:
             _write_turn(ws, "make the file")  # never answered
-            final = ws.receive_json()
+            final = _final(ws)
             assert final["type"] == CHAT_FINAL_TYPE
 
     assert not (stack.workspace / WRITE_PATH).exists()
@@ -535,7 +552,7 @@ def test_second_message_during_a_turn_is_busy(tmp_path: Path, monkeypatch: Any) 
             ws.send_json(
                 {"type": "approval.response", "id": approval["id"], "approved": True}
             )
-            final = ws.receive_json()
+            final = _final(ws)
             assert final["type"] == CHAT_FINAL_TYPE
             assert final["turn_id"] == started["turn_id"]
 
@@ -593,14 +610,28 @@ def test_disconnect_cancels_turn_and_denies_pending(tmp_path: Path, monkeypatch:
 
 class FinalAnswerGraph:
     """A graph whose model already answered: the turn is in its terminal
-    commit window (Task COMPLETED + Episode writes) the moment ainvoke
-    returns — exactly where a late cancel can land."""
+    commit window (Task COMPLETED + Episode writes) the moment its event
+    stream ends — exactly where a late cancel can land.
+    """
 
     def __init__(self, answer: str) -> None:
         self.answer = answer
 
     async def ainvoke(self, state: dict[str, Any]) -> dict[str, Any]:
         return {"messages": [*state["messages"], AIMessage(content=self.answer)]}
+
+    async def astream_events(
+        self, state: dict[str, Any], *args: Any, **kwargs: Any
+    ) -> Any:
+        # The M4 turn runner consumes astream_events; this fake emits exactly
+        # the one event the runner needs: the graph's own completion, whose
+        # ``data.output`` is the final messages state.
+        yield {
+            "event": "on_chain_end",
+            "name": "LangGraph",
+            "parent_ids": (),
+            "data": {"output": {"messages": [*state["messages"], AIMessage(content=self.answer)]}},
+        }
 
 
 def test_late_cancel_in_commit_window_keeps_completed_turn(tmp_path: Path) -> None:

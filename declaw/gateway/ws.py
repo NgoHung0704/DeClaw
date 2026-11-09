@@ -26,7 +26,7 @@ from declaw.app import Application
 from declaw.audit.logger import AuditLogger
 from declaw.brain.context import with_context_window
 from declaw.brain.chat_model import build_ollama_model
-from declaw.brain.loop import ModelCallable, build_agent_graph
+from declaw.brain.loop import ThinkStepModel, build_agent_graph
 from declaw.brain.repl import AgentGraph
 from declaw.gateway.approval import ApprovalBroker
 from declaw.gateway.auth import SESSION_COOKIE_NAME
@@ -43,7 +43,7 @@ WS_INTERNAL_ERROR_CLOSE_CODE = 1011
 
 # A session's model: tests inject a deterministic fake; production builds the
 # Ollama stack from the session's effective-settings snapshot (spec section 12).
-ModelFactory = Callable[[Sequence[BaseTool], EffectiveSettings], ModelCallable]
+ModelFactory = Callable[[Sequence[BaseTool], EffectiveSettings], ThinkStepModel]
 
 
 def build_session_graph(
@@ -80,7 +80,7 @@ def build_session_graph(
     return build_agent_graph(model=model, tools=tools)
 
 
-def _default_model_factory(tools: Sequence[BaseTool], snapshot: EffectiveSettings) -> ModelCallable:
+def _default_model_factory(tools: Sequence[BaseTool], snapshot: EffectiveSettings) -> ThinkStepModel:
     """The production model stack, fed from the snapshot (never the env cache)."""
     model = build_ollama_model(tools, model=snapshot.model, language=snapshot.language)
     return with_context_window(model)

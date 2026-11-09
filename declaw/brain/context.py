@@ -16,10 +16,12 @@ through the ``TokenCounter`` seam.
 from __future__ import annotations
 
 from collections.abc import Callable, Sequence
+from typing import Any
 
 from langchain_core.messages import AIMessage, BaseMessage, SystemMessage, ToolMessage
+from langchain_core.runnables import Runnable, RunnableConfig
 
-from declaw.brain.loop import ModelCallable
+from declaw.brain.loop import ThinkStepModel
 
 # A function that estimates the token cost of a message list.
 TokenCounter = Callable[[Sequence[BaseMessage]], int]
@@ -84,18 +86,78 @@ def fit_to_window(
     return [*head, *body]
 
 
+class _ContextWindowModel(Runnable[list[BaseMessage], BaseMessage]):
+    """``with_context_window``'s runnable face, for runnable models.
+
+    Trims the model-facing view exactly like the plain-callable wrapper, and
+    forwards ``config`` so streaming events keep escaping the running graph
+    (spec section 8's model-side contract end to end).
+    """
+
+    def __init__(
+        self,
+        inner: Runnable[Any, Any],
+        *,
+        counter: TokenCounter,
+        hard_cap: int,
+        soft_cap: int,
+    ) -> None:
+        self._inner = inner
+        self._counter = counter
+        self._hard_cap = hard_cap
+        self._soft_cap = soft_cap
+
+    async def __call__(
+        self,
+        messages: Sequence[BaseMessage],
+        config: RunnableConfig | None = None,
+    ) -> BaseMessage:
+        return await self.ainvoke(messages, config)
+
+    def _trimmed(self, messages: Sequence[BaseMessage]) -> list[BaseMessage]:
+        return fit_to_window(
+            messages, hard_cap=self._hard_cap, soft_cap=self._soft_cap, counter=self._counter
+        )
+
+    def invoke(
+        self,
+        input: Sequence[BaseMessage],
+        config: RunnableConfig | None = None,
+        **kwargs: Any,
+    ) -> BaseMessage:
+        result: BaseMessage = self._inner.invoke(self._trimmed(input), config, **kwargs)
+        return result
+
+    async def ainvoke(
+        self,
+        input: Sequence[BaseMessage],
+        config: RunnableConfig | None = None,
+        **kwargs: Any,
+    ) -> BaseMessage:
+        result: BaseMessage = await self._inner.ainvoke(
+            self._trimmed(input), config, **kwargs
+        )
+        return result
+
+
 def with_context_window(
-    model: ModelCallable,
+    model: ThinkStepModel,
     *,
     counter: TokenCounter = estimate_tokens,
     hard_cap: int = DEFAULT_HARD_CAP,
     soft_cap: int = DEFAULT_SOFT_CAP,
-) -> ModelCallable:
+) -> ThinkStepModel:
     """Wrap ``model`` so the messages it receives are trimmed to the window.
 
-    Composable with the other ``ModelCallable`` wrappers. Only the model-facing
-    view is trimmed; callers keep the full history in ``AgentState``.
+    Composable with the other model wrappers. Only the model-facing view is
+    trimmed; callers keep the full history in ``AgentState``. A runnable
+    model is wrapped as a runnable that forwards ``config`` (spec section 8)
+    so streaming survives the trim; plain callables keep the plain callable.
     """
+    if isinstance(model, Runnable):
+        return _ContextWindowModel(
+            model, counter=counter, hard_cap=hard_cap, soft_cap=soft_cap
+        )
 
     async def call(messages: Sequence[BaseMessage]) -> BaseMessage:
         trimmed = fit_to_window(

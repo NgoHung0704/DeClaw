@@ -18,6 +18,7 @@ from pydantic import BaseModel, Field
 
 from declaw.config import Language
 from declaw.documents.citations import render_outcome
+from declaw.documents.models import source_metadata
 from declaw.documents.prompts import chunk_preamble
 from declaw.documents.search import (
     DEFAULT_K,
@@ -25,6 +26,7 @@ from declaw.documents.search import (
     SearchableStore,
     search_documents,
 )
+from declaw.gateway.sources import record_source
 from declaw.tools.base import DeclawTool, ToolClass
 
 SearchCallable = Callable[[str], Awaitable[str]]
@@ -80,6 +82,10 @@ def build_document_search_tool(
 
     async def run_search(query: str) -> str:
         outcome = await search_documents(store, chunk_sanitizer, query, k=k)
+        # Typed side channel (spec section 8): retrieval provenance is
+        # recorded structurally, never parsed back out of the rendered text.
+        for hit in outcome.hits:
+            record_source(source_metadata(hit))
         rendered = render_outcome(outcome, language)
         if not outcome.hits:
             return rendered

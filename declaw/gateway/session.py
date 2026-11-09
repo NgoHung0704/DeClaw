@@ -30,7 +30,7 @@ from collections.abc import Callable, Coroutine
 from contextlib import suppress
 from typing import TYPE_CHECKING, Any
 
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
 from starlette.websockets import WebSocket, WebSocketDisconnect
@@ -41,6 +41,7 @@ from declaw.config import Language
 from declaw.db.models import Episode, Task, TaskStatus
 from declaw.gateway.approval import ApprovalBroker
 from declaw.gateway.middleware import RateLimiter
+from declaw.gateway.sources import TurnSources, current_turn_sources
 from declaw.log import logger
 
 if TYPE_CHECKING:
@@ -63,15 +64,47 @@ TURN_STARTED_TYPE = "turn.started"
 CHAT_FINAL_TYPE = "chat.final"
 TURN_CANCELLED_TYPE = "turn.cancelled"
 ERROR_TYPE = "error"
+# Streaming frames (spec section 8): per-turn, one monotonically increasing
+# ``seq`` spanning every frame kind that carries it.
+CHAT_DELTA_TYPE = "chat.delta"
+TOOL_START_TYPE = "tool.start"
+TOOL_END_TYPE = "tool.end"
 
 # Typed error codes carried by ``{"type": "error", "code": ...}`` frames.
 ERROR_BUSY = "busy"
 ERROR_RATE_LIMITED = "rate_limited"
 ERROR_BAD_FRAME = "bad_frame"
 ERROR_TURN_FAILED = "turn_failed"
+# Spec section 8 backpressure: the queue stayed full for the deadline, so the
+# turn is cancelled. A dedicated code (an extension of the M3 set) so a
+# client can tell "the model failed" from "you were not reading" apart.
+ERROR_BACKPRESSURE = "backpressure"
 
 CANCELLED_BY_USER = "cancelled by user"
 _FAIL_QUIET_TIMEOUT_SECONDS = 10.0
+# The streaming producer awaits the bounded queue for this long; a full queue
+# for the whole deadline means the client is not reading (spec section 8).
+BACKPRESSURE_TIMEOUT_SECONDS = 5.0
+BACKPRESSURE_ROW_ERROR = "client not reading; turn cancelled"
+# Tool result previews travel as truncated strings, never whole payloads.
+TOOL_RESULT_PREVIEW_MAX_CHARS = 200
+
+
+class OutboundBackpressure(Exception):
+    """The outbound queue stayed full past the backpressure deadline."""
+
+
+def _result_preview(output: Any) -> str:
+    """A short textual preview of a tool result for ``tool.end`` frames."""
+    content: Any
+    if isinstance(output, ToolMessage):
+        content = output.content
+    elif isinstance(output, str):
+        content = output
+    else:
+        content = str(output)
+    text = content if isinstance(content, str) else str(content)
+    return text[:TOOL_RESULT_PREVIEW_MAX_CHARS]
 
 
 def _error(code: str, message: str, *, turn_id: str | None = None) -> dict[str, Any]:
@@ -131,6 +164,7 @@ class GatewaySession:
         broker: ApprovalBroker,
         limiter: RateLimiter,
         sessionmaker: async_sessionmaker[AsyncSession],
+        backpressure_timeout: float = BACKPRESSURE_TIMEOUT_SECONDS,
     ) -> None:
         self.id = session_id
         self.language = language
@@ -142,6 +176,7 @@ class GatewaySession:
         self._broker = broker
         self._limiter = limiter
         self._sessionmaker = sessionmaker
+        self._backpressure_timeout = backpressure_timeout
         self._graph: AgentGraph | None = None
         self._turn_task: asyncio.Task[None] | None = None
         self.active_turn_id: str | None = None
@@ -156,10 +191,11 @@ class GatewaySession:
     # --- single-owner outbound transport ------------------------------------
 
     def enqueue(self, frame: dict[str, Any]) -> None:
-        """Publish one frame on the bounded queue (the one writer drains it).
+        """Publish one control frame on the bounded queue (one writer drains it).
 
-        The broker publishes approval requests through this same seam: it
-        never touches a transport. After close the writer is gone, so frames
+        The broker's ``approval.request`` and the reader-side error/ack frames
+        are singular control frames emitted outside the turn's event stream;
+        they fire-and-forget here. After close the writer is gone, so frames
         are dropped with a log line rather than piling up.
         """
         if self._writer_stopped:
@@ -170,10 +206,27 @@ class GatewaySession:
         try:
             self.outbound.put_nowait(frame)
         except asyncio.QueueFull:
-            # Bounded by design; M4 owns queue-full turn cancellation.
+            # Bounded by design; control frames from a stalled connection are
+            # dropped with a warning (fail-closed: an unread approval.request
+            # times out and denies). Streaming frames never travel this seam -
+            # the turn runner awaits (:meth:`_publish`) so a stalling client
+            # cancels the turn instead (spec section 8).
             logger.bind(session_id=self.id, frame_type=frame.get("type")).warning(
-                "Outbound queue full - frame dropped"
+                "Outbound queue full - control frame dropped"
             )
+
+    async def _publish(self, frame: dict[str, Any]) -> None:
+        """The turn runner's enqueue: the producer awaits (spec section 8).
+
+        Streaming frames (turn.started, chat.delta, tool.start, tool.end,
+        chat.final) travel through this seam only. A queue that stays full
+        for the whole backpressure deadline means the client is not reading:
+        no unbounded buffering, no silent drops - the turn is cancelled.
+        """
+        try:
+            await asyncio.wait_for(self.outbound.put(frame), self._backpressure_timeout)
+        except TimeoutError:
+            raise OutboundBackpressure(str(frame.get("type"))) from None
 
     def attach_graph(self, graph: AgentGraph) -> None:
         """Bind this session's graph (built with per-session tools/provider)."""
@@ -302,30 +355,43 @@ class GatewaySession:
         return True
 
     async def _run_turn(self, turn_id: str, text: str) -> None:
-        """One turn: Task row lifecycle + graph invocation (spec section 6)."""
+        """One turn: Task row lifecycle + streamed graph run (spec sections 6, 8)."""
         graph = self._graph
         if graph is None:  # pragma: no cover - the endpoint refuses such sessions
             raise RuntimeError("session graph was never bound")
         token = current_task_id.set(turn_id)
+        # The typed citation side channel rides the SAME context mechanism as
+        # the task id: document tools running inside this turn record their
+        # retrieval metadata through ``record_source``; ``chat.final.sources``
+        # is built from this collector, never parsed from tool output text and
+        # never model-authored (spec section 8).
+        sources = TurnSources()
+        sources_token = current_turn_sources.set(sources)
         completed = list(self.history)
         try:
             await self._insert_task_row(turn_id, text)
             await self._update_task(turn_id, status=TaskStatus.RUNNING)
             self.history.append(_human_message(text))
-            self.enqueue({"type": TURN_STARTED_TYPE, "turn_id": turn_id})
             try:
-                result = await graph.ainvoke({"messages": self.history})
+                await self._publish({"type": TURN_STARTED_TYPE, "turn_id": turn_id})
+                reply, seq = await self._stream_turn(graph, turn_id)
+            except OutboundBackpressure:
+                # The client is not reading: the turn is cancelled with a
+                # terminal error frame (spec section 8).
+                self.history = completed
+                await self._backpressure_failure(turn_id)
+                return
             except asyncio.CancelledError:
                 # The turn unwinds; the canceller (cancel/disconnect/shutdown)
                 # writes the FAILED row itself: awaits can be re-cancelled here.
                 self.history = completed
                 raise
-            reply = list(result["messages"])
+            reply = list(reply)
             self.history = reply
             answer = _reply_text(reply)
             # The model finished: the turn's terminal state is decided right
             # here — synchronously, since no await happened between the
-            # ainvoke return and this line — so a cancel landing in the
+            # stream end and this line — so a cancel landing in the
             # commit window below can no longer flip the finished turn.
             self._decide_terminal(TaskStatus.COMPLETED)
             await self._update_task(turn_id, status=TaskStatus.COMPLETED, result=answer)
@@ -333,7 +399,22 @@ class GatewaySession:
             # Clear the busy marker before the terminal frame so the next
             # message after chat.final is never spuriously "busy".
             self._clear_turn(turn_id)
-            self.enqueue({"type": CHAT_FINAL_TYPE, "turn_id": turn_id, "text": answer})
+            try:
+                seq += 1  # chat.final carries the stream's last, highest seq
+                await self._publish(
+                    {
+                        "type": CHAT_FINAL_TYPE,
+                        "turn_id": turn_id,
+                        "seq": seq,
+                        "text": answer,
+                        "sources": sources.sources(),
+                    }
+                )
+            except OutboundBackpressure:
+                # The turn genuinely completed (rows and history stand), but
+                # the client never drained the final frame: report that.
+                await self._backpressure_failure(turn_id)
+                return
         except asyncio.CancelledError:
             self.history = completed
             raise
@@ -352,7 +433,99 @@ class GatewaySession:
                 }
             )
         finally:
+            current_turn_sources.reset(sources_token)
             current_task_id.reset(token)
+
+    async def _stream_turn(
+        self, graph: AgentGraph, turn_id: str
+    ) -> tuple[list[BaseMessage], int]:
+        """Run the turn through ``astream_events`` and forward its frames.
+
+        Returns the final message list and the last used ``seq``. Token
+        deltas, tool progress and the final state all surface through the
+        event stream (spec section 8); every forwarded frame carries the
+        turn's single monotonically increasing ``seq``.
+        """
+        seq = 0
+        final: list[BaseMessage] | None = None
+        async for event in graph.astream_events({"messages": self.history}, version="v2"):
+            kind = event.get("event")
+            data = event.get("data") or {}
+            if kind == "on_chat_model_stream":
+                # Empty chunks (tool-call announcements, stream-final markers)
+                # carry no delta for the client.
+                content = getattr(data.get("chunk"), "content", "")
+                if isinstance(content, str) and content:
+                    seq += 1
+                    await self._publish(
+                        {
+                            "type": CHAT_DELTA_TYPE,
+                            "turn_id": turn_id,
+                            "seq": seq,
+                            "text": content,
+                        }
+                    )
+            elif kind == "on_tool_start":
+                seq += 1
+                await self._publish(
+                    {
+                        "type": TOOL_START_TYPE,
+                        "turn_id": turn_id,
+                        "seq": seq,
+                        "name": event.get("name"),
+                        "args": data.get("input") or {},
+                    }
+                )
+            elif kind == "on_tool_end":
+                seq += 1
+                await self._publish(
+                    {
+                        "type": TOOL_END_TYPE,
+                        "turn_id": turn_id,
+                        "seq": seq,
+                        "name": event.get("name"),
+                        "result_preview": _result_preview(data.get("output")),
+                    }
+                )
+            elif kind == "on_chain_end" and not event.get("parent_ids"):
+                # The graph's own completion event: its output is the final
+                # state (probe-pinned for this langgraph version).
+                output = data.get("output")
+                if isinstance(output, dict) and "messages" in output:
+                    final = list(output["messages"])
+        if final is None:  # pragma: no cover - a completed graph always ends the chain
+            raise RuntimeError("graph completed without a final messages state")
+        return final, seq
+
+    async def _backpressure_failure(self, turn_id: str) -> None:
+        """Cancel the turn after a backpressure deadline (spec section 8).
+
+        A turn that had already decided COMPLETED keeps its task/episode
+        rows and history; one still in flight is persisted FAILED and its
+        approvals are default-denied. The terminal error frame is the turn's
+        last produced frame and also awaits the bounded queue — once; if
+        even that cannot be delivered the client is gone and liveness wins
+        over a logged, dropped frame.
+        """
+        logger.bind(session_id=self.id, turn_id=turn_id).warning(
+            "Outbound queue stayed full for {}s - cancelling turn",
+            self._backpressure_timeout,
+        )
+        if self._decide_terminal(TaskStatus.FAILED):
+            await self._fail_quietly(turn_id, BACKPRESSURE_ROW_ERROR)
+        self._broker.deny_all(self.id, "turn stalled: client not reading")
+        self._clear_turn(turn_id)
+        frame = _error(
+            ERROR_BACKPRESSURE,
+            "the connection stopped reading; the turn was cancelled",
+            turn_id=turn_id,
+        )
+        try:
+            await asyncio.wait_for(self.outbound.put(frame), self._backpressure_timeout)
+        except TimeoutError:
+            logger.bind(session_id=self.id, turn_id=turn_id).error(
+                "Terminal backpressure frame dropped - client is not reading"
+            )
 
     async def abort_active(self) -> None:
         """Cancel the in-flight turn, mark it FAILED and deny its approvals.
