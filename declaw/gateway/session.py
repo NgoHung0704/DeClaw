@@ -269,7 +269,31 @@ class GatewaySession:
         if self._writer_task is None:
             return
         self._writer_stopped = True
-        await self.outbound.put(None)
+        # The sentinel must land even when the queue is 256-full with a dead
+        # writer: nothing consumes a slot for it, and asyncio putters are
+        # FIFO, so a still-pending producer put would re-claim any freed slot
+        # ahead of the sentinel (flood-then-disconnect hang). Space for the
+        # sentinel is therefore guaranteed: opportunistically first (the
+        # normal drainable-queue teardown keeps its frame order), otherwise
+        # by a non-blocking bounded drain of this teardown's undeliverable
+        # frames - the loop cannot await, so no producer can jump the
+        # sentinel once the queue is emptied.
+        try:
+            self.outbound.put_nowait(None)
+        except asyncio.QueueFull:
+            dropped = 0
+            while True:
+                try:
+                    self.outbound.get_nowait()
+                    dropped += 1
+                except asyncio.QueueEmpty:
+                    break
+            logger.bind(session_id=self.id).warning(
+                "Outbound queue full at teardown - dropped {} undelivered frames"
+                " before the writer-stop sentinel",
+                dropped,
+            )
+            self.outbound.put_nowait(None)  # drained: guaranteed space
         with suppress(Exception):
             await asyncio.wait_for(asyncio.shield(self._writer_task), _FAIL_QUIET_TIMEOUT_SECONDS)
         self._writer_task = None

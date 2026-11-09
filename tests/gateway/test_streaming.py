@@ -20,8 +20,11 @@ from __future__ import annotations
 import asyncio
 import json
 from collections.abc import Sequence
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
+
+import pytest
 
 from langchain_core.callbacks import CallbackManagerForLLMRun
 from langchain_core.language_models.chat_models import BaseChatModel, ChatResult
@@ -30,6 +33,7 @@ from langchain_core.outputs import ChatGenerationChunk
 from langchain_core.runnables import Runnable
 from langchain_core.tools import BaseTool
 
+import declaw.gateway.session as session_module
 from declaw.brain.context import with_context_window
 from declaw.brain.chat_model import _SnapshotModel
 from declaw.brain.loop import build_agent_graph
@@ -41,9 +45,11 @@ from declaw.documents.tools import build_document_search_tool
 from declaw.gateway.approval import ApprovalBroker
 from declaw.gateway.middleware import RateLimiter
 from declaw.gateway.session import (
+    CHAT_DELTA_TYPE,
     CHAT_FINAL_TYPE,
     ERROR_TYPE,
     OUTBOUND_QUEUE_MAXSIZE,
+    OutboundBackpressure,
     TOOL_RESULT_PREVIEW_MAX_CHARS,
     TURN_CANCELLED_TYPE,
     TURN_STARTED_TYPE,
@@ -438,4 +444,55 @@ async def test_backpressure_full_queue_cancels_turn_with_terminal_error(tmp_path
     row = await _await_row(maker, turn_id)
     assert row.status == TaskStatus.FAILED
     assert row.error is not None and row.error != "cancelled by user"
+    await engine.dispose()
+
+
+async def test_stop_writer_lands_sentinel_with_full_queue_and_dead_writer(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Disconnect telemetry during a flood-then-stall (review finding 1).
+
+    A 256-full outbound queue, a still-pending producer put (asyncio putters
+    are FIFO, so it would re-claim any freed slot ahead of the sentinel) and
+    a writer blocked on a stalled socket: the writer-stop sentinel must still
+    land in bounded time and teardown must complete - no hang.
+    """
+    monkeypatch.setattr(session_module, "_FAIL_QUIET_TIMEOUT_SECONDS", 0.1)
+    bound = ToolThenStreamModel(tokens=["x"]).bind_tools([])
+    session, engine, _maker = await _session(tmp_path, model=bound)
+
+    # A dead writer: consuming nothing (a websocket send blocked forever).
+    dead_writer = asyncio.create_task(asyncio.Event().wait())
+    session._writer_task = dead_writer
+    try:
+        # Flood the queue to full outside any turn, then a pending producer.
+        for i in range(OUTBOUND_QUEUE_MAXSIZE):
+            session.outbound.put_nowait(
+                {"type": CHAT_DELTA_TYPE, "seq": i, "text": f"t{i:03d}"}
+            )
+        assert session.outbound.full()
+        producer = asyncio.create_task(
+            session._publish({"type": CHAT_DELTA_TYPE, "seq": 256, "text": "late"})
+        )
+        for _ in range(3):
+            await asyncio.sleep(0)  # yield: the producer parks on the full queue
+        assert not producer.done()
+
+        # The disconnect path must complete in bounded time (RED = timeout).
+        await asyncio.wait_for(session._stop_writer(), 2.0)
+        assert session._writer_task is None
+
+        frames = _drain(session.outbound)
+        # The sentinel is FIRST: no late frame jumps it in FIFO wake-up order.
+        assert frames[0] is None
+        assert all(f is not None for f in frames[1:])
+
+        # The pending producer's put resolves against the emptied queue
+        # (or times out); it never wedges and is awaited before the test ends.
+        with suppress(OutboundBackpressure):
+            await asyncio.wait_for(producer, 2.0)
+    finally:
+        dead_writer.cancel()
+        with suppress(asyncio.CancelledError):
+            await dead_writer
     await engine.dispose()
