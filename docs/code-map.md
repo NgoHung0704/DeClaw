@@ -21,6 +21,16 @@ then follow dependencies and tests for the task at hand.
 | State, encryption and credentials | `declaw/db/`, `declaw/memory/`, `declaw/credentials/`, `alembic/` | `tests/unit/test_db.py`, `test_memory_crypto.py`, `test_credentials_store.py`, `test_credentials_fallback.py` |
 | Audit and network observation | `declaw/audit/tooling.py`, `logger.py`, `egress.py`, `report.py` | `tests/unit/test_audit_events.py`, `test_audit_logger.py`, `test_audit_egress.py` |
 | Configuration and defaults | `declaw/config.py`, `.env.example`, `pyproject.toml`, `uv.lock` | `tests/unit/test_config.py` |
+| Application lifecycle (gateway/CLI shared) | `declaw/app.py` | `tests/unit/test_app_lifecycle.py` |
+| Settings persistence and snapshots | `declaw/settings_service.py` | `tests/unit/test_settings_service.py` |
+| Gateway launcher and contract | `declaw/gateway/app.py`, `declaw/main.py:start` | `tests/gateway/test_launch.py` |
+| Gateway auth and security middleware | `declaw/gateway/auth.py`, `middleware.py` | `tests/gateway/test_auth.py`, `test_auth_flow.py`, `test_host_origin.py`, `test_limits.py` |
+| Gateway sessions, turns and approvals | `declaw/gateway/session.py`, `ws.py`, `approval.py` | `tests/gateway/test_chat_flow.py` |
+| Streaming and typed citations | `declaw/gateway/sources.py` | `tests/gateway/test_streaming.py` |
+| Gateway REST surface | `declaw/gateway/routes/` | `tests/gateway/test_rest.py` |
+| Event stream (`/ws/events`) | `declaw/gateway/events.py` | `tests/gateway/test_events_ws.py` |
+| Watcher handoff and indexing worker | `declaw/documents/worker.py`, `watcher.py` | `tests/gateway/test_documents_gateway.py` |
+| Web UI (vanilla JS, EN/FR) | `ui/index.html`, `ui/js/`, `ui/locales/` | `tests/gateway/test_ui_security.py`, [manual checklist](phase-9-review.md) |
 
 Filenames after the first path in a cell are relative to the same directory.
 

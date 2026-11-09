@@ -10,15 +10,16 @@ new product-test or model-benchmark run.
 | Filesystem tools | `declaw/tools/registry.py` registers typed tools, confirmation, sanitizer and audit wrappers. |
 | Plugin host | `declaw/plugin_host/host.py` and `declaw_plugin_sdk/` implement supervised subprocesses and IPC. This is not an OS sandbox. |
 | Document intelligence | `declaw/documents/session.py:build_document_stack` shares index/chat assembly; `plugins/builtin/doc-intel/` parses; core owns embedding, storage, retrieval and actions. |
-| Watcher | Component exists in `declaw/documents/watcher.py`; not started by the current CLI. Reconciliation runs on indexing. |
+| Watcher | `declaw/documents/watcher.py` + `declaw/documents/worker.py`: gateway mode starts a loop-safe watcher handoff feeding ONE serialized indexing worker (retry 0s/30s/300s); CLI behavior unchanged; deletion/move reconcile. |
 | Memory | Components exist under `declaw/memory/`; `with_memory` is not in the default `build_brain` stack. Do not assume episodic memory is populated by chat. |
-| Gateway | `declaw/main.py:start` and `stop` report unimplemented; `declaw/gateway/` is scaffolding. FastAPI being installed is not API availability. |
-| Desktop and installer | `ui/` and `tauri/` are scaffolding; no connected end-user desktop release is established. |
+| Gateway | `declaw start` runs the hardened loopback uvicorn launcher (`declaw/gateway/app.py`); a full FastAPI surface (auth, Host/Origin, rate/body caps, WS chat with approvals and streaming, REST, events) sits in `declaw/gateway/`. `declaw stop` stays unimplemented (DCL-234). Core wiring is `declaw/app.py` (`Application`, gateway/CLI shared). |
+| Desktop and installer | The gateway web UI is implemented under `ui/` (vanilla JS, EN/FR, CSP-locked; manual checklist in `phase-9-review.md`). `tauri/` remains scaffolding; packaging stays a Phase 14 gate. |
 | Shell sandbox | Deferred from v0.1; no product shell tool is exposed. |
 
 Phase 0, 1, 2, 4, 5, 6 (buildable core), 7, 8a and 8b completion
-is recorded by phase reviews and the ticket ledger. Phase 9 is the next planned
-product phase, not a feature implemented by this documentation update.
+is recorded by phase reviews and the ticket ledger. Phase 9 (gateway and web
+UI, DCL-120..134) is implemented on `feat/phase-9-gateway-web-ui`; see the
+dated [Phase 9 baseline](history/phase-9-baseline-2026-11-08.md).
 DCL-071/072/073 remain deferred until a plugin actually needs credentials;
 DCL-082 requires the future UI. The approved Phase 7–9 roadmap supersedes older
 ticket assumptions: [roadmap](specs/2026-08-23-phase-7-9-roadmap.md).
@@ -45,11 +46,11 @@ as current validation.
 
 ## Phase 9 readiness and maintenance
 
-The [readiness assessment](phase-9-readiness.md) identifies reusable CLI services
-and the remaining gateway/UI contracts. A
-[draft Phase 9 design](specs/2026-11-08-phase-9-gateway-web-ui-design.md) exists
-on `feat/phase-9-gateway-web-ui` and is awaiting review; the gateway/UI is not
-implemented.
+The [readiness assessment](phase-9-readiness.md) identified the reusable CLI
+services and the gateway/UI contracts; the [Phase 9 design](specs/2026-11-08-phase-9-gateway-web-ui-design.md)
+answered them and was ratified in full (all twelve section-20 decisions) on
+2026-11-08. The gateway/UI is implemented on this branch; current limits stay
+recorded in the design's section 18 and the [manual UI checklist](phase-9-review.md).
 
 The cold DB factory deadlock found during assessment was fixed in `5f168db`.
 `get_sessionmaker()` initializes the engine before taking the shared factory

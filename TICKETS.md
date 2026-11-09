@@ -729,107 +729,107 @@ Deferred for shell-free v0.1. These pending tickets do not block Phase 9 under t
 
 ## 🌐 PHASE 9 — GATEWAY & WEB UI (Week 10-11)
 
-Scope follows the approved Phase 7–9 roadmap: vanilla JS, locally vendored CSS, EN/FR, built-in plugin controls only. Estimates and the first-token latency target below are planning assumptions, not measurements. A [draft Phase 9 design](docs/specs/2026-11-08-phase-9-gateway-web-ui-design.md) covers the security/session/approval contracts and is awaiting review; all tickets remain pending.
+Scope follows the approved Phase 7–9 roadmap and the [ratified Phase 9 design](docs/specs/2026-11-08-phase-9-gateway-web-ui-design.md) (all twelve section-20 decisions ratified 2026-11-08). Implemented on `feat/phase-9-gateway-web-ui` per milestones M1-M5; evidence: [Phase 9 baseline](docs/history/phase-9-baseline-2026-11-08.md) (1047 passed / 1 skipped, ruff+mypy clean, measured first-token latency). The first-token latency number below was a planning assumption; the measured record lives in the dated baseline report — measured, not asserted.
 
-### [ ] DCL-120 — FastAPI app (bind 127.0.0.1 only)
+### [x] DCL-120 — FastAPI app (bind 127.0.0.1 only)
 
 - **Description**: Hardened uvicorn config; no LAN bind.
 - **Acceptance**: External interface rejects connections.
 - **Dependencies**: DCL-004
 - **Estimate**: 0.5d
 
-### [ ] DCL-121 — Local token authentication
+### [x] DCL-121 — Local token authentication
 
 - **Description**: Random token issued on first run; stored in keyring; required header.
 - **Acceptance**: Requests without token rejected.
 - **Dependencies**: DCL-070, DCL-120
 - **Estimate**: 0.5d
 
-### [ ] DCL-122 — Origin header validation middleware
+### [x] DCL-122 — Origin header validation middleware
 
 - **Description**: Defend against CSRF/DNS rebinding (CVE-2026-25253 class).
 - **Acceptance**: Foreign Origin/Host rejected.
 - **Dependencies**: DCL-120
 - **Estimate**: 0.5d
 
-### [ ] DCL-123 — Rate limiting
+### [x] DCL-123 — Rate limiting
 
 - **Description**: Per-route soft caps.
 - **Acceptance**: Abuse path 429s.
 - **Dependencies**: DCL-120
 - **Estimate**: 0.25d
 
-### [ ] DCL-124 — Input size limits per endpoint
+### [x] DCL-124 — Input size limits per endpoint
 
 - **Description**: Reject oversized bodies.
 - **Acceptance**: Limits documented + enforced.
 - **Dependencies**: DCL-120
 - **Estimate**: 0.25d
 
-### [ ] DCL-125 — WebSocket endpoint (real-time chat)
+### [x] DCL-125 — WebSocket endpoint (real-time chat)
 
 - **Description**: Auth on handshake.
 - **Acceptance**: Unauthenticated connection closed.
 - **Dependencies**: DCL-121
 - **Estimate**: 0.5d
 
-### [ ] DCL-126 — REST API (/chat, /tasks, /audit, /plugins, /settings, /documents)
+### [x] DCL-126 — REST API (/chat, /tasks, /audit, /plugins, /settings, /documents)
 
 - **Description**: Typed routes.
 - **Acceptance**: OpenAPI schema generated.
 - **Dependencies**: DCL-120
 - **Estimate**: 1d
 
-### [ ] DCL-127 — UI: Chat interface (streaming)
+### [x] DCL-127 — UI: Chat interface (streaming)
 
 - **Description**: Token stream via WS.
 - **Acceptance**: First token < 1s on dev hardware.
 - **Dependencies**: DCL-125
 - **Estimate**: 1d
 
-### [ ] DCL-128 — UI: Document panel
+### [x] DCL-128 — UI: Document panel
 
 - **Description**: Folder picker, indexing status, search.
 - **Acceptance**: Folder selection → indexing progress visible.
 - **Dependencies**: DCL-107, DCL-126
 - **Estimate**: 1d
 
-### [ ] DCL-129 — UI: Audit log viewer
+### [x] DCL-129 — UI: Audit log viewer
 
 - **Description**: Filter by date, plugin, severity.
 - **Acceptance**: Filters work; export buttons present.
 - **Dependencies**: DCL-061
 - **Estimate**: 0.5d
 
-### [ ] DCL-130 — UI: Plugin manager
+### [x] DCL-130 — UI: Plugin manager
 
 - **Description**: List built-in plugins, enable/disable them, inspect permissions and revoke grants. Third-party install/uninstall/update is out of scope for v0.1.
 - **Acceptance**: Built-in state and permission changes are visible, persisted and audited; no third-party installer is exposed.
 - **Dependencies**: DCL-091, DCL-082
 - **Estimate**: 0.5d
 
-### [ ] DCL-131 — UI: Settings
+### [x] DCL-131 — UI: Settings
 
 - **Description**: Model, language, workspace path.
 - **Acceptance**: Persists across restarts.
 - **Dependencies**: DCL-004
 - **Estimate**: 0.5d
 
-### [ ] DCL-132 — UI: i18n (EN + FR)
+### [x] DCL-132 — UI: i18n (EN + FR)
 
 - **Description**: JSON locales.
 - **Acceptance**: All visible strings translated.
 - **Dependencies**: DCL-127
 - **Estimate**: 0.5d
 
-### [ ] DCL-133 — UI: System status panel
+### [x] DCL-133 — UI: System status panel
 
 - **Description**: Ollama, Docker, egress monitor health.
 - **Acceptance**: Live updates via WS.
 - **Dependencies**: DCL-064, DCL-007
 - **Estimate**: 0.5d
 
-### [ ] DCL-134 — UI: Permission dialog
+### [x] DCL-134 — UI: Permission dialog
 
 - **Description**: Built-in permission experience, coordinated with DCL-082; detailed presentation remains undecided in the approved roadmap.
 - **Acceptance**: Consent/denial/revocation behavior is specified and tested before implementation; install-time dialogs remain deferred with third-party installation.

@@ -1,13 +1,14 @@
 # Phase 9 — Gateway & Web UI: Design
 
-> **Draft under review.** This file proposes decisions for Phase 9; it is not
-> yet an approved design record. Verify wiring and limitations against
-> [current status](../project-status.md) and
-> [active decisions](../architecture-decisions.md). Section 20 lists the
-> decisions that need explicit sign-off before implementation starts.
+> **Ratified design record** (2026-11-08): all twelve section-20 decisions
+> were ratified as proposed, and the phase was implemented on
+> `feat/phase-9-gateway-web-ui` following sections 1-17 (milestones M1-M5).
+> Wiring evidence: [Phase 9 baseline](../history/phase-9-baseline-2026-11-08.md),
+> [manual UI checklist](../phase-9-review.md), [code map](../code-map.md).
+> Limitations remain section 18 — honest limits, unchanged by implementation.
 
 - **Date**: 2026-11-08
-- **Status**: draft for review
+- **Status**: ratified (implemented on this branch; see the baseline report)
 - **Tickets**: DCL-120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131,
   132, 133, 134, plus DCL-082 (permission experience)
 - **Branch**: `feat/phase-9-gateway-web-ui` (from `main`, which carries Phases

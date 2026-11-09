@@ -14,7 +14,7 @@ The root README introduces the product; this file indexes contributor context.
 
 ## Reference
 
-- [Approved specs](specs/) include the [Phase 7–9 roadmap](specs/2026-08-23-phase-7-9-roadmap.md); the [Phase 9 gateway/UI design](specs/2026-11-08-phase-9-gateway-web-ui-design.md) is a draft awaiting review.
+- [Approved specs](specs/) include the [Phase 7–9 roadmap](specs/2026-08-23-phase-7-9-roadmap.md); the [Phase 9 gateway/UI design](specs/2026-11-08-phase-9-gateway-web-ui-design.md) is a ratified record, implemented on `feat/phase-9-gateway-web-ui` (see the [Phase 9 baseline](history/phase-9-baseline-2026-11-08.md)).
 - `phase-*-review.md` files preserve dated phase explanations, examples and results.
 - [Python baseline](history/python-baseline-2026-10-25.md) records the DB fix and checks actually run.
 
