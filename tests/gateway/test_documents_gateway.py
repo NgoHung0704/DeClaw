@@ -23,6 +23,7 @@ What is pinned here:
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -933,3 +934,67 @@ async def test_reindex_route_feeds_the_single_worker(
         assert indexer.full_finished == 2
 
     assert stack.application.document_worker is not None, "the route must go through the worker"
+
+
+# --- Fix round 1: heap ties and non-silent consumer death --------------------
+
+
+async def test_two_jobs_with_identical_retry_deadlines_do_not_kill_the_worker(
+    tmp_path: Path,
+) -> None:
+    # Deterministic pin of the heap tie: two retry entries with the SAME
+    # due_at must never fall back to comparing _Job objects — TypeError there
+    # kills the single run() consumer for the rest of the session. (Driving
+    # this through run()'s loop alone cannot force the tie: _admit_due pops
+    # equal-due entries before the next push, which is exactly why the crash
+    # was intermittent in production-shaped interleavings.)
+    from declaw.documents import worker as worker_module
+
+    clock = FakeClock(1000.0)
+    indexer = FakeIndexer(tmp_path / "workspace")
+    worker = make_worker(indexer, clock=clock)
+    job_a = worker_module._Job("index", path="a.txt", first_due=1000.0)
+    job_b = worker_module._Job("index", path="b.txt", first_due=1000.0)
+    job_a.attempts = 1  # as _execute leaves it after the first failed attempt
+    job_b.attempts = 1
+
+    await worker._on_job_failure(job_a, RuntimeError("a"), closing=False)
+    await worker._on_job_failure(job_b, RuntimeError("b"), closing=False)
+
+    assert [entry[0] for entry in worker._scheduled] == [1030.0, 1030.0]
+    assert {entry[-1].path for entry in worker._scheduled} == {"a.txt", "b.txt"}
+
+
+async def test_an_unexpected_consumer_death_is_not_silent(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The cost of a single consumer is that when it dies, everything behind it
+    # stalls: an unexpected exception must surface as a CRITICAL log record
+    # plus a health-visible marker on the worker, not a silent outage.
+    import io
+
+    from declaw.log import configure, set_request_id
+
+    buffer = io.StringIO()
+    configure(level="CRITICAL", stream=buffer, force=True)
+    try:
+        workspace = tmp_path / "workspace"
+        indexer = FakeIndexer(workspace)
+        worker = make_worker(indexer)
+
+        def exploding_admit(now: float) -> None:
+            raise ValueError("admit exploded")
+
+        monkeypatch.setattr(worker, "_admit_due", exploding_admit)
+        worker.start()
+
+        assert await soon(lambda: worker.crash is not None)
+        assert str(worker.crash) == "admit exploded"
+        assert worker._task is not None and worker._task.done()
+
+        records = [json.loads(line) for line in buffer.getvalue().splitlines() if line.strip()]
+        assert [record["level"] for record in records] == ["CRITICAL"]
+        assert "indexing worker" in records[0]["message"].lower()
+        assert records[0].get("extra", {}).get("event") == "documents.worker_crashed"
+    finally:
+        set_request_id(None)

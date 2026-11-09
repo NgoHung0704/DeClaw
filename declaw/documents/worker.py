@@ -21,6 +21,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import heapq
+import itertools
 import time
 from collections import deque
 from collections.abc import Awaitable, Callable
@@ -80,10 +81,18 @@ class IndexingWorker:
         self._clock = clock if clock is not None else time.monotonic
         self._sleep = sleep
         self._jobs: deque[_Job] = deque()
-        self._scheduled: list[tuple[float, _Job]] = []  # heap of (due_at, job)
+        # Heap of (due_at, tie_breaker, job): the monotonic sequence keeps a
+        # TOTAL order — two entries with the same due_at must never fall back
+        # to comparing _Job objects (which would raise TypeError inside the
+        # failure handler and kill this consumer for the whole session).
+        self._scheduled: list[tuple[float, int, _Job]] = []
+        self._sequence = itertools.count()
         self._task: asyncio.Task[None] | None = None
         self._reindex_active = False
         self._closing = False
+        # Health-visible marker: set when run() dies of an unexpected
+        # exception (review fix round 1 — a dead consumer must not be silent).
+        self.crash: BaseException | None = None
 
     # --- producers ---------------------------------------------------------
 
@@ -148,15 +157,29 @@ class IndexingWorker:
     # --- the single consumer loop -------------------------------------------
 
     async def run(self) -> None:
-        """Execute one job at a time, forever, until cancelled by stop()."""
-        while True:
-            now = self._clock()
-            self._admit_due(now)
-            if self._jobs:
-                job = self._jobs.popleft()
-                await self._execute(job)
-                continue
-            await self._wait_for_work()
+        """Execute one job at a time, until stopped by :meth:`stop`.
+
+        One consumer means one failure domain: if this loop dies, everything
+        behind it stalls for the rest of the session. An unexpected exception
+        is therefore never silent — it is logged CRITICAL and parked on
+        :attr:`crash` (a health-visible marker) before the task ends.
+        Cancellation (the normal stop() path) is not a crash.
+        """
+        try:
+            while True:
+                now = self._clock()
+                self._admit_due(now)
+                if self._jobs:
+                    job = self._jobs.popleft()
+                    await self._execute(job)
+                    continue
+                await self._wait_for_work()
+        except Exception as exc:  # asyncio.CancelledError is no Exception: passes
+            self.crash = exc
+            logger.bind(event="documents.worker_crashed").opt(exception=True).critical(
+                "the indexing worker's consumer loop died unexpectedly; document "
+                "changes and reindex requests will no longer be processed this session"
+            )
 
     async def _wait_for_work(self) -> None:
         """Block until an event arrives or the next deadline (retry/debounce) passes."""
@@ -188,7 +211,7 @@ class IndexingWorker:
 
     def _admit_due(self, now: float) -> None:
         while self._scheduled and self._scheduled[0][0] <= now:
-            self._jobs.append(heapq.heappop(self._scheduled)[1])
+            self._jobs.append(heapq.heappop(self._scheduled)[2])
         for event in self._coalescer.due(now=now):
             job = self._job_for(event)
             if job is not None:
@@ -281,7 +304,7 @@ class IndexingWorker:
         # (the pinned +0 s / +30 s / +5 min schedule never drifts when an
         # attempt runs late: a slow attempt does not push the next one out).
         due_at = max(self._clock(), job.first_due + RETRY_SCHEDULE_S[job.attempts])
-        heapq.heappush(self._scheduled, (due_at, job))
+        heapq.heappush(self._scheduled, (due_at, next(self._sequence), job))
         logger.info(
             "indexing attempt {} failed for {} ({}); retrying",
             job.attempts,
