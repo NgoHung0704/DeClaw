@@ -145,9 +145,32 @@ class DocumentIndexer:
                 continue  # outside the walked subtree: not ours to prune
             if known in present:
                 continue
-            self.store.delete_document(document_id(known))
+            await self.store.delete_document(document_id(known))
             await self.catalog.forget(known)
             report.removed += 1
+
+    async def index_document(self, relative: str) -> IndexReport:
+        """Index one workspace-relative path (worker entry, DCL-128).
+
+        On the ``index()`` semantics with the same file: hash-check, parse,
+        store, record — and a document that yields no text is warned about
+        rather than treated as a failure (a scan cannot be indexed by
+        retrying). Exceptions propagate to the caller (the indexing worker's
+        bounded retry).
+        """
+        report = IndexReport()
+        await self._index_one(relative, report)
+        return report
+
+    async def forget_document(self, relative: str) -> None:
+        """Remove one document's chunks and drop its catalog row (DCL-128).
+
+        The delete-half of watcher reconciliation: a file that left the
+        workspace must not survive in the index (a right-to-erasure argument,
+        not staleness) nor as a catalog row that keeps claiming it indexed.
+        """
+        await self.store.delete_document(document_id(relative))
+        await self.catalog.forget(relative)
 
     async def _index_one(self, relative: str, report: IndexReport) -> None:
         # Re-validate through the workspace boundary even though rglob started
@@ -175,7 +198,7 @@ class DocumentIndexer:
             report.warnings.append(f"{relative}: very large, indexing was truncated")
 
         doc = document_id(relative)
-        self.store.delete_document(doc)
+        await self.store.delete_document(doc)
         await self.store.add_document(doc, relative, chunks)
 
         stat = resolved.stat()

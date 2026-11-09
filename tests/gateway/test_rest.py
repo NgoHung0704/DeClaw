@@ -1337,16 +1337,24 @@ def test_reindex_starts_reconciliation_once_and_broadcasts_progress(
     stack = _stack(tmp_path, monkeypatch)
     indexer = FakeIndexer()
     broadcaster = FakeBroadcaster()
-    stack.application.stack = DocumentStack(
-        store=None,  # type: ignore[arg-type]
-        catalog=None,  # type: ignore[arg-type]
-        indexer=indexer,  # type: ignore[arg-type]
-        chunk_sanitizer=ChunkSanitizer(None),
-    )
 
     with stack.client() as client:
         cookie = stack.login(client)
         client.app.state.event_broadcaster = broadcaster
+        # Task 12 (DCL-128): the serialized indexing worker owns reindex runs;
+        # the route feeds it instead of spawning its own task. Injected inside
+        # the client context on purpose: the lifespan start() already ran with
+        # no doc-intel stack (it is faked here), so no startup reconciliation
+        # interferes with the pinned one-run assertions below.
+        stack.application.stack = DocumentStack(
+            store=None,  # type: ignore[arg-type]
+            catalog=None,  # type: ignore[arg-type]
+            indexer=indexer,  # type: ignore[arg-type]
+            chunk_sanitizer=ChunkSanitizer(None),
+        )
+        from declaw.documents.worker import IndexingWorker
+
+        stack.application.document_worker = IndexingWorker(indexer=indexer)  # type: ignore[arg-type]
 
         first = client.post("/api/documents/reindex", headers=stack.post_headers(cookie))
         assert first.status_code == 202

@@ -177,3 +177,23 @@ class IndexedDocument(SQLModel, table=True):
     doc_type: str = Field(max_length=32)
     chunk_count: int
     indexed_at: datetime = Field(default_factory=_utcnow, sa_column=_dt_col(index=True))
+
+
+class DocumentIndexFailure(SQLModel, table=True):
+    """A path that failed indexing after the bounded retries (DCL-128).
+
+    A SEPARATE table rather than a status column on ``IndexedDocument``:
+    a path that never indexed has no ``IndexedDocument`` row at all, and the
+    catalog must not lie that the index is fine. ``ensure_schema`` (create_all)
+    creates missing tables on existing databases, while a new column on an
+    existing table would not be applied and would break those databases at
+    runtime. The marker is cleared by ``DocumentCatalog.record`` and
+    ``DocumentCatalog.forget`` — recovery or deletion remove it.
+    """
+
+    __tablename__ = "document_index_failures"
+
+    path: str = Field(primary_key=True, max_length=1024, description="Workspace-relative path.")
+    error: str = Field(max_length=1024)
+    attempts: int
+    failed_at: datetime = Field(default_factory=_utcnow, sa_column=_dt_col(index=True))

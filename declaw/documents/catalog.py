@@ -16,9 +16,16 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from declaw.db.models import IndexedDocument
+from declaw.db.models import DocumentIndexFailure, IndexedDocument
 
 _HASH_CHUNK_BYTES = 1024 * 1024
+
+# DocumentIndexFailure.error column width.
+_MAX_FAILURE_ERROR = 1024
+
+
+def _clip(error: str) -> str:
+    return error[:_MAX_FAILURE_ERROR]
 
 
 def file_sha256(path: Path) -> str:
@@ -72,6 +79,9 @@ class DocumentCatalog:
                 row.chunk_count = chunk_count
             row.indexed_at = datetime.now(timezone.utc)
             session.add(row)
+            # Recovery removes the failure marker: a path that indexes fine
+            # must not keep telling the user it failed (DCL-128).
+            await self._drop_failure_row(session, relative_path)
             await session.commit()
 
     async def forget(self, relative_path: str) -> None:
@@ -80,10 +90,55 @@ class DocumentCatalog:
             row = await session.get(IndexedDocument, relative_path)
             if row is not None:
                 await session.delete(row)
-                await session.commit()
+            # A deleted file takes its failure marker with it.
+            await self._drop_failure_row(session, relative_path)
+            await session.commit()
 
     async def known_paths(self) -> list[str]:
         """Every indexed path, sorted."""
         async with self._sessionmaker() as session:
             rows = await session.exec(select(IndexedDocument.path))
             return sorted(rows.all())
+
+    async def record_failure(self, *, relative_path: str, error: str, attempts: int) -> None:
+        """Upsert the fail marker for a path that exhausted its retries (DCL-128).
+
+        The marker is what makes a failed path visible in the catalog instead
+        of silently missing — and it is cleared by :meth:`record` (recovery)
+        and :meth:`forget` (deletion).
+        """
+        async with self._sessionmaker() as session:
+            row = await session.get(DocumentIndexFailure, relative_path)
+            if row is None:
+                row = DocumentIndexFailure(
+                    path=relative_path,
+                    error=_clip(error),
+                    attempts=attempts,
+                    failed_at=datetime.now(timezone.utc),
+                )
+            else:
+                row.error = _clip(error)
+                row.attempts = attempts
+                row.failed_at = datetime.now(timezone.utc)
+            session.add(row)
+            await session.commit()
+
+    async def clear_failure(self, relative_path: str) -> None:
+        """Remove the fail marker; clearing an absent marker is a no-op."""
+        async with self._sessionmaker() as session:
+            await self._drop_failure_row(session, relative_path)
+            await session.commit()
+
+    async def failures(self) -> list[tuple[str, str, int]]:
+        """Every fail marker as ``(path, error, attempts)``, sorted by path."""
+        async with self._sessionmaker() as session:
+            rows = await session.exec(
+                select(DocumentIndexFailure.path, DocumentIndexFailure.error, DocumentIndexFailure.attempts)
+            )
+            return sorted(rows.all())
+
+    @staticmethod
+    async def _drop_failure_row(session: AsyncSession, relative_path: str) -> None:
+        row = await session.get(DocumentIndexFailure, relative_path)
+        if row is not None:
+            await session.delete(row)

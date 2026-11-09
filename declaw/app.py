@@ -20,9 +20,10 @@ shutdown policy, not one per request."
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 from langchain_core.tools import StructuredTool
 from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
@@ -32,7 +33,7 @@ from declaw.audit.logger import DbAuditLogger
 from declaw.audit.sinks import composite_sink, quarantine_db_sink
 from declaw.config import Settings, get_settings
 from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
-from declaw.documents.watcher import DocumentWatcher
+from declaw.documents.watcher import DocumentWatcher, WatcherEvent
 from declaw.log import logger
 from declaw.plugin_host.grants_helper import load_grants, load_state
 from declaw.plugin_host.host import PluginHost
@@ -47,6 +48,7 @@ if TYPE_CHECKING:
     from sqlmodel.ext.asyncio.session import AsyncSession
 
     from declaw.documents.session import DocumentStack
+    from declaw.documents.worker import IndexingWorker
     from declaw.gateway.session import SessionManager
 
 # A step of the deterministic shutdown sequence (spec section 5). The gateway
@@ -119,6 +121,10 @@ class Application:
         self.registry: ToolRegistry | None = None
         self.stack: DocumentStack | None = None
         self.watcher: DocumentWatcher | None = None
+        self.document_worker: IndexingWorker | None = None
+        # The /ws/events broadcaster seam (Task 13 wiring): the indexing
+        # worker's progress/failed frames reach clients only once this is set.
+        self._document_event_broadcaster: object | None = None
         self.egress_monitor: EgressMonitor | None = None
         # User-owned plugin policy (spec section 11): one PluginStateStore and
         # one GrantStore per Application, owned here so the gateway's REST
@@ -216,12 +222,29 @@ class Application:
                 )
             self.registry = registry
 
-            # Gateway-only: the watchdog fires while the CLI is not running
-            # (spec section 5 — CLI behavior unchanged).
+            # Gateway-only (spec section 10 — CLI behavior unchanged): the
+            # watcher hands events to this loop, and ONE serialized indexing
+            # worker consumes them alongside manual reindexes and the startup
+            # reconciliation that runs once here.
             if self.mode == "gateway":
+                from declaw.documents.worker import IndexingWorker
+
+                loop = asyncio.get_running_loop()
+                sink: Callable[[WatcherEvent], None] | None = None
+                if self.stack is not None:
+                    self.document_worker = IndexingWorker(
+                        indexer=self.stack.indexer,
+                        catalog=self.stack.catalog,
+                        on_event=self._emit_document_event,
+                    )
+                    self.document_worker.start()
+                    # Startup reconciliation, once at gateway start, through
+                    # the same worker (refuses to stack behind a manual run).
+                    self.document_worker.request_reindex()
+                    sink = self.document_worker.handoff.submit_from_thread(loop)
                 workspace = Path(self.settings.workspace_dir)
                 workspace.mkdir(parents=True, exist_ok=True)
-                self.watcher = DocumentWatcher(workspace)
+                self.watcher = DocumentWatcher(workspace, sink=sink)
                 self.watcher.start()
         except BaseException:
             await self._teardown_owned()
@@ -233,10 +256,11 @@ class Application:
         """Deterministic teardown, in the spec's fixed order.
 
         stop accepting sessions -> cancel in-flight turns -> deny all pending
-        approvals -> stop watcher -> ``host.stop()`` -> uninstall egress
-        monitor -> dispose engine. Each step is skipped when the concern does
-        not exist (CLI: no watcher, no session hooks) and the whole call is a
-        no-op when the application never started or already stopped.
+        approvals -> drain the document watcher queue -> stop the watcher ->
+        ``host.stop()`` -> uninstall egress monitor -> dispose engine. Each
+        step is skipped when the concern does not exist (CLI: no watcher, no
+        session hooks) and the whole call is a no-op when the application
+        never started or already stopped.
 
         Every step is individually guarded: one raising step is logged and
         the teardown continues — a failed shutdown hook must not strand the
@@ -275,6 +299,30 @@ class Application:
         if self._deny_pending_approvals is None:
             self._deny_pending_approvals = session_manager.deny_pending_approvals
 
+    def set_document_event_broadcaster(self, broadcaster: object) -> None:
+        """Give the indexing worker's frames a broadcast sink (Task 13 wiring).
+
+        The gateway's ``EventBroadcaster`` (``/ws/events``) is injected here
+        (and mirrored on ``app.state.event_broadcaster`` where the reindex
+        route reads it). Until then, ``index.progress``/``index.failed`` frames
+        from the worker go to the operational log only: no frame is dropped,
+        dropping the API silently later.
+        """
+        self._document_event_broadcaster = broadcaster
+
+    def _emit_document_event(self, frame: dict[str, Any]) -> None:
+        """Sink handed to the indexing worker (runs on the loop)."""
+        broadcaster = self._document_event_broadcaster
+        if broadcaster is None:
+            return
+        broadcast = getattr(broadcaster, "broadcast", None)
+        if broadcast is None:
+            return
+        try:
+            asyncio.get_running_loop().create_task(broadcast(frame))
+        except RuntimeError:
+            pass
+
     async def _teardown_owned(self) -> None:
         """Tear down the owned services in the spec's order.
 
@@ -282,6 +330,10 @@ class Application:
         only for a service that exists, and a raising step never stops the
         rest.
         """
+        if self.document_worker is not None:
+            # Spec section 10: drain the watcher queue BEFORE stopping the
+            # observer — every observed event is processed, then no more are.
+            await self._guarded("drain document watcher queue", self.document_worker.stop)
         if self.watcher is not None:
             self._guarded_sync("stop watcher", self.watcher.stop)
         if self.host is not None:
