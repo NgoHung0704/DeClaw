@@ -854,6 +854,15 @@ authenticated real-browser checklist items remain open.
 
 ## 🖥️ PHASE 10 — TAURI DESKTOP APP (Week 12-13)
 
+Architecture/scope decisions settled under owner delegation on 2026-11-12:
+see the [desktop spec](docs/specs/2026-11-12-phase-10-tauri-desktop-design.md)
+and [reviewed plan](docs/superpowers/plans/2026-11-12-phase-10-desktop.md).
+Phase 10 delivers the source-development Windows shell and the DCL-146..150
+release-boundary dossier; their release acceptance stays at Phase 14. DCL-144
+safe event wiring and in-app fallback are Phase 10 work; installed Windows
+identity/activation acceptance is deferred to Phase 14. All tickets remain open
+until their implementation and applicable acceptance are verified.
+
 ### [ ] DCL-140 — Tauri 2.0 project scaffold
 
 - **Description**: src-tauri + assets.

@@ -20,6 +20,17 @@ The root README introduces the product; this file indexes contributor context.
 
 Historical results are not fresh measurements. Source and current wiring take precedence.
 
+## Phase 10 planning (decisions settled)
+
+- [Desktop specification](specs/2026-11-12-phase-10-tauri-desktop-design.md)
+- [Desktop implementation plan](superpowers/plans/2026-11-12-phase-10-desktop.md)
+- [Documentation re-review, 2026-11-12](history/phase-10-spec-plan-review-2026-11-12.md)
+
+Seven architecture/scope decisions were settled under explicit owner delegation
+on 2026-11-12; product implementation remains pending. The plan records the pending
+Phase 9 maintenance dependency and defers installed native-notification acceptance
+to Phase 14. Historical review/verification results remain dated.
+
 ## History
 
 The long Claude diary, completed plans and optional architecture sites were

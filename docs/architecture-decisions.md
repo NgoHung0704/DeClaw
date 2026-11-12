@@ -23,6 +23,15 @@ inspection date: 2026-10-25. A planned decision does not imply implementation.
 
 | Phase 9 section-20 decisions | All twelve ratified 2026-11-08 with the design: strict `127.0.0.1` launch (settings stay wider, launcher refuses), paste-once token + HttpOnly cookie, no REST document writes (chat approvals only), permission panel (no first-run consent), hand-written CSS, no Markdown in v0.1, workspace restart-required + model/language new-session, cancelled turns FAILED (no CANCELLED migration), `declaw stop` deferred (DCL-234), validate-before-prompt, plugin enable at next start/disable immediate, one turn per connection. See [the design](specs/2026-11-08-phase-9-gateway-web-ui-design.md) section 20 and the SDD ledger. |
 
+Phase 10 decisions were settled on 2026-11-12 by agent selection explicitly
+delegated by the owner. Use the [desktop spec, section 10](specs/2026-11-12-phase-10-tauri-desktop-design.md#10-settled-decisions--2026-11-12): thin Tauri shell on the exact loopback gateway;
+owned core with conflict on occupied port; Job Object and private typed IPC;
+paste-once bootstrap login; close-to-tray and explicit Quit; source-development
+delivery with release acceptance at Phase 14; installed Windows notification
+identity/activation deferred to Phase 14 with in-app fallback retained. DCL-144
+and release tickets remain open. These are selected boundaries, not implemented
+behavior; Phase 9 maintenance integration and M1 checks remain outstanding.
+
 Phase 9 depends on the completed sanitizer work. The old requirement that Phase 3
 must precede Phase 9 is superseded for the shell-free v0.1 scope. This does not
 waive isolation for any future shell feature. Security hardening remains a release
