@@ -28,8 +28,15 @@ from declaw.gateway.app import (
 )
 from declaw.log import configure
 from declaw.main import cli
+from tests.gateway.test_auth_flow import FakeSecretStore
 
 runner = CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def memory_vault(monkeypatch: pytest.MonkeyPatch) -> None:
+    store = FakeSecretStore()
+    monkeypatch.setattr("declaw.credentials.store.CredentialStore", lambda: store)
 
 
 def _fresh(**env: str) -> Settings:

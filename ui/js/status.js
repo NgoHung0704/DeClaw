@@ -1,7 +1,7 @@
 // Status page (DCL-133): polls /api/status and subscribes to /ws/events for
 // live plugin/indexing changes.
 
-import { el, registerRoute, t } from "./app.js";
+import { el, registerRoute, t } from "./core.js";
 import { getJson, wsBase } from "./api.js";
 
 const mount = async (main) => {

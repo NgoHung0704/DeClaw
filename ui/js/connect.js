@@ -2,7 +2,7 @@
 // gateway token lives only in the session cookie — never localStorage, never
 // the URL.
 
-import { el, navigate, registerRoute, t } from "./app.js";
+import { el, navigate, registerRoute, t } from "./core.js";
 import { postJson } from "./api.js";
 
 const mount = async (main) => {

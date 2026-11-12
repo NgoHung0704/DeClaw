@@ -30,7 +30,11 @@ then follow dependencies and tests for the task at hand.
 | Gateway REST surface | `declaw/gateway/routes/` | `tests/gateway/test_rest.py` |
 | Event stream (`/ws/events`) | `declaw/gateway/events.py` | `tests/gateway/test_events_ws.py` |
 | Watcher handoff and indexing worker | `declaw/documents/worker.py`, `watcher.py` | `tests/gateway/test_documents_gateway.py` |
-| Web UI (vanilla JS, EN/FR) | `ui/index.html`, `ui/js/`, `ui/locales/` | `tests/gateway/test_ui_security.py`, [manual checklist](phase-9-review.md) |
+| Web UI (vanilla JS, EN/FR) | `ui/index.html`, `ui/js/app.js` (entry), `ui/js/core.js` (shared state), `ui/locales/` | `tests/gateway/test_ui_security.py`, `tests/gateway/ui-behavior.test.cjs`, [manual checklist](phase-9-review.md) |
+
+Shared visual tokens and responsive layouts live in `ui/css/main.css`.
+`ui/js/chat.js` owns multiline keyboard submission, pending-turn controls and
+connection/working feedback; both locales supply the visible labels.
 
 Filenames after the first path in a cell are relative to the same directory.
 

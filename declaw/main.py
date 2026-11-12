@@ -91,6 +91,8 @@ def start() -> None:
     # Imported lazily so `version`/`status` don't pay the FastAPI import cost.
     from declaw.gateway.app import GatewayLaunchError, assert_launch_contract, run_gateway
     from declaw.log import configure
+    from declaw.credentials.store import CredentialStore
+    from declaw.gateway.auth import mint_gateway_token
 
     settings = get_settings()
     try:
@@ -99,6 +101,10 @@ def start() -> None:
         console.print(f"[red]{error}[/red]")
         raise typer.Exit(code=1) from error
     configure()
+    # Intentional console-only bootstrap: never put bearer material in logs,
+    # URLs or frontend storage. Login reads this same OS-vault entry.
+    token = mint_gateway_token(CredentialStore())
+    console.print(f"Gateway login token: {token}", markup=False)
     console.print(
         f"[bold]gateway[/bold] listening on http://{settings.host}:{settings.port} — Ctrl-C to stop"
     )

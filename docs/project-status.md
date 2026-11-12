@@ -46,6 +46,27 @@ as current validation.
 
 ## Phase 9 readiness and maintenance
 
+The [2026-11-12 verification report](history/phase-9-verification-2026-11-12.md)
+records a completed full Python suite and companion checks. The owner accepted
+the visual UI; authenticated real-browser security/interaction acceptance remains
+open in the manual checklist. Phase 10 planning does not ratify its pending
+architecture choices.
+
+The [2026-11-10 repair report](history/phase-9-repairs-2026-11-10.md) records
+the review regressions and validation. UI page registration now loads shared
+state first; Documents, chat final answers/citations and audit event details
+have executable Node regressions. `declaw start` supplies the vault-backed
+login token on the console. Cold configuration applies the saved workspace to
+all consumers, with environment precedence retained. Gateway-owned quarantine
+and network emitters use task-correlated audit; invalid cookies allocate no
+REST rate buckets.
+
+The browser UI also has a shared dark workspace layout, distinct chat message
+roles, localized empty/connection/working states, and a multiline composer.
+Send is disabled while a turn is pending; Cancel is enabled only after the
+server announces an active turn. UI behavior tests cover keyboard submission
+and recovery after a rejected turn, in addition to the repair regressions.
+
 The [readiness assessment](phase-9-readiness.md) identified the reusable CLI
 services and the gateway/UI contracts; the [Phase 9 design](specs/2026-11-08-phase-9-gateway-web-ui-design.md)
 answered them and was ratified in full (all twelve section-20 decisions) on

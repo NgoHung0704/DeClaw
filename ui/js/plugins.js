@@ -2,7 +2,7 @@
 // first-run consent — ratified decision 4) with honest semantics: disable is
 // immediate, enable takes effect at the NEXT gateway start (decision 11).
 
-import { el, registerRoute, t } from "./app.js";
+import { el, registerRoute, t } from "./core.js";
 import { getJson, postJson } from "./api.js";
 
 const permissionPanel = async (main, name) => {

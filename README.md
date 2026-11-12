@@ -1,8 +1,8 @@
 # DeClaw
 
-**A local AI agent for working with private documents.** DeClaw runs an agent and document search on your machine, asks before changing files, and records its actions. The current working interface is a command-line application.
+**A local AI agent for working with private documents.** DeClaw runs an agent and document search on your machine, asks before changing files, and records its actions. The current interfaces are the Python CLI and a local browser UI.
 
-> **Development status:** The Python CLI, agent loop, filesystem tools, document indexing and search, plugin host, memory, and audit code are present on this branch. The FastAPI gateway, connected desktop experience, installer, and shell sandbox are still future work. See [Implementation status](#implementation-status).
+> **Development status:** The Python CLI, agent loop, filesystem tools, document indexing and search, plugin host, memory, and audit code are present on this branch. The loopback FastAPI gateway and browser UI are implemented on this branch. The desktop shell, installer, and shell sandbox remain future work. See [Implementation status](#implementation-status).
 
 [Quickstart](#quickstart) · [Architecture](#architecture) · [Data flows](#data-flows) · [Security boundaries](#security-boundaries) · [Repository map](#repository-map)
 
@@ -42,7 +42,7 @@ uv run declaw chat
 
 Configuration is loaded from environment variables and an optional local `.env` file; [`.env.example`](./.env.example) lists the settings. `DECLAW_WORKSPACE_DIR` selects the document folder, while `DECLAW_DATA_DIR` selects the application data folder. Keep `.env` out of Git.
 
-Other implemented commands include `declaw report`, `declaw audit export`, `declaw memory export`, `declaw memory wipe`, and `declaw plugins list|enable|disable|revoke`. `declaw start` and `declaw stop` currently report that the gateway is unavailable.
+Other implemented commands include `declaw report`, `declaw audit export`, `declaw memory export`, `declaw memory wipe`, and `declaw plugins list|enable|disable|revoke`. `uv run declaw start` serves the browser UI at `http://127.0.0.1:7842` and prints the login token to the terminal. Paste it into Connect; stop the gateway with Ctrl+C (`declaw stop` is deferred). The UI saves model/language for new chat sessions and workspace changes for the next process start; explicit environment values take precedence.
 
 ## Architecture
 
@@ -95,7 +95,7 @@ flowchart LR
     sanitizer -.->|quarantine events| audit
 ```
 
-The diagram shows the current module and process boundaries. The audit observer also instruments `httpx` requests in the core process, including Ollama calls. The gateway and desktop UI are omitted because they do not yet serve this path.
+The diagram shows the current module and process boundaries. The audit observer also instruments `httpx` requests in the core process, including Ollama calls. This diagram focuses on the CLI/core path. The local browser UI reaches the same Application services through the Phase 9 gateway; the desktop shell is deferred.
 
 ### Components
 
@@ -160,12 +160,14 @@ declaw/                 Python application
   audit/                Events, reports, HTTP observation
   credentials/          OS keyring and encrypted fallback
   db/                   SQLite models and engine
-  gateway/, sandbox/    Future runtime surfaces
+  gateway/              Loopback HTTP/WebSocket gateway
+  sandbox/              Deferred shell isolation
 declaw_plugin_sdk/      Protocol used by plugin subprocesses
 plugins/builtin/        Built-in doc-intel plugin
 alembic/                Database migrations
 docs/                   Phase reviews, specifications, design decisions
-ui/, tauri/             Future desktop interface scaffolding
+ui/                     Local browser UI (EN/FR)
+tauri/                  Future desktop shell scaffolding
 tests/                  Unit, integration, security and regression tests
 ```
 

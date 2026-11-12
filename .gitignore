@@ -55,3 +55,6 @@ coverage.xml
 /.claude/
 /.codex/
 /.superpowers/
+
+# Local dependency caches and test temporary files
+/.cache/

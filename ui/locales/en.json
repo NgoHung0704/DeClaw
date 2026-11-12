@@ -9,13 +9,27 @@
     "status": "Status"
   },
   "page": {
-    "connect": { "title": "Connect" },
-    "chat": { "title": "Chat" },
-    "documents": { "title": "Documents" },
-    "audit": { "title": "Audit trail" },
-    "plugins": { "title": "Plugins" },
-    "settings": { "title": "Settings" },
-    "status": { "title": "System status" }
+    "connect": {
+      "title": "Connect"
+    },
+    "chat": {
+      "title": "Chat"
+    },
+    "documents": {
+      "title": "Documents"
+    },
+    "audit": {
+      "title": "Audit trail"
+    },
+    "plugins": {
+      "title": "Plugins"
+    },
+    "settings": {
+      "title": "Settings"
+    },
+    "status": {
+      "title": "System status"
+    }
   },
   "connect": {
     "token": {
@@ -30,7 +44,17 @@
     "cancel": "Cancel turn",
     "disconnected": "Connection lost — the turn was cancelled and pending approvals were denied.",
     "sources": "Sources",
-    "sentinel_pending": "Pending"
+    "sentinel_pending": "Pending",
+    "conversation": "Conversation",
+    "empty_title": "A clearer view of your documents.",
+    "empty_help": "Ask a question, explore a file, or work through an idea. To read a file, include its path inside your workspace.",
+    "you": "You",
+    "activity": "Tool activity",
+    "connecting": "Connecting…",
+    "ready": "Ready for your next question",
+    "thinking": "DeClaw is working…",
+    "offline": "Disconnected",
+    "keyboard_hint": "Enter to send · Shift + Enter for a new line"
   },
   "approval": {
     "title": "Tool approval required",
@@ -45,7 +69,12 @@
     "reindex": "Reindex now",
     "reindexing": "Indexing…",
     "count": "{count} documents",
-    "columns": { "path": "Path", "size": "Size", "status": "Status", "indexed": "Indexed" }
+    "columns": {
+      "path": "Path",
+      "size": "Size",
+      "status": "Status",
+      "indexed": "Indexed"
+    }
   },
   "audit": {
     "filter": "Filter",
@@ -91,7 +120,11 @@
     "watcher": "File watcher",
     "egress": "Egress monitor",
     "plugins": "Plugins",
-    "reachable": { "true": "reachable", "false": "unreachable", "null": "not measured" }
+    "reachable": {
+      "true": "reachable",
+      "false": "unreachable",
+      "null": "not measured"
+    }
   },
   "error": {
     "unauthorized": "Sign-in required.",
@@ -109,5 +142,9 @@
     "bad_frame": "Unrecognized message.",
     "turn_failed": "The turn failed.",
     "backpressure": "The client stopped reading; the turn was cancelled."
+  },
+  "shell": {
+    "workspace": "Your workspace",
+    "local": "Runs on this computer"
   }
 }

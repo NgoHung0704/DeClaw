@@ -2,7 +2,7 @@
 // the md/json export — all through the typed /api/audit routes. Payloads are
 // untrusted JSON rendered as text only.
 
-import { el, registerRoute, t } from "./app.js";
+import { el, registerRoute, t } from "./core.js";
 import { getJson } from "./api.js";
 
 const mount = async (main) => {
@@ -69,7 +69,7 @@ const mount = async (main) => {
         row.appendChild(el("td", { text: `${event.created_at} ${event.id}` }));
         row.appendChild(el("td", { text: event.event_type }));
         const payload = el("td");
-        payload.textContent = JSON.stringify(event.payload);
+        payload.textContent = JSON.stringify(event);
         row.appendChild(payload);
         tbody.appendChild(row);
       }

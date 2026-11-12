@@ -17,6 +17,28 @@ from pydantic import ValidationError
 from declaw.config import Settings, get_settings
 
 
+def test_saved_workspace_applies_to_cold_start_and_path_containment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from declaw.settings_service import SettingsService
+    from declaw.tools.builtin._paths import resolve_in_workspace
+
+    monkeypatch.chdir(tmp_path)  # no developer .env file
+    monkeypatch.setenv("DECLAW_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.delenv("DECLAW_WORKSPACE_DIR", raising=False)
+    settings = get_settings()
+    new_workspace = tmp_path / "chosen-workspace"
+    SettingsService(settings).update(workspace_dir=str(new_workspace))
+    get_settings.cache_clear()  # a new process reads persisted settings
+    assert get_settings().workspace_dir == new_workspace
+    assert resolve_in_workspace("notes.txt") == new_workspace / "notes.txt"
+
+    # Environment remains authoritative over the saved file on restart.
+    monkeypatch.setenv("DECLAW_WORKSPACE_DIR", str(tmp_path / "env-workspace"))
+    get_settings.cache_clear()
+    assert get_settings().workspace_dir == tmp_path / "env-workspace"
+
+
 # Settings(_env_file=None) skips ``.env`` lookup so the test does not depend on
 # whatever .env happens to sit in CWD.
 def _fresh(**env: str) -> Settings:

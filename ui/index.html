@@ -9,7 +9,9 @@
 </head>
 <body>
   <header>
-    <nav>
+    <a class="brand" href="#/chat"><span class="brand-mark" aria-hidden="true">d.</span><span>DeClaw</span></a>
+    <p class="nav-caption" data-i18n="shell.workspace">Your workspace</p>
+    <nav aria-label="Main navigation">
       <a href="#/connect" data-route="connect">Connect</a>
       <a href="#/chat" data-route="chat">Chat</a>
       <a href="#/documents" data-route="documents">Documents</a>
@@ -18,6 +20,7 @@
       <a href="#/settings" data-route="settings">Settings</a>
       <a href="#/status" data-route="status">Status</a>
     </nav>
+    <div class="sidebar-footer"><span class="local-mark" aria-hidden="true"></span><span data-i18n="shell.local">Runs on this computer</span></div>
   </header>
   <main id="page"></main>
 </body>

@@ -401,8 +401,18 @@ class RateLimitMiddleware:
                 )
             return
         if method in ("GET", "HEAD") and path.startswith("/api/"):
+            registry = scope["app"].state.session_registry
+            # Never allocate a bucket for attacker-chosen cookie strings.
+            # Retire REST buckets when their authentication session expires.
+            for key in list(self._limiter._rest_read_buckets):
+                if not registry.validate(key):
+                    self._limiter._rest_read_buckets.pop(key, None)
             session_id = _cookie_value(scope, SESSION_COOKIE_NAME)
-            if session_id is not None and not self._limiter.allow_rest_read(session_id):
+            if (
+                session_id is not None
+                and registry.validate(session_id)
+                and not self._limiter.allow_rest_read(session_id)
+            ):
                 await _http_error_response(
                     send,
                     429,

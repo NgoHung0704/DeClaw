@@ -9,13 +9,27 @@
     "status": "État"
   },
   "page": {
-    "connect": { "title": "Connexion" },
-    "chat": { "title": "Discussion" },
-    "documents": { "title": "Documents" },
-    "audit": { "title": "Journal d'audit" },
-    "plugins": { "title": "Greffons" },
-    "settings": { "title": "Réglages" },
-    "status": { "title": "État du système" }
+    "connect": {
+      "title": "Connexion"
+    },
+    "chat": {
+      "title": "Discussion"
+    },
+    "documents": {
+      "title": "Documents"
+    },
+    "audit": {
+      "title": "Journal d'audit"
+    },
+    "plugins": {
+      "title": "Greffons"
+    },
+    "settings": {
+      "title": "Réglages"
+    },
+    "status": {
+      "title": "État du système"
+    }
   },
   "connect": {
     "token": {
@@ -30,7 +44,17 @@
     "cancel": "Annuler le tour",
     "disconnected": "Connexion perdue — le tour a été annulé et les approbations en attente ont été refusées.",
     "sources": "Sources",
-    "sentinel_pending": "En attente"
+    "sentinel_pending": "En attente",
+    "conversation": "Conversation",
+    "empty_title": "Vos documents, plus clairs.",
+    "empty_help": "Posez une question, explorez un fichier ou développez une idée. Pour lire un fichier, indiquez son chemin dans votre dossier de travail.",
+    "you": "Vous",
+    "activity": "Activité des outils",
+    "connecting": "Connexion…",
+    "ready": "Prêt pour votre prochaine question",
+    "thinking": "DeClaw travaille…",
+    "offline": "Déconnecté",
+    "keyboard_hint": "Entrée pour envoyer · Maj + Entrée pour une nouvelle ligne"
   },
   "approval": {
     "title": "Approbation d'outil requise",
@@ -45,7 +69,12 @@
     "reindex": "Réindexer maintenant",
     "reindexing": "Indexation…",
     "count": "{count} documents",
-    "columns": { "path": "Chemin", "size": "Taille", "status": "État", "indexed": "Indexé" }
+    "columns": {
+      "path": "Chemin",
+      "size": "Taille",
+      "status": "État",
+      "indexed": "Indexé"
+    }
   },
   "audit": {
     "filter": "Filtrer",
@@ -91,7 +120,11 @@
     "watcher": "Observateur de fichiers",
     "egress": "Moniteur de trafic sortant",
     "plugins": "Greffons",
-    "reachable": { "true": "accessible", "false": "inaccessible", "null": "non mesuré" }
+    "reachable": {
+      "true": "accessible",
+      "false": "inaccessible",
+      "null": "non mesuré"
+    }
   },
   "error": {
     "unauthorized": "Connexion requise.",
@@ -109,5 +142,9 @@
     "bad_frame": "Message non reconnu.",
     "turn_failed": "Le tour a échoué.",
     "backpressure": "Le client a cessé de lire ; le tour a été annulé."
+  },
+  "shell": {
+    "workspace": "Votre espace de travail",
+    "local": "Sur cet ordinateur"
   }
 }

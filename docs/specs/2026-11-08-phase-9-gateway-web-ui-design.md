@@ -465,7 +465,12 @@ update UI exists.
 
 - **Storage.** `settings.json` in `data_dir`, managed by
   `declaw/settings_service.py`. Precedence: environment > file > defaults.
-  `get_settings()` stays the env layer; `SettingsService` composes the two.
+  `SettingsService` composes the two. At cold process startup, `get_settings()`
+  freezes the effective workspace from this file into its singleton, retaining
+  which fields came explicitly from the environment. This aligns filesystem
+  containment, plugin parsing, the indexer and watcher after restart; browser
+  requests never clear or mutate that singleton. Model/language composition
+  remains per-session.
 - **Mutable keys (v0.1):** `model`, `language`, `workspace_dir`. Nothing else
   is editable from the UI; security toggles (`sanitizer_required`, etc.) stay
   env-only so a compromised session cannot quietly lower defenses.
@@ -594,7 +599,9 @@ contains fake citations must not leak them into `sources`).
 isolation; approval never crosses sessions; settings precedence env > file;
 restart-required flags; audit filters and export; EN/FR locale completeness
 test (same key set both files). DOM-level markup-injection is verified by a
-manual checklist (the repo has no JS test runner); server-side CSP and
+manual checklist; Node's built-in runner now executes bootstrap, Documents,
+chat answer/citation and audit rendering regressions with a minimal DOM.
+Server-side CSP and
 no-inline-script tests run in CI. First-token latency is measured and recorded
 in a dated history report — not asserted as a guarantee.
 

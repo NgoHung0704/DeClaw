@@ -3,7 +3,7 @@
 // folder on disk — the browser cannot pick arbitrary server paths, and the
 // copy says exactly that (spec section 10/13).
 
-import { el, registerRoute, t } from "./app.js";
+import { el, registerRoute, t } from "./core.js";
 import { getJson, postJson, wsBase } from "./api.js";
 
 const mount = async (main) => {
@@ -12,6 +12,7 @@ const mount = async (main) => {
   const info = el("div", { cls: "banner", attrs: { "data-kind": "info" } });
   const actions = el("div");
   const reindex = el("button", { text: t("documents.reindex") });
+  const progress = el("div", { cls: "muted", attrs: { hidden: "" } });
   actions.appendChild(reindex);
   actions.appendChild(progress);
   const table = el("table");
@@ -27,7 +28,6 @@ const mount = async (main) => {
   main.replaceChildren(h1, workspaceBlock, info, actions, table, banner);
 
   workspaceBlock.appendChild(el("h2", { text: t("documents.workspace") }));
-  const progress = el("div", { cls: "muted", attrs: { hidden: "" } });
 
   // The workspace path is honest copy (never a server folder picker).
   try {

@@ -32,6 +32,7 @@ from declaw.gateway.middleware import (
     RateLimiter,
     WebSocketMessageCapMiddleware,
 )
+from tests.gateway.test_auth_flow import FakeSecretStore
 
 TEST_PORT = 9000  # never the default 7842 (same convention as test_host_origin.py)
 BIND_AUTHORITY = f"127.0.0.1:{TEST_PORT}"
@@ -59,7 +60,10 @@ def _client() -> TestClient:
     # base_url pins the Host header to the bound authority (Task 3
     # middleware 403s the TestClient default "testserver"); POST/PUT still
     # need the explicit Origin header.
-    return TestClient(create_app(_settings()), base_url=f"http://{BIND_AUTHORITY}")
+    return TestClient(
+        create_app(_settings(), secret_store=FakeSecretStore()),
+        base_url=f"http://{BIND_AUTHORITY}",
+    )
 
 
 def _assert_error_shape(payload: Any) -> None:
@@ -133,14 +137,14 @@ def test_login_bucket_refills_over_time() -> None:
 
 def test_rest_reads_limited_to_120_per_minute_per_session() -> None:
     client = _client()
-    cookie = {"Cookie": f"{SESSION_COOKIE_NAME}=s1"}
+    session_id = client.app.state.session_registry.create()
+    cookie = {"Cookie": f"{SESSION_COOKIE_NAME}={session_id}"}
 
     # The bucket refills 2 tokens/second while the loop runs, so the
     # denial point can shift a little past 120; what must hold is that
     # it arrives (bounded by 200 attempts) and that everything before it
-    # reached the router. Since Task 11 the route exists and answers 401
-    # (the cookie value is not a registered session on this bare app) —
-    # that is the "reached the router" signal.
+    # reached the router. The valid cookie passes authentication; this bare
+    # app has no Application so its service route answers 503.
     statuses = []
     blocked_payload: object = None
     for _ in range(200):
@@ -149,7 +153,7 @@ def test_rest_reads_limited_to_120_per_minute_per_session() -> None:
         if response.status_code == 429:
             blocked_payload = response.json()
             break
-        assert statuses[-1] == 401
+        assert statuses[-1] == 503
 
     assert statuses[-1] == 429
     assert len(statuses) > 120  # a full bucket was consumed first

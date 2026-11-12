@@ -733,6 +733,15 @@ Scope follows the approved Phase 7–9 roadmap and the [ratified Phase 9 design]
 
 ### [x] DCL-120 — FastAPI app (bind 127.0.0.1 only)
 
+Phase 9 review repairs (DCL-121/123/127/128/129/131): startup token delivery,
+authenticated-only REST rate buckets, shared UI initialization, Documents
+mounting, chat final/tool-assisted rendering, flat audit payloads,
+task-correlated service audit and cold-start workspace application.
+See [2026-11-10 evidence](docs/history/phase-9-repairs-2026-11-10.md).
+Renewed full-suite verification and owner visual feedback are recorded in the
+[2026-11-12 report](docs/history/phase-9-verification-2026-11-12.md);
+authenticated real-browser checklist items remain open.
+
 - **Description**: Hardened uvicorn config; no LAN bind.
 - **Acceptance**: External interface rejects connections.
 - **Dependencies**: DCL-004
@@ -781,6 +790,11 @@ Scope follows the approved Phase 7–9 roadmap and the [ratified Phase 9 design]
 - **Estimate**: 1d
 
 ### [x] DCL-127 — UI: Chat interface (streaming)
+
+- **UI refinement (2026-11-10)**: Shared responsive workspace styling, labeled
+  message roles, EN/FR empty and working states, multiline input (Shift+Enter),
+  pending-turn send guard and active-turn-only cancellation. Browser layout
+  checked at desktop and 375px; behavior regressions run with Node.
 
 - **Description**: Token stream via WS.
 - **Acceptance**: First token < 1s on dev hardware.

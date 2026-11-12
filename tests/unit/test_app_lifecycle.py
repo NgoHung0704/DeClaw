@@ -47,6 +47,39 @@ def make_settings(tmp_path: Path, **overrides: Any) -> Settings:
     return Settings(**values)  # type: ignore[call-arg]
 
 
+async def test_gateway_owned_emitters_correlate_turn_audit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, fakes: list[str]
+) -> None:
+    import asyncio
+
+    from declaw.app import Application
+    from declaw.audit.correlation import current_task_id
+    from declaw.audit.events import NetworkCallEvent
+    from declaw.audit.logger import InMemoryAuditLogger
+    from declaw.sanitizer.verdict import SanitizerVerdict
+
+    captured = InMemoryAuditLogger()
+    monkeypatch.setattr("declaw.app.DbAuditLogger", lambda _: captured)
+    app = Application(make_settings(tmp_path), mode="gateway")
+    await app.start()
+    token = current_task_id.set("turn-security-regression")
+    try:
+        assert app.egress_monitor is not None
+        await app.egress_monitor.audit.emit(  # type: ignore[attr-defined]
+            NetworkCallEvent(method="GET", url="http://localhost/test", host="localhost")
+        )
+        app.quarantine.add(
+            content="untrusted", source="test.txt",
+            verdict=SanitizerVerdict(verdict="UNSAFE", reason="blocked"),
+        )
+        await asyncio.sleep(0)  # flush the sink's scheduled emit
+    finally:
+        current_task_id.reset(token)
+        await app.shutdown()
+    assert len(captured.events) == 2
+    assert all(event.task_id == "turn-security-regression" for event in captured.events)
+
+
 class FakeHealth:
     reachable = True
     version = "test"

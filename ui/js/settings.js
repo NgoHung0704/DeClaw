@@ -2,7 +2,7 @@
 // workspace_dir) with honest applied feedback — model/language apply to new
 // chat sessions, workspace changes require a gateway restart (spec section 12).
 
-import { el, navigate, registerRoute, setLanguage, t } from "./app.js";
+import { el, navigate, registerRoute, setLanguage, t } from "./core.js";
 import { getJson, putJson } from "./api.js";
 
 const mount = async (main) => {

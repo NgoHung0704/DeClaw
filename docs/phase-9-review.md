@@ -1,12 +1,24 @@
 # Phase 9 — manual DOM checklist (post-implementation review)
 
-The repository ships no JavaScript test runner (spec section 17, M5):
-server-side CSP and no-inline-script checks run in CI
-(`tests/gateway/test_ui_security.py`), but markup-injection and interactive
-behavior are verified by this manual checklist. Run against a real
+Node's built-in test runner executes module bootstrap and key DOM behavior
+regressions in CI (`tests/gateway/ui-behavior.test.cjs`, using a minimal DOM).
+Server-side CSP and no-inline-script checks run in Python CI
+(`tests/gateway/test_ui_security.py`). Real-browser markup-injection, layout
+and the remaining interactions are verified by this manual checklist. Run against a real
 `uv run declaw start` (token from the console) on the loopback URL.
 
+The 2026-11-10 visual refinement retains local CSS and system fonts. Shared
+tokens style the sidebar, forms, tables and approval overlay. Chat distinguishes
+user/assistant/tool entries and shows pending/active/disconnected state;
+Shift+Enter inserts a line, Enter sends (except during IME composition).
+These keyboard/control states are covered by executable Node regressions.
+
 ## Markup injection (XSS class deleted at the source)
+
+2026-11-12: the owner accepted the visual UI. This does not check off the
+security and interaction items below. The renewed automated Python and Node
+results and browser-tool limitation are recorded in the
+[verification report](history/phase-9-verification-2026-11-12.md).
 
 - [ ] Chat: send a turn whose model answer contains `<img src=x
       onerror=alert(1)>` and `<script>alert(1)</script>` — the bubble must

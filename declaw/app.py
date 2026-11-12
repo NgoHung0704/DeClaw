@@ -30,6 +30,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
 from declaw.audit.egress import EgressMonitor, allowed_hosts_from_settings
 from declaw.audit.logger import DbAuditLogger
+from declaw.audit.correlation import TaskCorrelatingAuditLogger
 from declaw.audit.sinks import composite_sink, quarantine_db_sink
 from declaw.config import Settings, get_settings
 from declaw.db.engine import ensure_schema, get_engine, get_sessionmaker
@@ -91,7 +92,8 @@ class Application:
         # process-wide singletons (DCL-005: concurrent cold-start safe).
         self.engine: AsyncEngine = get_engine()
         self.sessionmaker: async_sessionmaker[AsyncSession] = get_sessionmaker()
-        self.audit = DbAuditLogger(self.sessionmaker)
+        base_audit = DbAuditLogger(self.sessionmaker)
+        self.audit = TaskCorrelatingAuditLogger(base_audit) if mode == "gateway" else base_audit
 
         # Principle #4: external content is quarantined before the model sees
         # it. The store reports to the operational log and the audit DB
