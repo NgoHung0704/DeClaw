@@ -141,11 +141,11 @@ See [`docs/`](./docs/) for detailed reviews, security decisions, and limitations
 | Sanitizer, confirmation gate, SQLite audit, HTTP observer | Implemented in the CLI path |
 | Memory, credentials, plugin host and SDK | Implemented in source |
 | `doc-intel` parsing, indexing, retrieval, citations, and document actions | Implemented in source and CLI paths; quality and performance still need product validation |
-| Gateway / API | Configuration and package skeleton; `start` and `stop` are stubs |
+| Gateway / API and browser UI | Implemented: `declaw start`, authenticated REST/WebSockets and EN/FR UI; `declaw stop` remains deferred |
 | Desktop UI, Tauri integration, installer | Repository scaffolding; no working end-user desktop release |
 | Shell execution and sandbox | Deferred; no shell tool is exposed |
 
-Use the [current status](./docs/project-status.md), [documentation index](./docs/README.md), and [Phase 9 readiness assessment](./docs/phase-9-readiness.md) for handoff. The [ticket backlog](./TICKETS.md) and historical reviews preserve planning and rationale; executable code takes precedence.
+Use the [current status](./docs/project-status.md), [documentation index](./docs/README.md), and [Phase 9 verification](./docs/history/phase-9-verification-2026-11-12.md) for handoff. The pre-implementation readiness assessment, ticket backlog and historical reviews preserve planning and rationale; executable code takes precedence.
 
 ## Repository map
 
@@ -161,7 +161,6 @@ declaw/                 Python application
   credentials/          OS keyring and encrypted fallback
   db/                   SQLite models and engine
   gateway/              Loopback HTTP/WebSocket gateway
-  sandbox/              Deferred shell isolation
 declaw_plugin_sdk/      Protocol used by plugin subprocesses
 plugins/builtin/        Built-in doc-intel plugin
 alembic/                Database migrations

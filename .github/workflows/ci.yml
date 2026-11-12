@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, feat/phase-7-plugin-host]
+    branches: [main, 'feat/**']
   pull_request:
 
 permissions:

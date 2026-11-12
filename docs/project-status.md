@@ -1,6 +1,7 @@
 # Current implementation status
 
-Source reviewed: 2026-10-25. Runtime claims below follow the current wiring.
+Initial source review: 2026-10-25; Phase 9 maintenance review: 2026-11-12.
+Runtime claims below follow the current wiring.
 The dated maintenance baseline is linked below; this Markdown review is not a
 new product-test or model-benchmark run.
 
@@ -21,7 +22,8 @@ is recorded by phase reviews and the ticket ledger. Phase 9 (gateway and web
 UI, DCL-120..134) is implemented on `feat/phase-9-gateway-web-ui`; see the
 dated [Phase 9 baseline](history/phase-9-baseline-2026-11-08.md).
 DCL-071/072/073 remain deferred until a plugin actually needs credentials;
-DCL-082 requires the future UI. The approved Phase 7–9 roadmap supersedes older
+DCL-082 is delivered as the built-in permission panel (the ratified alternative
+to first-run consent). The approved Phase 7–9 roadmap supersedes older
 ticket assumptions: [roadmap](specs/2026-08-23-phase-7-9-roadmap.md).
 
 ## Limits to preserve in proposals
@@ -36,8 +38,9 @@ ticket assumptions: [roadmap](specs/2026-08-23-phase-7-9-roadmap.md).
 - Historical sanitizer scores differ substantially between development and
   held-out corpora. Do not turn a dated corpus score into a security guarantee.
 - Document organization validates before execution but is not an atomic batch.
-  Chat audit task IDs, packaged migrations and memory population remain follow-ups
-  recorded in history; verify wiring before claiming they are resolved.
+  Gateway turns propagate audit task IDs through context; CLI chat does not use
+  that gateway turn context. Packaged migrations and memory population remain
+  follow-ups recorded in history.
 
 For any new task, verify the relevant row against the current checkout. Update
 this file when executable behavior changes; put dated measurements in a separate
@@ -45,6 +48,13 @@ report with command, environment and corpus. Do not carry forward old test count
 as current validation.
 
 ## Phase 9 readiness and maintenance
+
+The [maintenance report](history/phase-9-maintenance-2026-11-12.md) records the
+documentation/dependency cleanup and shared-module boundaries. Document citation
+context lives in `declaw/documents/sources.py`; configuration bootstrap and
+SettingsService share `declaw/settings_file.py` without importing each other in
+a cycle. Empty deferred sandbox scaffolding is removed; shell isolation rules
+and the existing preflight Docker-probe limitation are unchanged.
 
 The [2026-11-12 verification report](history/phase-9-verification-2026-11-12.md)
 records a completed full Python suite and companion checks. The owner accepted
