@@ -1,6 +1,11 @@
 # DeClaw — Tickets
 
-> Backlog and historical ticket ledger. Current implementation is tracked in [project status](docs/project-status.md); [active decisions](docs/architecture-decisions.md) and approved specs override superseded ticket wording. Mark `[x]` only with implementation evidence. Phase 3 is deferred for the shell-free v0.1 scope; security gates still apply. See [Phase 9 readiness](docs/phase-9-readiness.md) before starting gateway work.
+> Backlog and historical ticket ledger. Current implementation is tracked in [project status](docs/project-status.md); [active decisions](docs/architecture-decisions.md) and approved specs override superseded ticket wording. Mark `[x]` only with implementation evidence. Phase 3 is deferred for the shell-free v0.1 scope; security gates still apply. For gateway maintenance see the [ratified Phase 9 design](docs/specs/2026-11-08-phase-9-gateway-web-ui-design.md); the readiness assessment is historical.
+
+Repository maintenance (2026-11-12): dependency/scaffold cleanup, phase-branch CI,
+shared document-source context and settings-file ownership are recorded in the
+[maintenance report](docs/history/phase-9-maintenance-2026-11-12.md). These changes
+do not start another product phase or complete pending browser acceptance.
 
 Checkboxes record delivered ticket scope, not enabled defaults, production readiness or achievement of every historical performance target. Notes below identify helper-only, partial and deferred scope. Week estimates are historical planning assumptions.
 
@@ -403,7 +408,7 @@ Deferred for shell-free v0.1. These pending tickets do not block Phase 9 under t
 ### [x] DCL-063 — Daily report
 
 - **Description**: "What did DeClaw do today?" rollup.
-- **Acceptance**: Daily report is available in the CLI; the product UI remains planned.
+- **Acceptance**: Daily report is available in the CLI and as a Markdown download via `/api/audit/export`; the browser Audit page exposes the export alongside event inspection.
 - **Dependencies**: DCL-062
 - **Estimate**: 0.5d
 
@@ -477,9 +482,9 @@ Deferred for shell-free v0.1. These pending tickets do not block Phase 9 under t
 - **Dependencies**: DCL-080
 - **Estimate**: 0.5d
 
-### [ ] DCL-082 — Permission request UI dialog
+### [x] DCL-082 — Built-in permission management panel (ratified scope)
 
-- **Description**: Built-in plugin consent/permission management, coordinated with DCL-134. First-run consent versus a Settings permission panel remains a Phase 9 design question.
+- **Description**: The ratified Phase 9 section 11 replaces first-run consent with a Settings-style panel on the Plugins page. `ui/js/plugins.js` uses the typed permission inventory/grant/revoke routes in `declaw/gateway/routes/plugins.py`; DCL-134 shares this delivery.
 - **Acceptance**: Explicit denials/revocations are respected and audited. Install-time consent is deferred with third-party installation; no install flow in v0.1.
 - **Dependencies**: DCL-081, DCL-127
 - **Estimate**: 0.5d
@@ -494,7 +499,7 @@ Deferred for shell-free v0.1. These pending tickets do not block Phase 9 under t
 ### [x] DCL-084 — Permission audit log
 
 - **Description**: Grants, denies, revocations recorded.
-- **Acceptance**: Permission transitions produce audit events available to CLI reports/exports. An audit UI remains planned.
+- **Acceptance**: Permission transitions produce audit events available to CLI reports/exports and the Phase 9 Audit page (`ui/js/audit.js`, `/api/audit`).
 - **Dependencies**: DCL-081, DCL-061
 - **Estimate**: 0.25d
 

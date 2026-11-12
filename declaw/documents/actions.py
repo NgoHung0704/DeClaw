@@ -20,7 +20,7 @@ from declaw.config import Language
 from declaw.documents.citations import format_source
 from declaw.documents.models import source_metadata
 from declaw.documents.search import ChunkSanitizer, SearchableStore, search_documents
-from declaw.gateway.sources import record_source
+from declaw.documents.sources import record_source
 from declaw.tools.base import DeclawTool, ToolClass
 from declaw.tools.builtin._paths import resolve_in_workspace
 

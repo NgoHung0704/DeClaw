@@ -36,25 +36,18 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 
 from declaw.config import Language, Settings, get_settings
-from declaw.log import logger
-
-_SETTINGS_FILENAME = "settings.json"
-_ALLOWED_LANGUAGES = ("en", "fr")
-# The only keys editable from the UI in v0.1. Security toggles stay env-only
-# so a compromised session cannot quietly lower defenses.
-MUTABLE_KEYS = ("model", "language", "workspace_dir")
+from declaw.settings_file import (
+    MUTABLE_KEYS,
+    SETTINGS_FILENAME,
+    InvalidSettingsFileError as InvalidSettingsFileError,
+    effective_workspace,
+    read_settings_file,
+    same_path,
+    validate_language,
+    validate_model,
+)
 APPLIED_NEW_SESSION = "new_session"
 APPLIED_RESTART_REQUIRED = "restart_required"
-
-
-class InvalidSettingsFileError(RuntimeError):
-    """The stored settings file violates a hard rule (fail closed).
-
-    Raised by :meth:`SettingsService.effective` when a stored value must not
-    be served — e.g. a hand-edited ``workspace_dir`` equal to ``data_dir``.
-    Fail closed: no snapshot is composed from an unsafe file, and callers
-    (session start, settings routes) can catch this typed error to report it.
-    """
 
 
 class EffectiveSettings(BaseModel):
@@ -78,7 +71,7 @@ class SettingsService:
         # The env layer is injectable so tests own it deterministically; the
         # production default is the process-wide cached Settings.
         self._settings = settings if settings is not None else get_settings()
-        self.path = self._settings.data_dir / _SETTINGS_FILENAME
+        self.path = self._settings.data_dir / SETTINGS_FILENAME
 
     def effective(self) -> EffectiveSettings:
         """Build the immutable effective-settings snapshot (env > file > defaults).
@@ -91,21 +84,21 @@ class SettingsService:
         file_values = self._file_values()
         composed: dict[str, Any] = {}
         for key in MUTABLE_KEYS:
+            if key == "workspace_dir":
+                composed[key] = effective_workspace(
+                    self._settings.workspace_dir,
+                    self._settings.data_dir,
+                    "workspace_dir" in self._settings.model_fields_set,
+                    file_values,
+                )
+                continue
             env_value = getattr(self._settings, key)
             env_is_explicit = key in self._settings.model_fields_set
             file_value = file_values.get(key)
             if env_is_explicit or file_value is None:
                 composed[key] = env_value
-            elif key == "workspace_dir":
-                composed[key] = Path(str(file_value)).expanduser()
             else:
                 composed[key] = file_value
-        workspace = Path(composed["workspace_dir"])
-        if _same_path(workspace, self._settings.data_dir):
-            raise InvalidSettingsFileError(
-                f"{self.path}: workspace_dir must not equal data_dir "
-                f"({self._settings.data_dir}); fix or delete the settings file."
-            )
         return EffectiveSettings(**composed)
 
     def update(
@@ -126,11 +119,11 @@ class SettingsService:
         file_values = self._file_values()
         applied: dict[str, str] = {}
         if model is not None:
-            _validate_model(model)
+            validate_model(model)
             file_values["model"] = model
             applied["model"] = APPLIED_NEW_SESSION
         if language is not None:
-            _validate_language(language)
+            validate_language(language)
             file_values["language"] = language
             applied["language"] = APPLIED_NEW_SESSION
         if workspace_dir is not None:
@@ -149,57 +142,11 @@ class SettingsService:
         that fail the same validation as :meth:`update` are ignored with an
         operational-log warning, and the env defaults apply.
         """
-        if not self.path.is_file():
-            return {}
-        try:
-            payload = json.loads(self.path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            logger.warning("Unreadable settings file ignored: {}", self.path)
-            return {}
-        if not isinstance(payload, dict):
-            logger.warning("Settings file is not a JSON object, ignored: {}", self.path)
-            return {}
-        values: dict[str, str] = {}
-        for key in MUTABLE_KEYS:
-            value = payload.get(key)
-            if value is None:
-                continue
-            try:
-                _validate_file_value(key, value)
-            except ValueError as exc:
-                logger.warning("Invalid {} in settings file ignored: {}", key, exc)
-                continue
-            values[key] = value
-        return values
+        return read_settings_file(self.path)
 
     def _write(self, values: dict[str, str]) -> None:
         self._settings.data_dir.mkdir(parents=True, exist_ok=True)
         self.path.write_text(json.dumps(values, indent=2) + "\n", encoding="utf-8")
-
-
-def _validate_model(model: str) -> None:
-    # Existence is checked against Ollama at the next session start, not here:
-    # saving must not require the daemon (spec section 12).
-    if not model.strip():
-        raise ValueError("model must be a non-empty string.")
-
-
-def _validate_language(language: str) -> None:
-    if language not in _ALLOWED_LANGUAGES:
-        raise ValueError(f"language must be one of {list(_ALLOWED_LANGUAGES)}.")
-
-
-def _validate_file_value(key: str, value: object) -> None:
-    """Validate a raw JSON value from the file with the update() rules."""
-    if not isinstance(value, str):
-        raise ValueError(f"{key} must be a string.")
-    if key == "model":
-        _validate_model(value)
-    elif key == "language":
-        _validate_language(value)
-    elif key == "workspace_dir":
-        if not value.strip():
-            raise ValueError("workspace_dir must be a non-empty string.")
 
 
 def _resolve_workspace(workspace_dir: str, data_dir: Path) -> Path:
@@ -218,7 +165,7 @@ def _resolve_workspace(workspace_dir: str, data_dir: Path) -> Path:
     if not workspace_dir.strip():
         raise ValueError("workspace_dir must be a non-empty string.")
     path = Path(workspace_dir).expanduser()
-    if _same_path(path, data_dir):
+    if same_path(path, data_dir):
         raise ValueError(f"workspace_dir must not equal data_dir ({data_dir}).")
     try:
         # "Exists or is creatable" is proved by creating it now, so the
@@ -227,11 +174,3 @@ def _resolve_workspace(workspace_dir: str, data_dir: Path) -> Path:
     except OSError as exc:
         raise ValueError(f"workspace_dir is not creatable: {exc}") from exc
     return path
-
-
-def _same_path(left: Path, right: Path) -> bool:
-    """Compare two paths after resolution (case, symlinks, 8.3 short names)."""
-    try:
-        return left.resolve() == right.resolve()
-    except OSError:  # pragma: no cover - resolve failures only surface the
-        return left == right  # literal comparison as a conservative fallback

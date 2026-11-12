@@ -11,7 +11,7 @@ import pytest
 from declaw.documents.citations import format_source, render_outcome
 from declaw.documents.models import SearchHit, source_metadata
 from declaw.documents.search import SearchOutcome
-from declaw.gateway.sources import TurnSources, current_turn_sources
+from declaw.documents.sources import TurnSources, current_turn_sources
 
 from declaw.documents.actions import build_document_summarize_tool
 from declaw.documents.search import ChunkSanitizer

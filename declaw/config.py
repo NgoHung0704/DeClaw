@@ -139,10 +139,15 @@ def get_settings() -> Settings:
     Model/language remain per-session SettingsService values; no request mutates
     this cache. A workspace edit takes effect only in the next process.
     """
-    from declaw.settings_service import SettingsService
+    from declaw.settings_file import SETTINGS_FILENAME, effective_workspace, read_settings_file
 
     environment = Settings()
-    workspace = SettingsService(environment).effective().workspace_dir
+    workspace = effective_workspace(
+        environment.workspace_dir,
+        environment.data_dir,
+        "workspace_dir" in environment.model_fields_set,
+        read_settings_file(environment.data_dir / SETTINGS_FILENAME),
+    )
     settings = environment.model_copy(update={"workspace_dir": workspace})
     # model_copy marks updated keys explicit. Keep the original env provenance
     # so SettingsService can still report a later file edit before restart.

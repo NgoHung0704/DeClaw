@@ -4,10 +4,9 @@ The launch contract lives here, not only in config parsing: the gateway must
 bind exactly ``127.0.0.1``, and the launcher refuses anything else even if a
 Settings instance carrying another host reaches it (defense in depth).
 
-``run_gateway`` is deliberately minimal for now: programmatic uvicorn with
-hardened flags, no reload, in the foreground. Later tickets bind the
-``Application`` lifespan, routes and middleware without touching this
-contract.
+``run_gateway`` runs foreground uvicorn with hardened flags and no reload.
+``create_app`` binds the shared ``Application`` lifespan, routes and security
+middleware while preserving the strict launcher contract.
 """
 
 from __future__ import annotations

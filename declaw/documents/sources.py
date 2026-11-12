@@ -1,4 +1,4 @@
-"""The typed retrieval-source side channel for chat turns (DCL-127, spec section 8).
+"""Shared retrieval-source context for chat turns (DCL-127, spec section 8).
 
 ``chat.final.sources`` is built from a per-turn :class:`TurnSources` collector,
 reached through the SAME context mechanism as the task id: the turn coroutine

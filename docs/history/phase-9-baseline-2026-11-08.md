@@ -3,8 +3,10 @@
 A dated, local, single-machine record. Not a guarantee for other machines,
 CI environments or future commits. Source state: branch
 `feat/phase-9-gateway-web-ui`, commit `dfb12c1` (Phase 9 tasks 1-15
-landed; see the [SDD plan](../superpowers/plans/2026-11-08-phase-9-gateway-web-ui.md)
-and the [ledger](../../../.superpowers/sdd/2026-11-08-phase-9-gateway-web-ui/progress.md)).
+landed; see the [original plan](../superpowers/plans/2026-11-08-phase-9-gateway-web-ui.md)
+and the [ratified design](../specs/2026-11-08-phase-9-gateway-web-ui-design.md)).
+The original execution ledger was machine-local ignored state; it is not a
+portable source of evidence. This versioned report preserves the dated results.
 
 Machine: Windows 10 (Git Bash), Python 3.12.13 (uv-managed), Ollama
 0.40.15 at `http://localhost:11434`, model `qwen2.5:3b-declaw`.

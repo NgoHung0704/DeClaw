@@ -26,7 +26,7 @@ from declaw.documents.search import (
     SearchableStore,
     search_documents,
 )
-from declaw.gateway.sources import record_source
+from declaw.documents.sources import record_source
 from declaw.tools.base import DeclawTool, ToolClass
 
 SearchCallable = Callable[[str], Awaitable[str]]

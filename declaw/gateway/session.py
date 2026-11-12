@@ -41,7 +41,7 @@ from declaw.config import Language
 from declaw.db.models import Episode, Task, TaskStatus
 from declaw.gateway.approval import ApprovalBroker
 from declaw.gateway.middleware import RateLimiter
-from declaw.gateway.sources import TurnSources, current_turn_sources
+from declaw.documents.sources import TurnSources, current_turn_sources
 from declaw.log import logger
 
 if TYPE_CHECKING:

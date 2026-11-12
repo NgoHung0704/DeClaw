@@ -10,11 +10,50 @@ Verifies the four acceptance criteria:
 from __future__ import annotations
 
 from pathlib import Path
+import json
+import os
+import subprocess
+import sys
 
 import pytest
 from pydantic import ValidationError
 
 from declaw.config import Settings, get_settings
+
+
+def test_cold_settings_does_not_load_service_or_operational_logging(tmp_path: Path) -> None:
+    data = tmp_path / "data"
+    data.mkdir()
+    workspace = tmp_path / "saved-workspace"
+    (data / "settings.json").write_text(
+        json.dumps({"workspace_dir": str(workspace)}), encoding="utf-8"
+    )
+    environment = {key: value for key, value in os.environ.items()
+                   if not key.startswith("DECLAW_")}
+    environment["DECLAW_DATA_DIR"] = str(data)
+    probe = subprocess.run(
+        [sys.executable, "-c", "import json, sys; from declaw.config import get_settings; "
+         "s = get_settings(); print(json.dumps([str(s.workspace_dir), "
+         "'declaw.settings_service' in sys.modules, 'declaw.log' in sys.modules]))"],
+        cwd=tmp_path, env=environment, capture_output=True, text=True, timeout=15,
+        check=True,
+    )
+    assert json.loads(probe.stdout) == [str(workspace), False, False]
+
+
+def test_cold_settings_rejects_saved_workspace_equal_to_data_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from declaw.settings_service import InvalidSettingsFileError
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("DECLAW_DATA_DIR", str(tmp_path))
+    monkeypatch.delenv("DECLAW_WORKSPACE_DIR", raising=False)
+    (tmp_path / "settings.json").write_text(
+        json.dumps({"workspace_dir": str(tmp_path)}), encoding="utf-8"
+    )
+    with pytest.raises(InvalidSettingsFileError, match="data_dir"):
+        get_settings()
 
 
 def test_saved_workspace_applies_to_cold_start_and_path_containment(

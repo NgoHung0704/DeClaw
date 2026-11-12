@@ -1,5 +1,10 @@
 # Phase 9 regression repairs
 
+Historical completed repair plan. The original execution restrictions below
+applied to the 2026-11-10 repair session; they do not override later owner
+instructions. Repairs were subsequently committed as `110e9e7`; see the
+[2026-11-12 verification](../../history/phase-9-verification-2026-11-12.md).
+
 Goal: repair the nine confirmed review findings without changing the approved
 loopback, approval, sanitizer or settings precedence contracts.
 

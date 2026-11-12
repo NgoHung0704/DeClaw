@@ -1,5 +1,13 @@
 # Phase 9 — Gateway & Web UI Implementation Plan
 
+Historical execution plan: implementation was delivered on 2026-11-08;
+see the [dated baseline](../../history/phase-9-baseline-2026-11-08.md) and
+[renewed verification](../../history/phase-9-verification-2026-11-12.md).
+The original checkboxes/instructions below are preserved as authored, not a
+current backlog or a claim that this maintenance reran their red/green steps.
+The original machine-local SDD ledger is not required to navigate these records.
+Node is now used for development behavior tests; no frontend build was added.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the loopback FastAPI gateway and local EN/FR web UI in front of the same CLI services, per the ratified Phase 9 spec.
@@ -8,7 +16,7 @@
 
 **Tech Stack:** Python 3.12 + uv, FastAPI/uvicorn (already in `pyproject.toml`), vanilla JS modules + hand-written CSS, JSON locales. No Node toolchain, no runtime CDN.
 
-**Spec:** `docs/specs/2026-11-08-phase-9-gateway-web-ui-design.md` — binding authority; this plan argues from it. Ratified: all 12 decisions of spec section 20 (see "Rulings" in the SDD ledger).
+**Spec:** `docs/specs/2026-11-08-phase-9-gateway-web-ui-design.md` — binding authority; this plan argues from it. Ratified: all 12 decisions of spec section 20, also recorded in the versioned architecture decisions and baseline.
 
 ## Global Constraints
 

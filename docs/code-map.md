@@ -20,13 +20,13 @@ then follow dependencies and tests for the task at hand.
 | DB singleton initialization | `declaw/db/engine.py:get_engine`, `get_sessionmaker`, `get_session` | `tests/unit/test_db.py` (cold factory-first and concurrent initialization regression tests) |
 | State, encryption and credentials | `declaw/db/`, `declaw/memory/`, `declaw/credentials/`, `alembic/` | `tests/unit/test_db.py`, `test_memory_crypto.py`, `test_credentials_store.py`, `test_credentials_fallback.py` |
 | Audit and network observation | `declaw/audit/tooling.py`, `logger.py`, `egress.py`, `report.py` | `tests/unit/test_audit_events.py`, `test_audit_logger.py`, `test_audit_egress.py` |
-| Configuration and defaults | `declaw/config.py`, `.env.example`, `pyproject.toml`, `uv.lock` | `tests/unit/test_config.py` |
+| Configuration and defaults | `declaw/config.py`, `declaw/settings_file.py`, `.env.example`, `pyproject.toml`, `uv.lock` | `tests/unit/test_config.py` |
 | Application lifecycle (gateway/CLI shared) | `declaw/app.py` | `tests/unit/test_app_lifecycle.py` |
-| Settings persistence and snapshots | `declaw/settings_service.py` | `tests/unit/test_settings_service.py` |
+| Settings persistence and snapshots | `declaw/settings_service.py`, `declaw/settings_file.py` | `tests/unit/test_settings_service.py` |
 | Gateway launcher and contract | `declaw/gateway/app.py`, `declaw/main.py:start` | `tests/gateway/test_launch.py` |
 | Gateway auth and security middleware | `declaw/gateway/auth.py`, `middleware.py` | `tests/gateway/test_auth.py`, `test_auth_flow.py`, `test_host_origin.py`, `test_limits.py` |
 | Gateway sessions, turns and approvals | `declaw/gateway/session.py`, `ws.py`, `approval.py` | `tests/gateway/test_chat_flow.py` |
-| Streaming and typed citations | `declaw/gateway/sources.py` | `tests/gateway/test_streaming.py` |
+| Streaming and retrieval-source context | `declaw/gateway/session.py`, `declaw/documents/sources.py` | `tests/gateway/test_streaming.py`, `tests/unit/test_documents_sources.py` |
 | Gateway REST surface | `declaw/gateway/routes/` | `tests/gateway/test_rest.py` |
 | Event stream (`/ws/events`) | `declaw/gateway/events.py` | `tests/gateway/test_events_ws.py` |
 | Watcher handoff and indexing worker | `declaw/documents/worker.py`, `watcher.py` | `tests/gateway/test_documents_gateway.py` |
@@ -65,6 +65,13 @@ failure/denial paths for security-sensitive work. Run checks appropriate to the
 change and update status/decisions with supporting evidence. Use the historical
 log only to recover the reason for a choice.
 
-## Planned gateway work
+## Gateway maintenance
 
-Before touching the gateway/UI scaffolds, read the [Phase 9 assessment](phase-9-readiness.md). Trace session assembly in main.chat/main.index, graph invocation in brain.repl, confirmation and audit wrappers, plugin lifecycle, and document watcher/indexer ownership. Existing component tests do not establish HTTP/WebSocket security or multi-session behavior.
+The gateway and UI are implemented. Read the [ratified design](specs/2026-11-08-phase-9-gateway-web-ui-design.md),
+[verification](history/phase-9-verification-2026-11-12.md) and
+[manual checklist](phase-9-review.md) before changing their contracts.
+`Application` owns shared chat/gateway services; CLI indexing retains a smaller
+stack through `build_document_stack`. Document tools record sources through the
+documents layer, never by importing gateway code. Component tests alone do not
+establish real-browser acceptance. The [readiness assessment](phase-9-readiness.md)
+is the historical pre-implementation analysis.
