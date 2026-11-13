@@ -14,7 +14,7 @@ new product-test or model-benchmark run.
 | Watcher | `declaw/documents/watcher.py` + `declaw/documents/worker.py`: gateway mode starts a loop-safe watcher handoff feeding ONE serialized indexing worker (retry 0s/30s/300s); CLI behavior unchanged; deletion/move reconcile. |
 | Memory | Components exist under `declaw/memory/`; `with_memory` is not in the default `build_brain` stack. Do not assume episodic memory is populated by chat. |
 | Gateway | `declaw start` runs the hardened loopback uvicorn launcher (`declaw/gateway/app.py`); a full FastAPI surface (auth, Host/Origin, rate/body caps, WS chat with approvals and streaming, REST, events) sits in `declaw/gateway/`. `declaw stop` stays unimplemented (DCL-234). Core wiring is `declaw/app.py` (`Application`, gateway/CLI shared). |
-| Desktop and installer | The gateway web UI is implemented under `ui/` (vanilla JS, EN/FR, CSP-locked; manual checklist in `phase-9-review.md`). `tauri/` remains scaffolding; packaging stays a Phase 14 gate. |
+| Desktop and installer | Windows source desktop is in progress under `tauri/` and `declaw/desktop/`: owned core/Job supervision, private IPC, trusted bootstrap/tray and candidate workspace picker. Native build and component/process tests exist; authenticated WebView2 and crash-recovery acceptance remain open. See the [dated progress report](history/phase-10-implementation-2026-11-13.md) and [desktop checklist](phase-10-review.md). Installed notifications/packaging stay at Phase 14. |
 | Shell sandbox | Deferred from v0.1; no product shell tool is exposed. |
 
 Phase 0, 1, 2, 4, 5, 6 (buildable core), 7, 8a and 8b completion

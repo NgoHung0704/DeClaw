@@ -868,6 +868,14 @@ safe event wiring and in-app fallback are Phase 10 work; installed Windows
 identity/activation acceptance is deferred to Phase 14. All tickets remain open
 until their implementation and applicable acceptance are verified.
 
+Implementation in progress on 2026-11-13: see the
+[dated report](docs/history/phase-10-implementation-2026-11-13.md) and
+[desktop checklist](docs/phase-10-review.md). Source shell, owned lifecycle,
+private IPC, tray/bootstrap and picker code exist with automated tests; remaining
+WebView2/Windows UI and interrupted-persistence checks prevent blanket completion
+of DCL-140..145. The [release dossier](docs/phase-10-release-boundaries.md) records
+DCL-146..150 prerequisites without closing those release tickets.
+
 ### [ ] DCL-140 — Tauri 2.0 project scaffold
 
 - **Description**: src-tauri + assets.

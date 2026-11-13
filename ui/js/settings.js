@@ -4,6 +4,7 @@
 
 import { el, navigate, registerRoute, setLanguage, t } from "./core.js";
 import { getJson, putJson } from "./api.js";
+import { chooseWorkspace, hasWorkspacePicker } from "./desktop.js";
 
 const mount = async (main) => {
   const h1 = el("h1", { text: t("page.settings.title") });
@@ -30,6 +31,22 @@ const mount = async (main) => {
     text: t("settings.applied.restart_required"),
   });
   workspaceField.replaceChildren(workspaceLabel, workspaceInput, workspaceNote);
+  if (hasWorkspacePicker()) {
+    const choose = el("button", { text: t("settings.choose_workspace"), attrs: { type: "button" } });
+    choose.addEventListener("click", async () => {
+      choose.disabled = true;
+      try {
+        const path = await chooseWorkspace();
+        if (path !== null) workspaceInput.value = path;
+      } catch {
+        banner.textContent = t("error.service_unavailable");
+        banner.removeAttribute("hidden");
+      } finally {
+        choose.disabled = false;
+      }
+    });
+    workspaceField.appendChild(choose);
+  }
 
   const save = el("button", { text: t("settings.save") });
   main.replaceChildren(h1, banner, feedback, modelField, languageField, workspaceField, save);

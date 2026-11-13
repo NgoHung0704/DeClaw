@@ -186,6 +186,7 @@ class GatewaySession:
         self._terminal_state: TaskStatus | None = None
         self._writer_task: asyncio.Task[None] | None = None
         self._closed = False
+        self._accepting_turns = True
         self._writer_stopped = False
 
     # --- single-owner outbound transport ------------------------------------
@@ -333,6 +334,9 @@ class GatewaySession:
         return True
 
     async def _handle_message(self, text: str) -> None:
+        if not self._accepting_turns or self._closed:
+            self.enqueue(_error(ERROR_BUSY, "gateway is shutting down"))
+            return
         if self._turn_task is not None:
             self.enqueue(
                 _error(
@@ -718,6 +722,12 @@ class SessionManager:
     async def stop_accepting_sessions(self) -> None:
         """Shutdown step 1: refuse new handshakes (existing ones continue)."""
         self._accepting = False
+        # Refuse new turns on existing sockets before cancellation yields.
+        for session in list(self._sessions.values()):
+            async def refuse(current: GatewaySession = session) -> None:
+                current._accepting_turns = False
+
+            await _await_on_loop(session.loop, refuse)
 
     async def cancel_in_flight_turns(self) -> None:
         """Shutdown step 2: cancel every live session's turn on its own loop."""

@@ -1,21 +1,19 @@
 # Phase 10 — Tauri desktop shell
 
 Date: 2026-11-12
-Status: Seven section-10 decisions settled on 2026-11-12 by agent selection explicitly delegated by the owner. Product implementation remains pending.
+Status: Seven section-10 decisions settled on 2026-11-12 by agent selection explicitly delegated by the owner. Product implementation is in progress; see the dated report and acceptance checklist.
 Scope: Windows-first desktop integration; source-development delivery.
 
 ## 1. Intent and baseline
 
 Provide one desktop entry point to the existing DeClaw gateway and EN/FR web UI, with reliable core ownership, native tray, notifications and workspace selection. Preserve the Python application as the sole owner of model execution, tools, approvals, indexing and audit.
 
-Branch state verified during this documentation review: `feat/phase-10` contains
-planning commit `ecc615a` on Phase 9 repair base `110e9e7`; local `main` is also
-`110e9e7`. Phase 9 now additionally contains maintenance commit `3f1d803`, which
-is not yet an ancestor of this branch. Preserve the planning commit and integrate
-that dependency through the normal local integration process before product
-implementation; do not reset/rebase away planning work or describe maintenance
-as already present here. This review changes documents only and does not move
-main, merge branches or publish to GitHub.
+Baseline integrated for implementation: reviewed planning decisions were preserved
+in `06d3551`, then Phase 9 maintenance `3f1d803` was merged into `feat/phase-10`
+by `e3bac04`. Planning commit `ecc615a` and repair base `110e9e7` remain in
+history. The merge retained both documentation indexes; no reset or remote
+publication was used. See the [implementation report](../history/phase-10-implementation-2026-11-13.md)
+and [acceptance checklist](../phase-10-review.md) for current evidence and gaps.
 
 The earlier Phase 9 Python/Node checks and owner visual feedback are dated
 evidence, not completion of authenticated real-browser acceptance. M1 must run
@@ -136,7 +134,7 @@ must prove the exact IPC transport under existing gateway CSP; an origin/CSP
 exception is not an implementation workaround. See [Tauri capabilities](https://v2.tauri.app/security/capabilities/).
 
 On child exit, mark the launch lease invalid synchronously and reject commands,
-then close/destroy the gateway webview. Do not assume Tauri exposes a generic
+then close/destroy the gateway webview. The actor must receive the generation-specific destruction acknowledgement before another launch; a scheduling/destruction error or five-second acknowledgement timeout remains failed and denies retry until destruction is confirmed. Native gateway labels encode the creation generation (`gateway-<generation>`), so a stale window cannot claim a newer generation through a JS argument. Do not assume Tauri exposes a generic
 dynamic capability-revocation operation. Recreate the webview only after a newly
 owned launch becomes ready; a replacement process listening on the same URL must
 never inherit native access.
@@ -147,7 +145,7 @@ Directory picker is user initiated and returns a path or cancellation. Selection
 
 Wire authoritative quarantine and approval-pending events from Python to the owned native supervisor through the private channel. Do not accept arbitrary notification text from documents or webview callers. Include event identifier, event kind and safe task reference; render localized fixed text without document contents, filenames or credentials. Deduplicate by identifier and bound queues/rate; notification loss never affects approval state.
 
-Clicking first focuses the existing gateway window without reload, navigation or
+For the deferred native activation acceptance, clicking first focuses the existing gateway window without reload, navigation or
 opening another chat socket. The current Chat mount replaces its connection;
 remounting could cancel the very approval referenced by a notice. Route/focus
 integration must retain the existing socket, pending turn and modal, or show a
@@ -233,10 +231,10 @@ verification, installation or publication.
 | 4 | Paste-once token login through explicit trusted-bootstrap reveal. | Reuse gateway authentication and the same approved SecretStore; no automatic cookie bootstrap, token logging or automatic clipboard copy. Automatic login is deferred. |
 | 5 | Window close hides to tray; explicit Quit stops all owned descendants. | Keep background work available with a first-use EN/FR explanation. Quit uses bounded cooperative shutdown followed by owned-process cleanup. |
 | 6 | Source-development Windows delivery in Phase 10; release acceptance for DCL-146..150 stays at Phase 14. | Deliver the release-boundary dossier now. Installer, updater, distribution and signing tickets remain open until their actual release criteria pass. |
-| 7 | Defer installed Windows native-notification identity/activation acceptance to Phase 14. | Phase 10 implements safe event wiring, bounded dispatch and tested focus handling, retaining in-app feedback when native delivery is unavailable. No installation/registration is authorized by this decision. DCL-144 remains open; development toasts and mocks cannot satisfy installed acceptance. |
+| 7 | Defer installed Windows native-notification identity/activation acceptance to Phase 14. | Phase 10 implements safe event wiring and bounded dispatch, retaining in-app feedback. Native click activation/focus acceptance is deferred with installed delivery to Phase 14. No installation/registration is authorized by this decision. DCL-144 remains open; development toasts and mocks cannot satisfy installed acceptance. |
 
-All seven decisions are settled. The Phase 9 maintenance integration and M1
-compatibility checks remain prerequisites. Later recovery evidence may require
+All seven decisions are settled. Phase 9 maintenance is integrated; the open M1 compatibility checks remain
+acceptance prerequisites. Later recovery evidence may require
 an additional scoped architecture decision before persistence changes; these
 seven decisions do not authorize a new durable ownership schema. Routine module
 names and test organization can follow repository conventions.

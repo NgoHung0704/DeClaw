@@ -36,6 +36,7 @@ desktop.ini
 # Tauri / Rust
 target/
 src-tauri/target/
+/tauri/src-tauri/gen/
 
 # Coverage
 .coverage

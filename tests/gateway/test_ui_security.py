@@ -85,6 +85,7 @@ def test_csp_connect_src_derived_from_bind() -> None:
     assert "style-src 'self'" in csp
     assert "img-src 'self' data:" in csp
     assert "frame-ancestors 'none'" in csp
+    assert "frame-src 'none'" in csp
 
 
 def test_csp_present_on_rejected_responses_too() -> None:

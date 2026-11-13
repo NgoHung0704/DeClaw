@@ -357,6 +357,28 @@ async def test_failed_start_uninstalls_the_egress_monitor(
     ]
 
 
+def test_optional_quarantine_notice_failure_preserves_audit_and_quarantine(
+    fakes: list[str], tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from declaw.app import Application
+    from declaw.sanitizer.verdict import SanitizerVerdict
+
+    audited: list[str] = []
+    notified: list[str] = []
+    monkeypatch.setattr("declaw.app.log_audit_sink", lambda _event: None)
+    monkeypatch.setattr("declaw.app.quarantine_db_sink", lambda _audit: lambda event: audited.append(event.id))
+
+    def unavailable(identifier: str) -> None:
+        notified.append(identifier)
+        raise RuntimeError("optional native delivery failed")
+
+    application = Application(make_settings(tmp_path), quarantine_event=unavailable)
+    identifier = application.quarantine.add(content="untrusted fixture", source="fixture.txt",
+                                          verdict=SanitizerVerdict(verdict="UNSAFE", reason="fixture"))
+    assert audited == notified == [identifier]
+    assert application.quarantine.get(identifier).content == "untrusted fixture"
+
+
 async def test_a_failing_shutdown_step_does_not_strand_the_rest(
     fakes: list[str], tmp_path: Path
 ) -> None:

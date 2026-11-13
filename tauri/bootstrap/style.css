@@ -1,0 +1,5 @@
+:root { color-scheme: dark; font: 16px/1.6 system-ui, sans-serif; background: #13151b; color: #e8eaf0; }
+body { margin: 0; } main { max-width: 42rem; margin: 3rem auto; padding: 1.5rem; }
+h1 { font-size: 2.5rem; } button, select { font: inherit; padding: .6rem 1rem; margin: .5rem .5rem .5rem 0; border: 1px solid #626b80; border-radius: .5rem; background: #232936; color: inherit; }
+button:focus-visible, select:focus-visible { outline: 2px solid #9ab4ff; } button:disabled { opacity: .5; }
+output { overflow-wrap: anywhere; padding: 1rem; border: 1px solid #626b80; user-select: all; }

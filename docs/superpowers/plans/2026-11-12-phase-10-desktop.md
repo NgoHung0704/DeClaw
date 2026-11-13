@@ -12,7 +12,7 @@
 
 ## Execution status and branch prerequisite
 
-Planning only, 2026-11-12. Neither product code nor dependency installation is authorized by this plan alone. All seven spec section-10 decisions were settled under explicit owner delegation on 2026-11-12; see the spec for the selected scope.
+Implementation authorized by the owner on 2026-11-12 ("code it"), resumed 2026-11-13. Rust/MSVC installation was separately approved. See the [progress report](../../history/phase-10-implementation-2026-11-13.md) and [acceptance checklist](../../phase-10-review.md). All seven spec section-10 decisions were settled under explicit owner delegation on 2026-11-12; see the spec for the selected scope.
 
 Branch setup completed on 2026-11-12. The Phase 9 repair commit is `110e9e7`;
 local `main` was fast-forwarded from `61947f6` to that exact tested commit,
@@ -44,19 +44,19 @@ publication; preserve refs and add the pending integration gate below.
 
 Files: this plan, the Phase 10 spec and the eventual dated spike/review reports.
 
-- [ ] Preserve `ecc615a` and these reviewed planning changes. Inspect local Git
+- [x] Preserve `ecc615a` and these reviewed planning changes. Inspect local Git
   status, then integrate Phase 9 commit `3f1d803` (or a reviewed successor) into
   this branch through the normal integration process, without reset/force-push.
   If the chosen process requires main integration, do that only with its own
   authorization. Verify the selected Phase 9 tip is an ancestor of Phase 10.
-- [ ] Read the Phase 9 maintenance report from the selected baseline and update
+- [x] Read the Phase 9 maintenance report from the selected baseline and update
   the exact source paths: documents/sources.py, settings_file.py and the new CI
   feature-branch trigger. Do not resurrect removed dependencies/scaffolding.
 - [x] Record all seven spec section-10 decisions under owner delegation (2026-11-12): source-development delivery, DCL-146..150 release acceptance and installed Windows notification identity/activation deferred to Phase 14. DCL-144 remains open.
-- [ ] Map open Phase 9 browser checks to Task 1 WebView2 acceptance. Existing
+- [x] Map open Phase 9 browser checks to Task 1 WebView2 acceptance. Existing
   visual feedback or server/minimal-DOM tests do not check off browser security.
 
-Task 0 remains incomplete because baseline integration and browser-check mapping are still open. The seven architecture/scope decisions are settled; this is not product completion.
+Task 0 is complete: e3bac04 integrates 3f1d803 while retaining the reviewed docs; current source paths/CI were read, and docs/phase-10-review.md maps the browser acceptance. Task 1 acceptance remains open; mapping is not verification.
 
 ## Global constraints
 
@@ -88,7 +88,7 @@ capabilities/gateway.json and permissions/*.toml. Pin the toolchain in
 tauri/rust-toolchain.toml; bootstrap assets live in tauri/bootstrap/. No extra
 Cargo workspace is needed. Record results in a dated docs/history/phase-10-desktop-spike report.
 
-**Interfaces:** Define window labels bootstrap and gateway. Gateway navigation target is the exact loopback URL. No generic invoke commands.
+**Interfaces:** Define the local bootstrap label and immutable native gateway-<generation> labels; scope the picker capability to that native-only prefix. Gateway navigation target is the exact loopback URL. No generic invoke commands.
 
 - [ ] Complete Task 0 above, preserving the seven settled decisions and their scope limits.
 - [ ] Pin the compatible Rust toolchain, Cargo Tauri CLI, crate/plugins and MSRV; record WebView2/MSVC prerequisites. Create rust-toolchain.toml and explicit application-command permissions. Use AppManifest command permissions, an explicit capability list and narrow gateway remote access; inspect combined grants. No frontend build or npm dependency is assumed.
@@ -237,7 +237,7 @@ execute installation/registration steps or label native delivery complete; safe
 event-hook tests and existing in-app feedback do not replace the missing acceptance.
 
 - [ ] Write tests for malformed IDs, oversize frames, duplicate notices, queue/rate bounds, denied OS permission and sensitive content omission.
-- [ ] Test click focusing the existing window preserves the original WebSocket,
+- [ ] Deferred to Phase 14 under decision 7: test actual native click focusing the existing window preserves the original WebSocket,
   pending turn/modal and typed message buffer: no reload/hash remount/new socket,
   no tool approval/replay. Expired/cross-session IDs show fixed localized feedback;
   do not navigate to nonexistent task/quarantine viewers. If Audit navigation
@@ -291,6 +291,17 @@ Windows notification constraint -> Task 1; protocol/process ownership -> Task 2;
 exclusive binding/auth/shutdown -> Task 3; bootstrap/tray/picker -> Tasks 4/5;
 safe notices and live chat preservation -> Task 6; scoped recovery/verification ->
 Task 7; deferred delivery artifacts -> Task 8. Protocol/notice limits are selected
-policy defaults with matching spec values, not measured guarantees. Task 0
-baseline integration and browser-check mapping remain open; notification scope
-is settled by decision 7. No product task is marked complete by these decisions. Only documents were changed in this pass.
+policy defaults with matching spec values, not measured guarantees. Task 0 is
+complete; WebView2/Windows UI and recovery acceptance remain open, and
+notification scope is settled by decision 7. No product task is marked complete by these decisions. Only documents were changed in this pass.
+
+
+## Execution evidence - 2026-11-13
+
+Task 0 is complete. Tasks 1-6 have implementation and automated evidence in the
+[report](../../history/phase-10-implementation-2026-11-13.md), with remaining
+checks in the [checklist](../../phase-10-review.md); do not infer whole-task
+completion from source existence. Task 7 has outstanding real-WebView2 and
+ownership-scoped recovery acceptance. Task 8 is documented in the
+[release-boundary dossier](../../phase-10-release-boundaries.md); release tickets
+remain open. Product code has not been pushed by this execution.

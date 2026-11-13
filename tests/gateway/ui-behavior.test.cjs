@@ -15,14 +15,15 @@ class Element {
   addEventListener(type, callback) { this.listeners[type] = callback; }
 }
 
-async function harness(page, responses = {}) {
+async function harness(page, responses = {}, desktop = null) {
   const main = new Element('main');
   const sockets = [];
   const document = { createElement: tag => new Element(tag), getElementById: () => main,
     querySelectorAll: () => [], querySelector: () => null, body: new Element('body') };
   const context = vm.createContext({ console, document, URLSearchParams, Date,
     window: { document, location: { hash: `#/${page}`, protocol: 'http:', host: '127.0.0.1:7842' },
-      addEventListener() {}, dispatchEvent() {} },
+      addEventListener() {}, dispatchEvent() {},
+      ...(desktop ? { __TAURI__: { core: { invoke: desktop } }, __DECLAW_DESKTOP_GENERATION__: 7, __DECLAW_DESKTOP_ORIGIN__: 'http://127.0.0.1:7842' } : {}) },
     fetch: async url => ({ ok: true, status: 200, json: async () => responses[String(url).replace('http://127.0.0.1:7842', '')] || {} }),
     WebSocket: class { static OPEN = 1; constructor() { this.readyState = 1; this.sent = []; sockets.push(this); queueMicrotask(() => this.onopen?.()); } close() {} send(value) { this.sent.push(JSON.parse(value)); } },
   });
@@ -42,6 +43,45 @@ async function harness(page, responses = {}) {
 test('connect bootstrap displays the login form', async () => {
   const { main } = await harness('connect');
   assert.ok(main.children.some(node => node.tag === 'form'));
+});
+
+test('desktop picker supplies a candidate only and cancellation preserves the field', async () => {
+  let selection = 'D:\\Documents\\Équipe workspace';
+  const calls = [];
+  const { main } = await harness('settings', { '/api/settings': { workspace_dir: 'D:\\old', language: 'en' } }, async (command, args) => {
+    calls.push([command, args]); return selection;
+  });
+  const field = main.children.find(node => node.children?.some(child => child.attributes.id === 'workspace'));
+  const input = field.children.find(node => node.attributes.id === 'workspace');
+  const button = field.children.find(node => node.tag === 'button');
+  assert.ok(button);
+  await button.listeners.click();
+  assert.equal(input.value, selection);
+  assert.deepEqual(calls.map(call => call[0]), ['pick_workspace']);
+  assert.equal(calls[0][1].generation, 7);
+  selection = null;
+  await button.listeners.click();
+  assert.equal(input.value, 'D:\\Documents\\Équipe workspace');
+});
+
+test('browser settings retain a plain path field without native picker', async () => {
+  const { main } = await harness('settings', { '/api/settings': {} });
+  const field = main.children.find(node => node.children?.some(child => child.attributes.id === 'workspace'));
+  assert.ok(field.children.some(node => node.attributes.id === 'workspace'));
+  assert.equal(field.children.some(node => node.tag === 'button'), false);
+});
+
+test('desktop folder picker uses the shipped EN and FR labels', async () => {
+  const en = JSON.parse(fs.readFileSync(path.join(root, '../locales/en.json'), 'utf8'));
+  const fr = JSON.parse(fs.readFileSync(path.join(root, '../locales/fr.json'), 'utf8'));
+  for (const [language, expected] of [['en', 'Choose folder…'], ['fr', 'Choisir un dossier…']]) {
+    const { main } = await harness('settings', {
+      'locales/en.json': en, 'locales/fr.json': fr,
+      '/api/settings': { language },
+    }, async () => null);
+    const field = main.children.find(node => node.children?.some(child => child.attributes.id === 'workspace'));
+    assert.equal(field.children.find(node => node.tag === 'button').textContent, expected);
+  }
 });
 
 test('chat composer supports multiline input and prevents overlapping sends', async () => {

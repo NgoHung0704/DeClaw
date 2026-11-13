@@ -36,7 +36,11 @@
       "label": "Gateway token (printed by declaw start)",
       "help": "Paste the token from the console to open a session."
     },
-    "submit": "Sign in"
+    "submit": "Sign in",
+    "desktop": {
+      "label": "Gateway login token",
+      "help": "Open Status and login from the DeClaw tray, then explicitly reveal the token and paste it here."
+    }
   },
   "chat": {
     "placeholder": "Ask DeClaw…",
@@ -110,7 +114,8 @@
     "applied": {
       "new_session": "Applies to new chat sessions",
       "restart_required": "Requires a gateway restart"
-    }
+    },
+    "choose_workspace": "Choose folder…"
   },
   "status": {
     "refresh": "Refresh",

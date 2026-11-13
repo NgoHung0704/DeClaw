@@ -36,7 +36,11 @@
       "label": "Jeton de passerelle (affiché par declaw start)",
       "help": "Collez le jeton affiché dans la console pour ouvrir une session."
     },
-    "submit": "Se connecter"
+    "submit": "Se connecter",
+    "desktop": {
+      "label": "Jeton de connexion au service",
+      "help": "Ouvrez État et connexion dans la zone de notification DeClaw, affichez explicitement le jeton, puis collez-le ici."
+    }
   },
   "chat": {
     "placeholder": "Demandez à DeClaw…",
@@ -110,7 +114,8 @@
     "applied": {
       "new_session": "S'applique aux nouvelles sessions de discussion",
       "restart_required": "Nécessite un redémarrage de la passerelle"
-    }
+    },
+    "choose_workspace": "Choisir un dossier…"
   },
   "status": {
     "refresh": "Actualiser",
