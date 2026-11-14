@@ -35,6 +35,13 @@ desktop. Server/minimal-DOM tests do not close WebView2 acceptance items.
 
 ## WebView2 and Windows UI
 
+The [2026-11-14 acceptance attempt](history/phase-10-acceptance-2026-11-14.md)
+initially reported repeat-use picker and minimized second-launch problems.
+Follow-up corrected the Cancel inference: the unparented dialog was still open
+behind the main window; actual Cancel completed normally. Minimized gateway
+restore passed after adding unminimize. Parented-dialog final acceptance is
+recorded in that report; compound entries below remain open.
+
 - [x] Bundled bootstrap opens and calls native status under its CSP.
 - [x] Owned gateway opens the existing UI at the exact loopback authority.
 - [ ] Repeat native Stop after the Windows pipe fix; verify STOPPED, destroyed
@@ -42,6 +49,10 @@ desktop. Server/minimal-DOM tests do not close WebView2 acceptance items.
   The 2026-11-14 rebuilt app reached STOPPED, removed its gateway window and
   successfully completed Start/Restart. Tray Quit/empty-Job UI acceptance is
   still separate; the checkbox remains open.
+  Follow-up: after owner-triggered Quit on the final build, successful Windows
+  process/listener checks found no DeClaw-related Python/desktop process and no
+  listener on 7842. The closed Job itself was not queried; evidence is in the
+  acceptance report.
 - [ ] Paste-once login, HttpOnly cookie reload/logout, REST settings/status and
   both chat/events sockets under gateway CSP, without new allowed origins.
 - [ ] Actual remote picker IPC succeeds under CSP; wrong-origin/window, iframe,

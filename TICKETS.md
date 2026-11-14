@@ -921,6 +921,8 @@ DCL-146..150 prerequisites without closing those release tickets.
 
 ### [ ] DCL-145 — Native file picker
 
+- **Acceptance follow-up (2026-11-14)**: picker is explicitly parented to its requesting window; actual Cancel preserves the candidate and completes IPC. The earlier stuck-callback diagnosis was corrected after targeting the separate dialog. See [acceptance evidence](docs/history/phase-10-acceptance-2026-11-14.md).
+
 - **Description**: Replaces web file input.
 - **Acceptance**: Picker returns absolute path.
 - **Dependencies**: DCL-140

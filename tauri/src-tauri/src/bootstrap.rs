@@ -39,6 +39,7 @@ pub fn destroy_gateway(
 pub fn show_bootstrap(app: &tauri::AppHandle) -> tauri::Result<()> {
     if let Some(window) = app.get_webview_window("bootstrap") {
         window.show()?;
+        window.unminimize()?;
         window.set_focus()?;
         return Ok(());
     }
@@ -146,6 +147,7 @@ pub fn open(app: &tauri::AppHandle) {
         .filter(|_| lease.ready && lease.alive)
     {
         let _ = window.show();
+        let _ = window.unminimize();
         let _ = window.set_focus();
     } else if lease.ready && lease.alive {
         apply_snapshot(app, app.state::<SupervisorHandle>().snapshot());

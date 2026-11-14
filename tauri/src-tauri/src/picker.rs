@@ -24,9 +24,13 @@ pub async fn pick_workspace(
         return Err(DesktopError::Unavailable);
     }
     let (sender, receiver) = tauri::async_runtime::channel(1);
-    window.dialog().file().pick_folder(move |selection| {
-        let _ = sender.blocking_send(selection);
-    });
+    window
+        .dialog()
+        .file()
+        .set_parent(&window)
+        .pick_folder(move |selection| {
+            let _ = sender.blocking_send(selection);
+        });
     let mut receiver = receiver;
     let selection = receiver.recv().await.ok_or(DesktopError::Unavailable)?;
     if !authorize(

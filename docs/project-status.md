@@ -78,6 +78,9 @@ tracks verification and remaining real-WebView acceptance.
 The rebuilt app's Stop/Start/Restart and authenticated JSON/Markdown downloads
 were observed on 2026-11-14. This does not close the remaining security,
 tray-Quit, forced-crash or release acceptance checklist.
+The acceptance follow-up restores minimized windows before focus and parents
+the native picker to its requesting window. See the [acceptance report](history/phase-10-acceptance-2026-11-14.md)
+for the corrected Cancel diagnosis and manual checks.
 
 The [2026-11-10 repair report](history/phase-9-repairs-2026-11-10.md) records
 the review regressions and validation. UI page registration now loads shared
