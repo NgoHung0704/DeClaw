@@ -397,10 +397,13 @@ fn actor(
                             &shared,
                             &changed,
                         );
-                        if let Some(owned) = core.as_mut() {
-                            let _ = send(owned, &launch, None);
-                        }
                         deadline = Some(Instant::now() + Duration::from_secs(10));
+                        if let Some(owned) = core.as_mut() {
+                            if let Err(failure) = send(owned, &launch, None) {
+                                lifecycle.fail();
+                                error = Some(failure);
+                            }
+                        }
                     }
                 }
                 Action::Token(generation, reply) => {
@@ -419,6 +422,8 @@ fn actor(
                             .and_then(|()| send(core.as_mut().unwrap(), &launch, Some(&request)));
                         if let Err(failure) = result {
                             let _ = reply.send(Err(failure));
+                            lifecycle.fail();
+                            error = Some(failure);
                         } else {
                             token = Some((Instant::now() + Duration::from_secs(2), reply));
                         }
@@ -486,6 +491,12 @@ fn actor(
                     }
                     Incoming::EventsClosed => {
                         event_eof = true;
+                        // A clean Stopped frame and EOF share the reader's FIFO.
+                        // Only an acknowledged explicit stop may drain before exit.
+                        if !stop_requested || stop_ack != Some(true) {
+                            lifecycle.fail();
+                            error = error.or(Some(DesktopError::Unavailable));
+                        }
                     }
                 }
             }
@@ -504,6 +515,13 @@ fn actor(
                     let _ = notice_gate.accept(&frame, clock.elapsed());
                 }
             }
+        }
+        if core
+            .as_ref()
+            .is_some_and(|owned| owned.control_health().is_err())
+        {
+            lifecycle.fail();
+            error = error.or(Some(DesktopError::Unavailable));
         }
         if token
             .as_ref()

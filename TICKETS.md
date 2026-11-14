@@ -815,6 +815,8 @@ authenticated real-browser checklist items remain open.
 
 ### [x] DCL-129 — UI: Audit log viewer
 
+- **Phase 10 usability repair (2026-11-14)**: authenticated same-origin attachment exports, Older/Newer cursor history and collapsible payload details; [evidence](docs/history/phase-10-usability-repairs-2026-11-14.md).
+
 - **Description**: Filter by date, plugin, severity.
 - **Acceptance**: Filters work; export buttons present.
 - **Dependencies**: DCL-061
@@ -828,6 +830,8 @@ authenticated real-browser checklist items remain open.
 - **Estimate**: 0.5d
 
 ### [x] DCL-131 — UI: Settings
+
+- **Phase 10 usability repair (2026-11-14)**: full form/feedback localization after Save; retained Chat applies model/language snapshots only on explicit New conversation. Existing approval and restart-required workspace semantics remain.
 
 - **Description**: Model, language, workspace path.
 - **Acceptance**: Persists across restarts.
@@ -885,12 +889,16 @@ DCL-146..150 prerequisites without closing those release tickets.
 
 ### [ ] DCL-141 — Python core lifecycle from Tauri
 
+- **Architecture repair (2026-11-14)**: independent bounded cleanup after server failures; unexpected EOF revokes readiness; bounded control writer with cancellable, joined I/O. See [evidence](docs/history/phase-10-architecture-repairs-2026-11-14.md). Overall acceptance remains open.
+
 - **Description**: Spawn, monitor, kill on exit.
 - **Acceptance**: No orphan Python process after quit.
 - **Dependencies**: DCL-140
 - **Estimate**: 1d
 
 ### [ ] DCL-142 — Webview points to localhost:7842
+
+- **Architecture repair (2026-11-14)**: failed window creation is observable in the trusted bootstrap and retry reuses the live generation through existing Start/Open privileges. Real failure-injection WebView2 acceptance remains separate.
 
 - **Description**: Wait-for-ready handshake.
 - **Acceptance**: No race conditions on first launch.

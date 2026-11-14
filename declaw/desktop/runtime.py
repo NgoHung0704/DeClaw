@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import socket
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from contextlib import suppress
 from typing import Protocol
 
@@ -177,22 +177,39 @@ async def run_desktop(settings: Settings, channel: DesktopChannel) -> int:
             await channel.send(Failure(launch_id=channel.launch_id, code="unavailable"))
         result = 1
     finally:
+        async def shutdown_step(step: Awaitable[None]) -> None:
+            nonlocal clean
+            try:
+                await step
+            except Exception:
+                # A failed service must not strand the remaining owned services.
+                # Cancellation still propagates to the shared shutdown deadline.
+                clean = False
+
         async def teardown() -> None:
+            nonlocal clean
             if startup is not None and not startup.done():
                 startup.cancel()
-                with suppress(asyncio.CancelledError):
-                    await startup
+                # Consume the child's expected cancellation, but let cancellation
+                # of this teardown (the shared deadline) propagate through gather.
+                outcomes = await asyncio.gather(startup, return_exceptions=True)
+                if isinstance(outcomes[0], Exception):
+                    clean = False
             if application is not None:
                 # Refuse/cancel/deny before uvicorn drains connections.
                 if server is not None and gateway is not None:
                     manager = gateway.state.session_manager
-                    await manager.stop_accepting_sessions()
-                    await manager.cancel_in_flight_turns()
-                    await manager.deny_pending_approvals()
+                    await shutdown_step(manager.stop_accepting_sessions())
+                    await shutdown_step(manager.cancel_in_flight_turns())
+                    await shutdown_step(manager.deny_pending_approvals())
                     server.should_exit = True
                 if serving is not None:
-                    await serving
-                await application.shutdown()
+                    # A server task can cancel itself while draining. Gather
+                    # separates that outcome from cancellation of this teardown.
+                    outcomes = await asyncio.gather(serving, return_exceptions=True)
+                    if isinstance(outcomes[0], BaseException):
+                        clean = False
+                await shutdown_step(application.shutdown())
 
         try:
             async with asyncio.timeout(SHUTDOWN_SECONDS):

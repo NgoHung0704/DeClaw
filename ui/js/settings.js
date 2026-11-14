@@ -2,7 +2,7 @@
 // workspace_dir) with honest applied feedback — model/language apply to new
 // chat sessions, workspace changes require a gateway restart (spec section 12).
 
-import { el, navigate, registerRoute, setLanguage, t } from "./core.js";
+import { el, registerRoute, setLanguage, t } from "./core.js";
 import { getJson, putJson } from "./api.js";
 import { chooseWorkspace, hasWorkspacePicker } from "./desktop.js";
 
@@ -12,27 +12,28 @@ const mount = async (main) => {
   const feedback = el("div", { cls: "banner", attrs: { "data-kind": "info", hidden: "" } });
 
   const modelField = el("div", { cls: "field" });
-  const modelLabel = el("label", { attrs: { for: "model" }, text: t("settings.model") });
+  const modelLabel = el("label", { attrs: { for: "model", "data-i18n": "settings.model" }, text: t("settings.model") });
   const modelInput = el("input", { attrs: { id: "model", type: "text" } });
   modelField.replaceChildren(modelLabel, modelInput);
 
   const languageField = el("div", { cls: "field" });
-  const languageLabel = el("label", { attrs: { for: "language" }, text: t("settings.language") });
+  const languageLabel = el("label", { attrs: { for: "language", "data-i18n": "settings.language" }, text: t("settings.language") });
   const languageSelect = el("select", { attrs: { id: "language" } });
   languageSelect.appendChild(el("option", { attrs: { value: "en" }, text: "English" }));
   languageSelect.appendChild(el("option", { attrs: { value: "fr" }, text: "Français" }));
   languageField.replaceChildren(languageLabel, languageSelect);
 
   const workspaceField = el("div", { cls: "field" });
-  const workspaceLabel = el("label", { attrs: { for: "workspace" }, text: t("settings.workspace_dir") });
+  const workspaceLabel = el("label", { attrs: { for: "workspace", "data-i18n": "settings.workspace_dir" }, text: t("settings.workspace_dir") });
   const workspaceInput = el("input", { attrs: { id: "workspace", type: "text" } });
   const workspaceNote = el("p", {
     cls: "muted",
+    attrs: { "data-i18n": "settings.applied.restart_required" },
     text: t("settings.applied.restart_required"),
   });
   workspaceField.replaceChildren(workspaceLabel, workspaceInput, workspaceNote);
   if (hasWorkspacePicker()) {
-    const choose = el("button", { text: t("settings.choose_workspace"), attrs: { type: "button" } });
+    const choose = el("button", { text: t("settings.choose_workspace"), attrs: { type: "button", "data-i18n": "settings.choose_workspace" } });
     choose.addEventListener("click", async () => {
       choose.disabled = true;
       try {
@@ -48,7 +49,7 @@ const mount = async (main) => {
     workspaceField.appendChild(choose);
   }
 
-  const save = el("button", { text: t("settings.save") });
+  const save = el("button", { text: t("settings.save"), attrs: { "data-i18n": "settings.save" } });
   main.replaceChildren(h1, banner, feedback, modelField, languageField, workspaceField, save);
 
   try {
@@ -63,6 +64,8 @@ const mount = async (main) => {
   }
 
   save.addEventListener("click", async () => {
+    if (save.disabled) return;
+    save.disabled = true;
     banner.setAttribute("hidden", "");
     feedback.setAttribute("hidden", "");
     try {
@@ -71,9 +74,10 @@ const mount = async (main) => {
       if (languageSelect.value) body.language = languageSelect.value;
       if (workspaceInput.value.trim()) body.workspace_dir = workspaceInput.value.trim();
       const result = await putJson("/api/settings", body);
+      setLanguage(languageSelect.value);
       const messages = [];
       for (const [key, flag] of Object.entries(result.applied || {})) {
-        messages.push(`${key}: ${t(`settings.applied.${flag}`)}`);
+        messages.push(`${t(`settings.${key}`)}: ${t(`settings.applied.${flag}`)}`);
       }
       if (messages.length === 0) {
         messages.push(t("settings.saved"));
@@ -87,10 +91,11 @@ const mount = async (main) => {
         }
         h1.textContent = t("page.settings.title");
       }
-      navigate("settings");
     } catch (error) {
       banner.textContent = t(`error.${error.code || "service_unavailable"}`);
       banner.removeAttribute("hidden");
+    } finally {
+      save.disabled = false;
     }
   });
 };

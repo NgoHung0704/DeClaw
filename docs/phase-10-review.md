@@ -1,7 +1,8 @@
 # Phase 10 acceptance checklist
 
-Updated 2026-11-13. Checked boxes require observed evidence in the
-[dated implementation report](history/phase-10-implementation-2026-11-13.md).
+Updated 2026-11-14. Checked boxes require observed evidence in the
+[implementation report](history/phase-10-implementation-2026-11-13.md) or
+[architecture repair report](history/phase-10-architecture-repairs-2026-11-14.md).
 This checklist maps the open [Phase 9 browser checks](phase-9-review.md) to the
 desktop. Server/minimal-DOM tests do not close WebView2 acceptance items.
 
@@ -23,6 +24,14 @@ desktop. Server/minimal-DOM tests do not close WebView2 acceptance items.
   event; EOF is observed while that descendant remains alive.
 - [x] Picker candidate/cancellation/browser fallback and shipped EN/FR label tests.
 - [x] Notice-hook failure retains default deny; dispatch rate/dedup and fixed body tests.
+- [x] Server/service failure and cancelled server drain do not skip later cleanup;
+  one total timeout still bounds teardown.
+- [x] Unexpected event EOF revokes readiness while the child is alive; acknowledged
+  clean Stop followed by EOF remains clean.
+- [x] Actual full control pipe cannot block Quit or autonomous write deadlines;
+  cleanup cancels pending native I/O and joins its writer.
+- [x] Injected gateway-builder state failure offers a localized same-core retry;
+  actual WebView2 build failure remains a manual acceptance gap.
 
 ## WebView2 and Windows UI
 
@@ -30,6 +39,9 @@ desktop. Server/minimal-DOM tests do not close WebView2 acceptance items.
 - [x] Owned gateway opens the existing UI at the exact loopback authority.
 - [ ] Repeat native Stop after the Windows pipe fix; verify STOPPED, destroyed
   gateway window and empty Job, then Start/Restart/Quit through the native UI.
+  The 2026-11-14 rebuilt app reached STOPPED, removed its gateway window and
+  successfully completed Start/Restart. Tray Quit/empty-Job UI acceptance is
+  still separate; the checkbox remains open.
 - [ ] Paste-once login, HttpOnly cookie reload/logout, REST settings/status and
   both chat/events sockets under gateway CSP, without new allowed origins.
 - [ ] Actual remote picker IPC succeeds under CSP; wrong-origin/window, iframe,

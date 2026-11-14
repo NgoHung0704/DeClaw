@@ -46,6 +46,10 @@
     "placeholder": "Ask DeClaw…",
     "send": "Send",
     "cancel": "Cancel turn",
+    "new_session": "New conversation",
+    "cancelled": "Response stopped — the text above is incomplete.",
+    "tool_finished": "Finished",
+    "tool_incomplete": "Finished without a result",
     "disconnected": "Connection lost — the turn was cancelled and pending approvals were denied.",
     "sources": "Sources",
     "sentinel_pending": "Pending",
@@ -83,6 +87,11 @@
   "audit": {
     "filter": "Filter",
     "export": "Export",
+    "download_ready": "Export ready. Select Save to download the file.",
+    "save_download": "Save {format}",
+    "download_complete": "Download completed.",
+    "export_day": "Export day",
+    "details": "Event details",
     "event_type": "Event type",
     "task_id": "Task ID",
     "from": "From",
@@ -132,6 +141,7 @@
     }
   },
   "error": {
+    "download_failed": "Download failed. Check the destination and try again.",
     "unauthorized": "Sign-in required.",
     "not_found": "Not found.",
     "reindex_in_progress": "An indexing run is already in progress.",

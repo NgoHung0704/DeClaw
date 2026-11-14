@@ -1,6 +1,59 @@
 use declaw_desktop::boundary::{authorize, Command, Lease};
 
 #[test]
+fn downloads_require_the_live_gateway_and_exact_audit_endpoint() {
+    use declaw_desktop::boundary::authorize_download;
+    let lease = Lease {
+        generation: 7,
+        ready: true,
+        alive: true,
+    };
+    let source = "http://127.0.0.1:7842/";
+    let export = "http://127.0.0.1:7842/api/audit/export?day=2026-11-14&format=json";
+    assert!(authorize_download("gateway-7", source, export, 7, &lease));
+    for url in [
+        "http://localhost:7842/api/audit/export?day=2026-11-14&format=json",
+        "http://127.0.0.1:7843/api/audit/export?day=2026-11-14&format=json",
+        "http://127.0.0.1:7842/api/settings?day=2026-11-14&format=json",
+        "http://127.0.0.1:7842/api/audit/export?day=../../evil&format=json",
+        "http://127.0.0.1:7842/api/audit/export?day=2026-11-14&format=exe",
+        "http://127.0.0.1:7842/api/audit/export?day=2026-11-14&format=md&format=json",
+        "http://127.0.0.1:7842/api/audit/export?day=2026-11-14&format=json&extra=1",
+        "blob:http://127.0.0.1:7842/export",
+    ] {
+        assert!(!authorize_download("gateway-7", source, url, 7, &lease));
+    }
+    assert!(!authorize_download("bootstrap", source, export, 7, &lease));
+    assert!(!authorize_download("gateway-6", source, export, 7, &lease));
+    assert!(!authorize_download("gateway-7", source, export, 6, &lease));
+    assert!(!authorize_download(
+        "gateway-7",
+        "http://evil.invalid/",
+        export,
+        7,
+        &lease
+    ));
+    for invalid in [
+        Lease {
+            ready: false,
+            ..lease
+        },
+        Lease {
+            alive: false,
+            ..lease
+        },
+    ] {
+        assert!(!authorize_download(
+            "gateway-7",
+            source,
+            export,
+            7,
+            &invalid
+        ));
+    }
+}
+
+#[test]
 fn gateway_gets_only_picker_on_live_owned_generation() {
     let lease = Lease {
         generation: 7,

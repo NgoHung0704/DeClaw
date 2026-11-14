@@ -42,6 +42,43 @@ pub fn gateway_label(generation: u64) -> String {
     format!("gateway-{generation}")
 }
 
+/// Browser downloads are a native event, not an additional remote IPC command.
+pub fn authorize_download(
+    label: &str,
+    source: &str,
+    destination: &str,
+    generation: u64,
+    lease: &Lease,
+) -> bool {
+    if !authorize(label, source, generation, lease, Command::PickWorkspace)
+        || !gateway_url(destination)
+    {
+        return false;
+    }
+    let Ok(url) = tauri::Url::parse(destination) else {
+        return false;
+    };
+    if url.path() != "/api/audit/export" || url.fragment().is_some() {
+        return false;
+    }
+    let query: Vec<_> = url.query_pairs().collect();
+    query.len() == 2
+        && query.iter().any(|(key, value)| {
+            key == "day"
+                && value.len() == 10
+                && value.bytes().enumerate().all(|(i, byte)| {
+                    if i == 4 || i == 7 {
+                        byte == b'-'
+                    } else {
+                        byte.is_ascii_digit()
+                    }
+                })
+        })
+        && query
+            .iter()
+            .any(|(key, value)| key == "format" && matches!(value.as_ref(), "json" | "md"))
+}
+
 pub fn authorize(label: &str, url: &str, generation: u64, lease: &Lease, command: Command) -> bool {
     if label == "bootstrap" {
         let local = bootstrap_url(url);

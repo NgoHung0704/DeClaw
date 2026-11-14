@@ -1,7 +1,8 @@
 //! Windows ownership: explicit inherited handles, suspended assignment, no breakaway.
 
-use crate::control::DesktopError;
+use crate::control::{DesktopError, MAX_CONTROL_BYTES};
 use std::{
+    collections::VecDeque,
     ffi::OsStr,
     fs::File,
     io::{Read, Write},
@@ -12,14 +13,18 @@ use std::{
     },
     path::Path,
     ptr::{null, null_mut},
-    sync::Arc,
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc::{self, SyncSender},
+        Arc, Mutex,
+    },
     thread,
     time::{Duration, Instant},
 };
 use windows_sys::Win32::{
     Foundation::*,
     Security::SECURITY_ATTRIBUTES,
-    System::{JobObjects::*, Pipes::CreatePipe, Threading::*},
+    System::{JobObjects::*, Pipes::CreatePipe, Threading::*, IO::CancelSynchronousIo},
 };
 
 fn handle(raw: HANDLE) -> Result<OwnedHandle, DesktopError> {
@@ -102,10 +107,122 @@ impl Drop for Attributes {
     }
 }
 
+const CONTROL_QUEUE: usize = 4;
+const CONTROL_WRITE_TIMEOUT: Duration = Duration::from_secs(2);
+
+// Only this worker owns the synchronous pipe. The actor only enqueues and polls;
+// queue capacity, frame size and the oldest outstanding deadline are bounded.
+struct ControlWriter {
+    sender: Option<SyncSender<Vec<u8>>>,
+    pending: Arc<Mutex<VecDeque<Instant>>>,
+    failed: Arc<AtomicBool>,
+    closing: Arc<AtomicBool>,
+    worker: Option<thread::JoinHandle<()>>,
+}
+
+impl ControlWriter {
+    fn new(mut pipe: File) -> Result<Self, DesktopError> {
+        let (sender, receiver) = mpsc::sync_channel::<Vec<u8>>(CONTROL_QUEUE);
+        let pending = Arc::new(Mutex::new(VecDeque::new()));
+        let failed = Arc::new(AtomicBool::new(false));
+        let closing = Arc::new(AtomicBool::new(false));
+        let (queue, failure, stopping) = (pending.clone(), failed.clone(), closing.clone());
+        let worker = thread::Builder::new()
+            .name("desktop-control".into())
+            .spawn(move || {
+                while let Ok(bytes) = receiver.recv() {
+                    if stopping.load(Ordering::SeqCst) {
+                        break;
+                    }
+                    if pipe.write_all(&bytes).is_err() {
+                        failure.store(true, Ordering::SeqCst);
+                        break;
+                    }
+                    queue.lock().unwrap_or_else(|e| e.into_inner()).pop_front();
+                }
+            })
+            .map_err(|_| DesktopError::SpawnFailed)?;
+        Ok(Self {
+            sender: Some(sender),
+            pending,
+            failed,
+            closing,
+            worker: Some(worker),
+        })
+    }
+
+    fn send(&self, bytes: &[u8]) -> Result<(), DesktopError> {
+        if bytes.len() > MAX_CONTROL_BYTES {
+            return Err(DesktopError::ProtocolInvalid);
+        }
+        self.health()?;
+        let mut pending = self.pending.lock().unwrap_or_else(|e| e.into_inner());
+        pending.push_back(Instant::now() + CONTROL_WRITE_TIMEOUT);
+        if self
+            .sender
+            .as_ref()
+            .is_none_or(|sender| sender.try_send(bytes.to_vec()).is_err())
+        {
+            pending.pop_back();
+            return Err(DesktopError::Unavailable);
+        }
+        Ok(())
+    }
+
+    fn health(&self) -> Result<(), DesktopError> {
+        let overdue = self
+            .pending
+            .lock()
+            .unwrap_or_else(|e| e.into_inner())
+            .front()
+            .is_some_and(|deadline| Instant::now() >= *deadline);
+        if self.failed.load(Ordering::SeqCst) || overdue {
+            Err(DesktopError::Unavailable)
+        } else {
+            Ok(())
+        }
+    }
+
+    fn shutdown(&mut self, deadline: Instant) -> Result<(), DesktopError> {
+        self.closing.store(true, Ordering::SeqCst);
+        self.sender.take();
+        while let Some(worker) = self.worker.as_ref() {
+            if worker.is_finished() {
+                return self
+                    .worker
+                    .take()
+                    .unwrap()
+                    .join()
+                    .map_err(|_| DesktopError::Unavailable);
+            }
+            // Cancellation does not wait for completion. Repeat until joined to
+            // cover the race between checking `closing` and entering WriteFile.
+            unsafe {
+                CancelSynchronousIo(worker.as_raw_handle());
+            }
+            if Instant::now() >= deadline {
+                return Err(DesktopError::ShutdownTimeout);
+            }
+            thread::sleep(Duration::from_millis(1));
+        }
+        Ok(())
+    }
+}
+
+impl Drop for ControlWriter {
+    fn drop(&mut self) {
+        // Normal actor cleanup already joined. Never detach a writer/pipe when
+        // an owner is dropped directly: cancellation targets our own pipe worker.
+        while self.worker.is_some() {
+            let _ = self.shutdown(Instant::now() + Duration::from_millis(10));
+        }
+    }
+}
+
 pub struct OwnedCore {
     job: OwnedHandle,
     process: Arc<OwnedHandle>,
-    pub control: File,
+    control: ControlWriter,
     pub events: Option<File>,
     pub credentials: Option<File>,
 }
@@ -231,7 +348,7 @@ impl OwnedCore {
             Ok(Self {
                 job,
                 process: Arc::new(process),
-                control,
+                control: ControlWriter::new(control)?,
                 events: Some(events),
                 credentials: Some(credentials),
             })
@@ -259,9 +376,11 @@ impl OwnedCore {
     }
 
     pub fn write_control(&mut self, bytes: &[u8]) -> Result<(), DesktopError> {
-        self.control
-            .write_all(bytes)
-            .map_err(|_| DesktopError::Unavailable)
+        self.control.send(bytes)
+    }
+
+    pub fn control_health(&self) -> Result<(), DesktopError> {
+        self.control.health()
     }
 
     pub fn active_processes(&self) -> Result<u32, DesktopError> {
@@ -285,6 +404,9 @@ impl OwnedCore {
         unsafe {
             TerminateJobObject(self.job.as_raw_handle(), 1);
         }
+        // Retain the Job and worker on timeout; replacement/exit requires both
+        // process cleanup and a joined writer, never an orphaned blocked thread.
+        self.control.shutdown(deadline)?;
         loop {
             // Job accounting and process-handle signaling can settle separately.
             if self.active_processes()? == 0 && !self.alive() {
@@ -309,6 +431,60 @@ impl ProcessProbe {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn full_control_pipe_has_bounded_queue_and_cancels_without_peer_exit() {
+        let (mut pipe, peer) = pipe(false).unwrap();
+        let raw_pipe = pipe.as_raw_handle();
+        // Fill the configured 64 KiB pipe before handing it to the worker.
+        for _ in 0..4 {
+            pipe.write_all(&vec![0; MAX_CONTROL_BYTES]).unwrap();
+        }
+        let mut writer = ControlWriter::new(pipe).unwrap();
+        writer.send(b"blocked\n").unwrap();
+        let deadline = Instant::now() + Duration::from_secs(1);
+        loop {
+            let mut pending = 0;
+            assert_ne!(
+                unsafe {
+                    GetThreadIOPendingFlag(
+                        writer.worker.as_ref().unwrap().as_raw_handle(),
+                        &mut pending,
+                    )
+                },
+                0
+            );
+            if pending != 0 {
+                break;
+            }
+            assert!(
+                Instant::now() < deadline,
+                "writer never entered pending I/O"
+            );
+            thread::sleep(Duration::from_millis(1));
+        }
+        assert!(!writer.worker.as_ref().unwrap().is_finished());
+        let started = Instant::now();
+        for _ in 0..CONTROL_QUEUE {
+            writer.send(b"queued\n").unwrap();
+        }
+        assert_eq!(writer.send(b"overflow\n"), Err(DesktopError::Unavailable));
+        assert_eq!(writer.pending.lock().unwrap().len(), CONTROL_QUEUE + 1);
+        assert!(started.elapsed() < Duration::from_millis(100));
+        // The reader remains open and never drains. Cancellation, rather than
+        // peer death or dropping a JoinHandle, must release the blocked writer.
+        writer
+            .shutdown(Instant::now() + Duration::from_secs(1))
+            .unwrap();
+        assert!(writer.worker.is_none(), "writer thread was detached");
+        let mut flags = 0;
+        assert_ne!(
+            unsafe { GetHandleInformation(peer.as_raw_handle(), &mut flags) },
+            0
+        );
+        assert_eq!(unsafe { GetHandleInformation(raw_pipe, &mut flags) }, 0);
+        assert_eq!(unsafe { GetLastError() }, ERROR_INVALID_HANDLE);
+    }
 
     #[test]
     fn job_kills_descendants_and_preserves_unrelated_process() {

@@ -9,6 +9,10 @@ const errors = {
   fr: {invalid_settings: "Vérifiez que le service utilise 127.0.0.1:7842, puis réessayez.", port_conflict: "Le port 7842 est occupé. Arrêtez vous-même l’autre service, puis réessayez.", spawn_failed: "Vérifiez l’environnement Python de ce dépôt, puis réessayez.", protocol_invalid: "La connexion privée au service a échoué. Réessayez après le nettoyage.", startup_timeout: "Le démarrage a expiré. Vérifiez la configuration locale, puis réessayez.", shutdown_timeout: "L’arrêt normal a expiré. Réessayez après le nettoyage.", unavailable: "Le service est indisponible. Réessayez après le nettoyage."},
 };
 const language = () => element("language").value === "fr" ? "fr" : "en";
+const viewErrors = {
+  en: { message: "The main window could not open. Retry opening it; the core is still running.", retry: "Retry opening window" },
+  fr: { message: "La fenêtre principale n’a pas pu s’ouvrir. Réessayez ; le service fonctionne toujours.", retry: "Réessayer d’ouvrir la fenêtre" },
+};
 const invoke = (name, args) => window.__TAURI__.core.invoke(name, args);
 function clearToken() { element("token").textContent = ""; element("token").hidden = true; element("clear").hidden = true; }
 let generation = 0;
@@ -20,7 +24,10 @@ async function refresh() {
     generation = state.generation;
     element("status").textContent = strings[language()][state.state] || strings[language()].unavailable;
     if (state.state === "failed") element("status").textContent = errors[language()][state.error] || errors[language()].unavailable;
-    element("start").disabled = !["stopped", "failed"].includes(state.state);
+    const retryView = state.state === "running" && state.view_error === true;
+    if (retryView) element("status").textContent = viewErrors[language()].message;
+    element("start").textContent = retryView ? viewErrors[language()].retry : strings[language()].start;
+    element("start").disabled = !retryView && !["stopped", "failed"].includes(state.state);
     element("stop").disabled = !["starting", "running"].includes(state.state);
     element("restart").disabled = state.state !== "running";
     element("reveal").disabled = state.state !== "running";

@@ -46,6 +46,10 @@
     "placeholder": "Demandez à DeClaw…",
     "send": "Envoyer",
     "cancel": "Annuler le tour",
+    "new_session": "Nouvelle discussion",
+    "cancelled": "Réponse arrêtée — le texte ci-dessus est incomplet.",
+    "tool_finished": "Terminé",
+    "tool_incomplete": "Terminé sans résultat",
     "disconnected": "Connexion perdue — le tour a été annulé et les approbations en attente ont été refusées.",
     "sources": "Sources",
     "sentinel_pending": "En attente",
@@ -83,6 +87,11 @@
   "audit": {
     "filter": "Filtrer",
     "export": "Exporter",
+    "download_ready": "Export prêt. Sélectionnez Enregistrer pour télécharger le fichier.",
+    "save_download": "Enregistrer {format}",
+    "download_complete": "Téléchargement terminé.",
+    "export_day": "Jour à exporter",
+    "details": "Détails de l’événement",
     "event_type": "Type d'événement",
     "task_id": "ID de tâche",
     "from": "Du",
@@ -132,6 +141,7 @@
     }
   },
   "error": {
+    "download_failed": "Échec du téléchargement. Vérifiez la destination puis réessayez.",
     "unauthorized": "Connexion requise.",
     "not_found": "Introuvable.",
     "reindex_in_progress": "Une indexation est déjà en cours.",

@@ -59,8 +59,25 @@ and the existing preflight Docker-probe limitation are unchanged.
 The [2026-11-12 verification report](history/phase-9-verification-2026-11-12.md)
 records a completed full Python suite and companion checks. The owner accepted
 the visual UI; authenticated real-browser security/interaction acceptance remains
-open in the manual checklist. Phase 10 planning does not ratify its pending
-architecture choices.
+open in the manual checklist. Phase 10's seven architecture choices were settled
+under owner delegation; acceptance remains tracked separately.
+
+The Phase 10 usability repairs retain the live Chat view/socket across in-app
+navigation, with an explicit New conversation action for fresh settings or a
+closed connection. Authentication loss discards retained private state. Audit
+uses authenticated same-origin attachments, bidirectional cursor history and
+collapsible payloads; Settings updates all localized form labels after saving.
+See the [dated usability repair evidence](history/phase-10-usability-repairs-2026-11-14.md).
+
+Desktop fault handling now continues cooperative cleanup after service/server
+failures within one shutdown budget, revokes readiness on unexpected event EOF,
+and keeps bounded control writes off the lifecycle actor. Failed gateway-window
+creation exposes a localized same-core retry in the trusted bootstrap. The
+[architecture repair report](history/phase-10-architecture-repairs-2026-11-14.md)
+tracks verification and remaining real-WebView acceptance.
+The rebuilt app's Stop/Start/Restart and authenticated JSON/Markdown downloads
+were observed on 2026-11-14. This does not close the remaining security,
+tray-Quit, forced-crash or release acceptance checklist.
 
 The [2026-11-10 repair report](history/phase-9-repairs-2026-11-10.md) records
 the review regressions and validation. UI page registration now loads shared

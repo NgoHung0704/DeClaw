@@ -1,12 +1,15 @@
 //! Windows are created only from bundled bootstrap or an owned ready core.
 
 use crate::{
-    boundary::{bootstrap_url, gateway_label, gateway_url},
+    boundary::{authorize_download, bootstrap_url, gateway_label, gateway_url},
     control::DesktopError,
     supervisor::{Snapshot, State, SupervisorHandle},
 };
 use std::sync::{mpsc::Sender, Arc, Mutex};
-use tauri::{webview::NewWindowResponse, Manager, WebviewUrl, WebviewWindowBuilder};
+use tauri::{
+    webview::{DownloadEvent, NewWindowResponse},
+    Manager, WebviewUrl, WebviewWindowBuilder,
+};
 
 pub fn destroy_gateway(
     app: &tauri::AppHandle,
@@ -80,10 +83,11 @@ pub fn apply_snapshot(app: &tauri::AppHandle, snapshot: Snapshot) {
         return;
     }
     let navigation = supervisor.clone();
+    let downloads = supervisor.clone();
     let initialization = format!(
         "Object.defineProperty(window,'__DECLAW_DESKTOP_GENERATION__',{{value:{generation},writable:false,configurable:false}});Object.defineProperty(window,'__DECLAW_DESKTOP_ORIGIN__',{{value:'http://127.0.0.1:7842',writable:false,configurable:false}});"
     );
-    let result = WebviewWindowBuilder::new(
+    let result = app.state::<crate::gateway_view::GatewayView>().create(generation, || WebviewWindowBuilder::new(
         app,
         gateway_label(generation),
         WebviewUrl::External("http://127.0.0.1:7842/".parse().unwrap()),
@@ -96,8 +100,31 @@ pub fn apply_snapshot(app: &tauri::AppHandle, snapshot: Snapshot) {
         let lease = navigation.lease();
         gateway_url(url.as_str()) && lease.generation == generation && lease.ready && lease.alive
     })
+    .on_download(move |view, event| {
+        let lease = downloads.lease();
+        let Ok(source) = view.url() else { return false; };
+        match event {
+            DownloadEvent::Requested { url, destination } => {
+                authorize_download(view.label(), source.as_str(), url.as_str(), generation, &lease)
+                    && destination.is_absolute()
+                    && !destination.exists()
+            }
+            DownloadEvent::Finished { url, success, .. } => {
+                if authorize_download(view.label(), source.as_str(), url.as_str(), generation, &lease) {
+                    let script = if success {
+                        "window.dispatchEvent(new CustomEvent('declaw:download-finished',{detail:true}));"
+                    } else {
+                        "window.dispatchEvent(new CustomEvent('declaw:download-finished',{detail:false}));"
+                    };
+                    let _ = view.eval(script);
+                }
+                true
+            }
+            _ => false,
+        }
+    })
     .on_new_window(|_, _| NewWindowResponse::Deny)
-    .build();
+    .build());
     if let Ok(window) = result {
         let hidden = window.clone();
         window.on_window_event(move |event| {
@@ -106,6 +133,9 @@ pub fn apply_snapshot(app: &tauri::AppHandle, snapshot: Snapshot) {
                 let _ = hidden.hide();
             }
         });
+    } else {
+        // Only fixed localized diagnostics are exposed by desktop_status.
+        let _ = show_bootstrap(app);
     }
 }
 
@@ -117,6 +147,8 @@ pub fn open(app: &tauri::AppHandle) {
     {
         let _ = window.show();
         let _ = window.set_focus();
+    } else if lease.ready && lease.alive {
+        apply_snapshot(app, app.state::<SupervisorHandle>().snapshot());
     } else {
         let _ = show_bootstrap(app);
     }

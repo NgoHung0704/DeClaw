@@ -1,6 +1,7 @@
 mod bootstrap;
 pub mod boundary;
 pub mod control;
+pub mod gateway_view;
 pub mod notifications;
 mod picker;
 pub mod supervisor;
@@ -14,6 +15,13 @@ use control::DesktopError;
 use std::{path::Path, sync::Arc};
 use supervisor::{Snapshot, SupervisorHandle};
 use tauri::Manager;
+
+#[derive(serde::Serialize)]
+struct DesktopStatus {
+    #[serde(flatten)]
+    core: Snapshot,
+    view_error: bool,
+}
 
 fn check(
     window: &tauri::WebviewWindow,
@@ -41,18 +49,29 @@ fn check(
 fn desktop_status(
     window: tauri::WebviewWindow,
     supervisor: tauri::State<'_, SupervisorHandle>,
-) -> Result<Snapshot, DesktopError> {
+) -> Result<DesktopStatus, DesktopError> {
     check(&window, &supervisor, Command::Status, 0)?;
-    Ok(supervisor.snapshot())
+    let core = supervisor.snapshot();
+    let view_error = window
+        .state::<gateway_view::GatewayView>()
+        .failed(core.generation);
+    Ok(DesktopStatus { core, view_error })
 }
 
 #[tauri::command]
-fn desktop_start(
+async fn desktop_start(
+    app: tauri::AppHandle,
     window: tauri::WebviewWindow,
     supervisor: tauri::State<'_, SupervisorHandle>,
 ) -> Result<(), DesktopError> {
     check(&window, &supervisor, Command::Start, 0)?;
-    supervisor.start()
+    if supervisor.snapshot().state == supervisor::State::Running {
+        let target = app.clone();
+        app.run_on_main_thread(move || bootstrap::open(&target))
+            .map_err(|_| DesktopError::Unavailable)
+    } else {
+        supervisor.start()
+    }
 }
 
 #[tauri::command]
@@ -109,6 +128,7 @@ pub fn run() {
             picker::pick_workspace
         ])
         .setup(move |app| {
+            app.manage(gateway_view::GatewayView::default());
             let handle = app.handle().clone();
             let updates = handle.clone();
             let teardown = handle.clone();

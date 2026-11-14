@@ -33,11 +33,15 @@ then follow dependencies and tests for the task at hand.
 | Web UI (vanilla JS, EN/FR) | `ui/index.html`, `ui/js/app.js` (entry), `ui/js/core.js` (shared state), `ui/locales/` | `tests/gateway/test_ui_security.py`, `tests/gateway/ui-behavior.test.cjs`, [manual checklist](phase-9-review.md) |
 | Desktop child: private IPC and owned listener | `declaw/desktop/__main__.py`, `channel.py`, `protocol.py`, `runtime.py`, `notifications.py` | `tests/unit/test_desktop_*.py`, `tests/integration/test_desktop_lifecycle.py` |
 | Windows shell: ownership and native privilege | `tauri/src-tauri/src/lib.rs`, `supervisor.rs`, `windows_job.rs`, `boundary.rs`, `control.rs`, `capabilities/` | `tauri/src-tauri/tests/`, Windows helper unit test in `windows_job.rs`, [desktop checklist](phase-10-review.md) |
-| Desktop bootstrap/tray/picker | `tauri/bootstrap/`, `tauri/src-tauri/src/bootstrap.rs`, `tray.rs`, `picker.rs`, `ui/js/desktop.js` | Native boundary/actor tests, Node UI tests, [source run guide](../tauri/README.md) |
+| Desktop bootstrap/tray/picker | `tauri/bootstrap/`, `tauri/src-tauri/src/bootstrap.rs`, `gateway_view.rs`, `tray.rs`, `picker.rs`, `ui/js/desktop.js` | Native boundary/actor/view-failure tests, Node UI tests, [source run guide](../tauri/README.md) |
 
 Shared visual tokens and responsive layouts live in `ui/css/main.css`.
 `ui/js/chat.js` owns multiline keyboard submission, pending-turn controls and
-connection/working feedback; both locales supply the visible labels.
+connection/working feedback and a retained in-memory conversation with explicit
+New conversation. `ui/js/audit.js` owns cursor history and attachment actions;
+`ui/js/api.js` preflights download authentication. Both locales supply visible
+labels; Node regressions exercise routing, auth-loss cleanup, downloads and
+language changes. See the [repair evidence](history/phase-10-usability-repairs-2026-11-14.md).
 
 Filenames after the first path in a cell are relative to the same directory.
 
