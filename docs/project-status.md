@@ -29,7 +29,12 @@ ticket assumptions: [roadmap](specs/2026-08-23-phase-7-9-roadmap.md).
   is not wholly encrypted. Logical deletion is not a disk scrub.
 - HTTP observation covers instrumented core-process `httpx` calls, not every
   process or all network egress.
-- The default brain uses context-window trimming. Repair, summarizing compaction,
+- The default brain uses context-window trimming. Selection uses LangChain
+  `trim_messages` and `count_tokens_approximately` configured for three characters
+  per token, with the helper's other defaults.
+  It preserves the latest human turn and leading system instruction; required
+  context above the estimated hard cap fails before model invocation. See the
+  [context policy](specs/2026-11-12-context-trimming.md). Repair, summarizing compaction,
   memory retrieval and a system prompt must not be described as enabled merely
   because their helpers exist. Inspect `build_brain` and `chat` before changing them.
 - Historical sanitizer scores differ substantially between development and
