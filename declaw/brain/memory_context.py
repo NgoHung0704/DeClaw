@@ -29,7 +29,7 @@ from collections.abc import Awaitable, Callable, Sequence
 
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 
-from declaw.brain.context import TokenCounter, estimate_tokens
+from declaw.brain.context import DEFAULT_TOKEN_COUNTER
 from declaw.brain.loop import ModelCallable
 from declaw.memory.semantic import MemoryHit
 
@@ -58,7 +58,7 @@ def build_memory_note(
     hits: Sequence[MemoryHit],
     *,
     token_budget: int = DEFAULT_MEMORY_TOKEN_BUDGET,
-    counter: TokenCounter = estimate_tokens,
+    counter: Callable[[Sequence[BaseMessage]], int] = DEFAULT_TOKEN_COUNTER,
 ) -> SystemMessage | None:
     """Fold ``hits`` (nearest first) into one budgeted ``SystemMessage``.
 
@@ -82,7 +82,7 @@ def with_memory(
     retrieve: MemoryRetriever,
     *,
     token_budget: int = DEFAULT_MEMORY_TOKEN_BUDGET,
-    counter: TokenCounter = estimate_tokens,
+    counter: Callable[[Sequence[BaseMessage]], int] = DEFAULT_TOKEN_COUNTER,
 ) -> ModelCallable:
     """Wrap ``model`` so each call sees relevant memories before the last turn.
 

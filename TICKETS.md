@@ -100,8 +100,8 @@ Checkboxes record delivered ticket scope, not enabled defaults, production readi
 
 ### [x] DCL-014 — Context window management (32k-derived budget)
 
-- **Description**: Token counter, soft/hard caps with eviction policy.
-- **Acceptance**: Model-facing history is trimmed using the configured heuristic budget (default hard cap 30,720, soft cap 24,000). This is not an exact tokenizer guarantee for every model or a single oversized latest message.
+- **Description**: LangChain helper-based selection and approximate token counting configured for three characters per token, with soft/hard caps and current-turn preservation.
+- **Acceptance**: Model-facing history is trimmed using the configured heuristic budget (default hard cap 30,720, soft cap 24,000). The latest human turn and leading system instruction are required; they may exceed the soft target but raise `ContextWindowExceededError` above the hard cap. This is not an exact tokenizer guarantee. See [policy](docs/specs/2026-11-12-context-trimming.md).
 - **Dependencies**: DCL-011
 - **Estimate**: 0.5d
 

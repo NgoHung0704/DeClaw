@@ -10,8 +10,8 @@ def _block(text: str, **kw: object) -> Block:
     return Block(text=text, **kw)  # type: ignore[arg-type]
 
 
-def test_estimate_tokens_matches_the_core_heuristic() -> None:
-    # ceil(chars / 3), same constant as declaw/brain/context.py.
+def test_estimate_tokens_uses_text_chunking_heuristic() -> None:
+    # Independent text-only estimate: ceil(chars / 3).
     assert estimate_tokens("abc") == 1
     assert estimate_tokens("abcd") == 2
     assert estimate_tokens("") == 0

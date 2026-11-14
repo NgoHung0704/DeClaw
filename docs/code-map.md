@@ -8,7 +8,7 @@ then follow dependencies and tests for the task at hand.
 | --- | --- | --- |
 | CLI session and assembly | `declaw/main.py`, `declaw/brain/repl.py` | `tests/unit/test_repl.py`, `tests/integration/test_chat_repl.py` |
 | Model, state, execution loop | `declaw/brain/loop.py`, `state.py`, `chat_model.py` | `tests/unit/test_loop.py`, `test_state.py`, `test_chat_model.py` |
-| Context and optional memory | `declaw/brain/context.py`, `compaction.py`, `repair.py`, `memory_context.py` | `tests/unit/test_context.py`, `test_compaction.py`, `test_repair.py`, `test_memory_context.py` |
+| Context selection, budget overflow and optional memory | `declaw/brain/context.py`, `compaction.py`, `repair.py`, `memory_context.py` | `tests/unit/test_context.py`, `test_compaction.py`, `test_repair.py`, `test_memory_context.py` |
 | Tool contracts and approval | `declaw/tools/base.py`, `registry.py`, `confirmation.py` | `tests/unit/test_tools_base.py`, `test_tools_registry.py`, `test_tools_confirmation.py` |
 | Workspace filesystem | `declaw/tools/builtin/filesystem.py`, `_paths.py` | `tests/unit/test_tools_filesystem.py`, `test_path_traversal.py` |
 | Documents: indexing and storage | `declaw/documents/session.py`, `indexer.py`, `catalog.py`, `store.py` | `tests/unit/test_documents_indexer.py`, `test_documents_store.py`, `test_documents_catalog.py` |
