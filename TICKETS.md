@@ -815,6 +815,8 @@ authenticated real-browser checklist items remain open.
 
 ### [x] DCL-129 — UI: Audit log viewer
 
+- **Phase 10 usability repair (2026-11-14)**: authenticated same-origin attachment exports, Older/Newer cursor history and collapsible payload details; [evidence](docs/history/phase-10-usability-repairs-2026-11-14.md).
+
 - **Description**: Filter by date, plugin, severity.
 - **Acceptance**: Filters work; export buttons present.
 - **Dependencies**: DCL-061
@@ -828,6 +830,8 @@ authenticated real-browser checklist items remain open.
 - **Estimate**: 0.5d
 
 ### [x] DCL-131 — UI: Settings
+
+- **Phase 10 usability repair (2026-11-14)**: full form/feedback localization after Save; retained Chat applies model/language snapshots only on explicit New conversation. Existing approval and restart-required workspace semantics remain.
 
 - **Description**: Model, language, workspace path.
 - **Acceptance**: Persists across restarts.
@@ -859,6 +863,23 @@ authenticated real-browser checklist items remain open.
 
 ## 🖥️ PHASE 10 — TAURI DESKTOP APP (Week 12-13)
 
+Architecture/scope decisions settled under owner delegation on 2026-11-12:
+see the [desktop spec](docs/specs/2026-11-12-phase-10-tauri-desktop-design.md)
+and [reviewed plan](docs/superpowers/plans/2026-11-12-phase-10-desktop.md).
+Phase 10 delivers the source-development Windows shell and the DCL-146..150
+release-boundary dossier; their release acceptance stays at Phase 14. DCL-144
+safe event wiring and in-app fallback are Phase 10 work; installed Windows
+identity/activation acceptance is deferred to Phase 14. All tickets remain open
+until their implementation and applicable acceptance are verified.
+
+Implementation in progress on 2026-11-13: see the
+[dated report](docs/history/phase-10-implementation-2026-11-13.md) and
+[desktop checklist](docs/phase-10-review.md). Source shell, owned lifecycle,
+private IPC, tray/bootstrap and picker code exist with automated tests; remaining
+WebView2/Windows UI and interrupted-persistence checks prevent blanket completion
+of DCL-140..145. The [release dossier](docs/phase-10-release-boundaries.md) records
+DCL-146..150 prerequisites without closing those release tickets.
+
 ### [ ] DCL-140 — Tauri 2.0 project scaffold
 
 - **Description**: src-tauri + assets.
@@ -868,12 +889,16 @@ authenticated real-browser checklist items remain open.
 
 ### [ ] DCL-141 — Python core lifecycle from Tauri
 
+- **Architecture repair (2026-11-14)**: independent bounded cleanup after server failures; unexpected EOF revokes readiness; bounded control writer with cancellable, joined I/O. See [evidence](docs/history/phase-10-architecture-repairs-2026-11-14.md). Overall acceptance remains open.
+
 - **Description**: Spawn, monitor, kill on exit.
 - **Acceptance**: No orphan Python process after quit.
 - **Dependencies**: DCL-140
 - **Estimate**: 1d
 
 ### [ ] DCL-142 — Webview points to localhost:7842
+
+- **Architecture repair (2026-11-14)**: failed window creation is observable in the trusted bootstrap and retry reuses the live generation through existing Start/Open privileges. Real failure-injection WebView2 acceptance remains separate.
 
 - **Description**: Wait-for-ready handshake.
 - **Acceptance**: No race conditions on first launch.
@@ -895,6 +920,8 @@ authenticated real-browser checklist items remain open.
 - **Estimate**: 0.5d
 
 ### [ ] DCL-145 — Native file picker
+
+- **Acceptance follow-up (2026-11-14)**: picker is explicitly parented to its requesting window; actual Cancel preserves the candidate and completes IPC. The earlier stuck-callback diagnosis was corrected after targeting the separate dialog. See [acceptance evidence](docs/history/phase-10-acceptance-2026-11-14.md).
 
 - **Description**: Replaces web file input.
 - **Acceptance**: Picker returns absolute path.

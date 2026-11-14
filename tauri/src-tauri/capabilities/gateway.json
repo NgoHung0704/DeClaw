@@ -1,0 +1,8 @@
+{
+  "identifier": "gateway",
+  "description": "Owned gateway directory selection only",
+  "local": false,
+  "windows": ["gateway-*"],
+  "remote": { "urls": ["http://127.0.0.1:7842/*"] },
+  "permissions": ["allow-pick-workspace"]
+}

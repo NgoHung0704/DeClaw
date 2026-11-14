@@ -14,7 +14,7 @@ new product-test or model-benchmark run.
 | Watcher | `declaw/documents/watcher.py` + `declaw/documents/worker.py`: gateway mode starts a loop-safe watcher handoff feeding ONE serialized indexing worker (retry 0s/30s/300s); CLI behavior unchanged; deletion/move reconcile. |
 | Memory | Components exist under `declaw/memory/`; `with_memory` is not in the default `build_brain` stack. Do not assume episodic memory is populated by chat. |
 | Gateway | `declaw start` runs the hardened loopback uvicorn launcher (`declaw/gateway/app.py`); a full FastAPI surface (auth, Host/Origin, rate/body caps, WS chat with approvals and streaming, REST, events) sits in `declaw/gateway/`. `declaw stop` stays unimplemented (DCL-234). Core wiring is `declaw/app.py` (`Application`, gateway/CLI shared). |
-| Desktop and installer | The gateway web UI is implemented under `ui/` (vanilla JS, EN/FR, CSP-locked; manual checklist in `phase-9-review.md`). `tauri/` remains scaffolding; packaging stays a Phase 14 gate. |
+| Desktop and installer | Windows source desktop is in progress under `tauri/` and `declaw/desktop/`: owned core/Job supervision, private IPC, trusted bootstrap/tray and candidate workspace picker. Native build and component/process tests exist; authenticated WebView2 and crash-recovery acceptance remain open. See the [dated progress report](history/phase-10-implementation-2026-11-13.md) and [desktop checklist](phase-10-review.md). Installed notifications/packaging stay at Phase 14. |
 | Shell sandbox | Deferred from v0.1; no product shell tool is exposed. |
 
 Phase 0, 1, 2, 4, 5, 6 (buildable core), 7, 8a and 8b completion
@@ -59,8 +59,28 @@ and the existing preflight Docker-probe limitation are unchanged.
 The [2026-11-12 verification report](history/phase-9-verification-2026-11-12.md)
 records a completed full Python suite and companion checks. The owner accepted
 the visual UI; authenticated real-browser security/interaction acceptance remains
-open in the manual checklist. Phase 10 planning does not ratify its pending
-architecture choices.
+open in the manual checklist. Phase 10's seven architecture choices were settled
+under owner delegation; acceptance remains tracked separately.
+
+The Phase 10 usability repairs retain the live Chat view/socket across in-app
+navigation, with an explicit New conversation action for fresh settings or a
+closed connection. Authentication loss discards retained private state. Audit
+uses authenticated same-origin attachments, bidirectional cursor history and
+collapsible payloads; Settings updates all localized form labels after saving.
+See the [dated usability repair evidence](history/phase-10-usability-repairs-2026-11-14.md).
+
+Desktop fault handling now continues cooperative cleanup after service/server
+failures within one shutdown budget, revokes readiness on unexpected event EOF,
+and keeps bounded control writes off the lifecycle actor. Failed gateway-window
+creation exposes a localized same-core retry in the trusted bootstrap. The
+[architecture repair report](history/phase-10-architecture-repairs-2026-11-14.md)
+tracks verification and remaining real-WebView acceptance.
+The rebuilt app's Stop/Start/Restart and authenticated JSON/Markdown downloads
+were observed on 2026-11-14. This does not close the remaining security,
+tray-Quit, forced-crash or release acceptance checklist.
+The acceptance follow-up restores minimized windows before focus and parents
+the native picker to its requesting window. See the [acceptance report](history/phase-10-acceptance-2026-11-14.md)
+for the corrected Cancel diagnosis and manual checks.
 
 The [2026-11-10 repair report](history/phase-9-repairs-2026-11-10.md) records
 the review regressions and validation. UI page registration now loads shared

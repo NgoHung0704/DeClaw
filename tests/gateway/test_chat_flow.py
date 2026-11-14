@@ -859,6 +859,21 @@ def test_gateway_shutdown_denies_pending_approvals_and_fails_tasks(
 # --- Rate bucket eviction on drop (Task 4 review handoff) ---------------------
 
 
+def test_shutdown_refuses_new_turn_on_existing_connection(
+    tmp_path: Path, monkeypatch: Any,
+) -> None:
+    stack = _stack(tmp_path, monkeypatch, ModelHub())
+    with stack.client() as client:
+        cookie = stack.login(client)
+        with stack.connect(client, cookie) as ws:
+            asyncio.run(stack.app.state.session_manager.stop_accepting_sessions())
+            ws.send_json({"type": "message", "text": "must not start during shutdown"})
+            frame = ws.receive_json()
+            assert frame["type"] == ERROR_TYPE
+            assert all(model.calls == [] for model in stack.hub.models)
+    assert stack.fetch()["tasks"] == []
+
+
 def test_rate_buckets_evicted_on_drop_connection() -> None:
     limiter = RateLimiter(clock=FakeClock())
     for _ in range(10):

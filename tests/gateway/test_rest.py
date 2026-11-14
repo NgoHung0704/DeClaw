@@ -781,6 +781,9 @@ def test_audit_export_markdown_reuses_daily_report(tmp_path: Path, monkeypatch: 
 
     assert response.status_code == 200
     assert response.headers["content-type"].startswith("text/markdown")
+    assert response.headers.get("content-disposition") == (
+        'attachment; filename="declaw-audit-2026-01-02.md"'
+    )
     body = response.text
     assert "DeClaw daily report — 2026-01-02" in body
     assert "Task t1" in body
@@ -801,6 +804,9 @@ def test_audit_export_json_round_trips_the_archive(tmp_path: Path, monkeypatch: 
 
     assert response.status_code == 200
     archive = response.json()
+    assert response.headers.get("content-disposition") == (
+        'attachment; filename="declaw-audit-2026-01-02.json"'
+    )
     envelope = archive["declaw_audit_export"]
     assert envelope["schema_version"] == 1
     assert envelope["event_count"] == 3

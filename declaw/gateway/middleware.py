@@ -88,6 +88,7 @@ class SecurityHeadersMiddleware:
             "img-src 'self' data:; "
             "style-src 'self'; "
             "script-src 'self'; "
+            "frame-src 'none'; "
             "frame-ancestors 'none'"
         )
 

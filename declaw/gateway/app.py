@@ -95,6 +95,7 @@ def create_app(
     model_factory: ModelFactory | None = None,
     rate_limiter: RateLimiter | None = None,
     status_health_check: Callable[[], Awaitable[OllamaHealth]] | None = None,
+    manage_application_lifespan: bool = True,
 ) -> FastAPI:
     """Build the FastAPI application for the gateway.
 
@@ -138,6 +139,8 @@ def create_app(
         # Task 9 wiring (spec sections 5/6): the constructor-injected hooks
         # from Task 7 get their real handlers — the manager and broker above.
         application.wire_gateway_shutdown(manager)
+
+    if application is not None and manage_application_lifespan:
 
         @asynccontextmanager
         async def lifespan(_app: FastAPI) -> AsyncIterator[None]:

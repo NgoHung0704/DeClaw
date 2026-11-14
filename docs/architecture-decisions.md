@@ -14,7 +14,7 @@ A planned decision does not imply implementation.
 | Subprocess trust | Allowlisted environment and crash/lifecycle supervision are not OS sandboxing or a barrier to same-user resources/keyring. See `declaw/plugin_host/process.py` and the Phase 7 spec. |
 | Credential storage | OS keyring with encrypted fallback; see `declaw/credentials/`. Do not claim keyring is the only implemented backend. |
 | Shell execution | Dropped from v0.1: typed document/file actions need no shell, while Docker setup adds end-user burden. If shell returns, approved Docker isolation is required; never add an unsandboxed fallback. See [AGENTS.md](../AGENTS.md#invariants). |
-| Gateway and desktop | Phase 9 gateway implemented: loopback-only FastAPI (`declaw/gateway/`) with paste-once token auth, Host/Origin fail-closed policy, rate/body caps, WS chat with validate-before-prompt approvals and default deny, streaming with typed citation side channel, `/ws/events` and a CSP-locked vanilla-JS EN/FR UI. REST supports settings, plugin permissions and reindex requests; document write actions remain chat-only. Desktop Tauri shell remains later; packaging is the Phase 14 gate. |
+| Gateway and desktop | Phase 9 gateway implemented: loopback-only FastAPI (`declaw/gateway/`) with paste-once token auth, Host/Origin fail-closed policy, rate/body caps, WS chat with validate-before-prompt approvals and default deny, streaming with typed citation side channel, `/ws/events` and a CSP-locked vanilla-JS EN/FR UI. REST supports settings, plugin permissions and reindex requests; document write actions remain chat-only. Windows source desktop implementation exists with open WebView2/recovery acceptance; see the Phase 10 record below. Packaging is the Phase 14 gate. |
 | Repository documentation | Markdown status, code map, decisions and dated history are retained. Optional architecture viewers and their site-specific CI were removed by owner request on 2026-10-25; this does not alter the planned product UI. See [documentation index](README.md). |
 | Frontend assets | Vanilla JS modules + hand-written local CSS (no frontend build), EN/FR JSON locales with identical key sets, untrusted text via `textContent` only, no Markdown rendering in v0.1. Node's built-in runner executes UI behavior regressions in CI; real-browser checks remain in `phase-9-review.md`. |
 | Third-party installation and plugin secrets | v0.1 uses built-ins with enable/disable and one-time audited auto-grants; revocations persist. Third-party installation requires code digests in the signed manifest and removal of built-in auto-grant assumptions. Current signatures cover manifest bytes only. Defer plugin credential APIs until a real plugin needs secrets; see roadmap and host tests. |
@@ -24,6 +24,19 @@ A planned decision does not imply implementation.
 
 | Phase 9 section-20 decisions | All twelve ratified 2026-11-08 with the design: strict `127.0.0.1` launch (settings stay wider, launcher refuses), paste-once token + HttpOnly cookie, no REST document writes (chat approvals only), permission panel (no first-run consent), hand-written CSS, no Markdown in v0.1, workspace restart-required + model/language new-session, cancelled turns FAILED (no CANCELLED migration), `declaw stop` deferred (DCL-234), validate-before-prompt, plugin enable at next start/disable immediate, one turn per connection. See [the design](specs/2026-11-08-phase-9-gateway-web-ui-design.md) section 20 and [versioned baseline](history/phase-9-baseline-2026-11-08.md). |
 | Shared module ownership | Retrieval-source context belongs to `declaw/documents/sources.py`; core document tools do not depend on gateway transport. `declaw/settings_file.py` owns file parsing and workspace composition for both config bootstrap and SettingsService. This maintenance preserves existing precedence, fail-closed path checks, confirmation and audit behavior; see [maintenance design](specs/2026-11-12-phase-9-maintenance-design.md). |
+
+Phase 10 decisions were settled on 2026-11-12 by agent selection explicitly
+delegated by the owner. Use the [desktop spec, section 10](specs/2026-11-12-phase-10-tauri-desktop-design.md#10-settled-decisions--2026-11-12): thin Tauri shell on the exact loopback gateway;
+owned core with conflict on occupied port; Job Object and private typed IPC;
+paste-once bootstrap login; close-to-tray and explicit Quit; source-development
+delivery with release acceptance at Phase 14; installed Windows notification
+identity/activation deferred to Phase 14 with in-app fallback retained. DCL-144
+and release tickets remain open. Phase 9 maintenance integration is complete;
+implementation and open M1 acceptance are recorded in the
+[dated progress report](history/phase-10-implementation-2026-11-13.md).
+The desktop uses the existing gateway policies with an additional
+`frame-src 'none'` restriction to prohibit embedded child frames. This does not
+widen script/connect/origin grants; future iframe features require review.
 
 Phase 9 depends on the completed sanitizer work. The old requirement that Phase 3
 must precede Phase 9 is superseded for the shell-free v0.1 scope. This does not

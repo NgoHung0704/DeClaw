@@ -29,7 +29,7 @@ const massageError = async (response) => {
   return new ApiError(response.status, "http_error", `HTTP ${response.status}`);
 };
 
-const request = async (method, path, body) => {
+const requestResponse = async (method, path, body) => {
   const options = { method, credentials: "same-origin" };
   if (body !== undefined) {
     options.headers = { "Content-Type": "application/json" };
@@ -43,7 +43,17 @@ const request = async (method, path, body) => {
   if (!response.ok) {
     throw await massageError(response);
   }
-  return await response.json();
+  return response;
+};
+
+const request = async (method, path, body) => (await requestResponse(method, path, body)).json();
+
+// Preflight uses the same auth/error handling; the native browser performs the
+// attachment request itself so downloads never navigate to a blob origin.
+export const prepareDownload = async (path) => {
+  const response = await requestResponse("GET", path);
+  await response.body?.cancel();
+  return `${httpBase()}${path}`;
 };
 
 export const getJson = (path) => request("GET", path);
