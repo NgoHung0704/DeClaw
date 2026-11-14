@@ -1,7 +1,8 @@
 # Active architecture decisions
 
 This index separates current direction from historical discussion. Source
-inspection date: 2026-10-25. A planned decision does not imply implementation.
+initial inspection date: 2026-10-25; Phase 9 maintenance review: 2026-11-12.
+A planned decision does not imply implementation.
 
 | Decision | State and rationale / evidence |
 | --- | --- |
@@ -13,13 +14,16 @@ inspection date: 2026-10-25. A planned decision does not imply implementation.
 | Subprocess trust | Allowlisted environment and crash/lifecycle supervision are not OS sandboxing or a barrier to same-user resources/keyring. See `declaw/plugin_host/process.py` and the Phase 7 spec. |
 | Credential storage | OS keyring with encrypted fallback; see `declaw/credentials/`. Do not claim keyring is the only implemented backend. |
 | Shell execution | Dropped from v0.1: typed document/file actions need no shell, while Docker setup adds end-user burden. If shell returns, approved Docker isolation is required; never add an unsandboxed fallback. See [AGENTS.md](../AGENTS.md#invariants). |
-| Gateway and desktop | Planned FastAPI loopback gateway (`127.0.0.1:7842`) and Windows-first Tauri 2 shell; currently scaffolding. |
+| Gateway and desktop | Phase 9 gateway implemented: loopback-only FastAPI (`declaw/gateway/`) with paste-once token auth, Host/Origin fail-closed policy, rate/body caps, WS chat with validate-before-prompt approvals and default deny, streaming with typed citation side channel, `/ws/events` and a CSP-locked vanilla-JS EN/FR UI. REST supports settings, plugin permissions and reindex requests; document write actions remain chat-only. Desktop Tauri shell remains later; packaging is the Phase 14 gate. |
 | Repository documentation | Markdown status, code map, decisions and dated history are retained. Optional architecture viewers and their site-specific CI were removed by owner request on 2026-10-25; this does not alter the planned product UI. See [documentation index](README.md). |
-| Frontend assets | Planned Vanilla JS, English/French, locally vendored assets. Tailwind CDN is superseded by the approved roadmap's no-runtime-CDN correction. |
+| Frontend assets | Vanilla JS modules + hand-written local CSS (no frontend build), EN/FR JSON locales with identical key sets, untrusted text via `textContent` only, no Markdown rendering in v0.1. Node's built-in runner executes UI behavior regressions in CI; real-browser checks remain in `phase-9-review.md`. |
 | Third-party installation and plugin secrets | v0.1 uses built-ins with enable/disable and one-time audited auto-grants; revocations persist. Third-party installation requires code digests in the signed manifest and removal of built-in auto-grant assumptions. Current signatures cover manifest bytes only. Defer plugin credential APIs until a real plugin needs secrets; see roadmap and host tests. |
 | Source attribution and evaluation | Sources derive from retrieval metadata, not model-authored citations. Benchmarks separate development and externally sourced held-out sets; no private client documents in committed fixtures. See `declaw/documents/citations.py`, `declaw/documents/corpus/heldout.py` and the Phase 8b spec. |
 | License | Project metadata declares AGPL-3.0-or-later; see `pyproject.toml`. A possible future commercial license is not an implemented distribution/licensing flow. |
 | Brain wrappers and prompts | Repair, compaction, memory retrieval and system-prompt activation require measured validation before default wiring. See `declaw/brain/repl.py` and `declaw/main.py`; old Mistral findings are historical, not proof about current Qwen behavior. |
+
+| Phase 9 section-20 decisions | All twelve ratified 2026-11-08 with the design: strict `127.0.0.1` launch (settings stay wider, launcher refuses), paste-once token + HttpOnly cookie, no REST document writes (chat approvals only), permission panel (no first-run consent), hand-written CSS, no Markdown in v0.1, workspace restart-required + model/language new-session, cancelled turns FAILED (no CANCELLED migration), `declaw stop` deferred (DCL-234), validate-before-prompt, plugin enable at next start/disable immediate, one turn per connection. See [the design](specs/2026-11-08-phase-9-gateway-web-ui-design.md) section 20 and [versioned baseline](history/phase-9-baseline-2026-11-08.md). |
+| Shared module ownership | Retrieval-source context belongs to `declaw/documents/sources.py`; core document tools do not depend on gateway transport. `declaw/settings_file.py` owns file parsing and workspace composition for both config bootstrap and SettingsService. This maintenance preserves existing precedence, fail-closed path checks, confirmation and audit behavior; see [maintenance design](specs/2026-11-12-phase-9-maintenance-design.md). |
 
 Phase 9 depends on the completed sanitizer work. The old requirement that Phase 3
 must precede Phase 9 is superseded for the shell-free v0.1 scope. This does not

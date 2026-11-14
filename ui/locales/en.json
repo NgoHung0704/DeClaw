@@ -1,0 +1,150 @@
+{
+  "nav": {
+    "connect": "Connect",
+    "chat": "Chat",
+    "documents": "Documents",
+    "audit": "Audit",
+    "plugins": "Plugins",
+    "settings": "Settings",
+    "status": "Status"
+  },
+  "page": {
+    "connect": {
+      "title": "Connect"
+    },
+    "chat": {
+      "title": "Chat"
+    },
+    "documents": {
+      "title": "Documents"
+    },
+    "audit": {
+      "title": "Audit trail"
+    },
+    "plugins": {
+      "title": "Plugins"
+    },
+    "settings": {
+      "title": "Settings"
+    },
+    "status": {
+      "title": "System status"
+    }
+  },
+  "connect": {
+    "token": {
+      "label": "Gateway token (printed by declaw start)",
+      "help": "Paste the token from the console to open a session."
+    },
+    "submit": "Sign in"
+  },
+  "chat": {
+    "placeholder": "Ask DeClaw…",
+    "send": "Send",
+    "cancel": "Cancel turn",
+    "disconnected": "Connection lost — the turn was cancelled and pending approvals were denied.",
+    "sources": "Sources",
+    "sentinel_pending": "Pending",
+    "conversation": "Conversation",
+    "empty_title": "A clearer view of your documents.",
+    "empty_help": "Ask a question, explore a file, or work through an idea. To read a file, include its path inside your workspace.",
+    "you": "You",
+    "activity": "Tool activity",
+    "connecting": "Connecting…",
+    "ready": "Ready for your next question",
+    "thinking": "DeClaw is working…",
+    "offline": "Disconnected",
+    "keyboard_hint": "Enter to send · Shift + Enter for a new line"
+  },
+  "approval": {
+    "title": "Tool approval required",
+    "tool": "Tool",
+    "args": "Exact arguments that will run",
+    "approve": "Approve",
+    "deny": "Deny",
+    "preview": "Preview"
+  },
+  "documents": {
+    "workspace": "Workspace folder",
+    "reindex": "Reindex now",
+    "reindexing": "Indexing…",
+    "count": "{count} documents",
+    "columns": {
+      "path": "Path",
+      "size": "Size",
+      "status": "Status",
+      "indexed": "Indexed"
+    }
+  },
+  "audit": {
+    "filter": "Filter",
+    "export": "Export",
+    "event_type": "Event type",
+    "task_id": "Task ID",
+    "from": "From",
+    "to": "To",
+    "older": "Older",
+    "newer": "Newer",
+    "clear": "Clear filters"
+  },
+  "plugins": {
+    "enable": "Enable",
+    "disable": "Disable",
+    "permissions": "Permissions",
+    "requested": "Requested",
+    "denied_by_author": "Author-denied",
+    "granted": "Granted",
+    "grant": "Grant",
+    "revoke": "Revoke",
+    "takes_effect": {
+      "next_gateway_start": "Takes effect at the next gateway start",
+      "immediate": "Takes effect immediately"
+    }
+  },
+  "settings": {
+    "model": "Model",
+    "language": "Language",
+    "workspace_dir": "Workspace folder",
+    "save": "Save",
+    "saved": "Saved",
+    "applied": {
+      "new_session": "Applies to new chat sessions",
+      "restart_required": "Requires a gateway restart"
+    }
+  },
+  "status": {
+    "refresh": "Refresh",
+    "version": "Version",
+    "ollama": "Ollama",
+    "model_present": "Model present",
+    "watcher": "File watcher",
+    "egress": "Egress monitor",
+    "plugins": "Plugins",
+    "reachable": {
+      "true": "reachable",
+      "false": "unreachable",
+      "null": "not measured"
+    }
+  },
+  "error": {
+    "unauthorized": "Sign-in required.",
+    "not_found": "Not found.",
+    "reindex_in_progress": "An indexing run is already in progress.",
+    "documents_unavailable": "Document features are unavailable right now.",
+    "invalid_settings": "Invalid settings value.",
+    "invalid_settings_file": "The settings file is invalid.",
+    "invalid_cursor": "The listing cursor is invalid.",
+    "invalid_request": "Invalid request.",
+    "service_unavailable": "Service unavailable.",
+    "rate_limited": "Too many requests — wait a moment.",
+    "payload_too_large": "The request body is too large.",
+    "busy": "A turn is already running in this session.",
+    "bad_frame": "Unrecognized message.",
+    "turn_failed": "The turn failed.",
+    "backpressure": "The client stopped reading; the turn was cancelled."
+  },
+  "shell": {
+    "workspace": "Your workspace",
+    "local": "Runs on this computer"
+  }
+}

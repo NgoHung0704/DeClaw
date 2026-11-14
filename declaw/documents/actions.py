@@ -18,7 +18,9 @@ from pydantic import BaseModel, Field
 
 from declaw.config import Language
 from declaw.documents.citations import format_source
+from declaw.documents.models import source_metadata
 from declaw.documents.search import ChunkSanitizer, SearchableStore, search_documents
+from declaw.documents.sources import record_source
 from declaw.tools.base import DeclawTool, ToolClass
 from declaw.tools.builtin._paths import resolve_in_workspace
 
@@ -206,6 +208,11 @@ def build_document_summarize_tool(
             raise FileNotFoundError(f"Folder for {args.path!r} does not exist.")
 
         outcome = await search_documents(store, chunk_sanitizer, args.query)
+        # Typed side channel (spec section 8): same structural recording as
+        # the search tool, so chat.final.sources is collector-built for the
+        # summarize flow too.
+        for hit in outcome.hits:
+            record_source(source_metadata(hit))
         sources: list[str] = []
         for hit in outcome.hits:
             rendered = format_source(hit)

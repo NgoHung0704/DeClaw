@@ -54,3 +54,7 @@ coverage.xml
 # Machine-local coding-agent configuration
 /.claude/
 /.codex/
+/.superpowers/
+
+# Local dependency caches and test temporary files
+/.cache/

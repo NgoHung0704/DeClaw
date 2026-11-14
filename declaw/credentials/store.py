@@ -32,6 +32,7 @@ SERVICE_NAME = "declaw"
 # Every secret name DeClaw may create, in one place, so `purge()` (and the
 # Phase 14 uninstaller) can remove all of them without backend enumeration.
 KNOWN_SECRET_NAMES: tuple[str, ...] = (
+    "gateway-token",  # DCL-121: loopback gateway bearer token
     "memory-fernet-key",  # DCL-051: at-rest encryption of vector memory
 )
 

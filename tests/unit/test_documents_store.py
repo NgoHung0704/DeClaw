@@ -123,7 +123,7 @@ async def test_delete_removes_only_that_document(
     document, _ = store
     await document.add_document(document_id("a.txt"), "a.txt", _chunks("alpha"))
     await document.add_document(document_id("b.txt"), "b.txt", _chunks("beta"))
-    document.delete_document(document_id("a.txt"))
+    await document.delete_document(document_id("a.txt"))
     assert document.count() == 1
     assert (await document.search("beta", k=1))[0].path == "b.txt"
 
@@ -134,7 +134,7 @@ async def test_reindexing_replaces_rather_than_duplicates(
     document, _ = store
     doc = document_id("a.txt")
     await document.add_document(doc, "a.txt", _chunks("first version"))
-    document.delete_document(doc)
+    await document.delete_document(doc)
     await document.add_document(doc, "a.txt", _chunks("second version"))
     assert document.count() == 1
 

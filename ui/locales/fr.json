@@ -1,0 +1,150 @@
+{
+  "nav": {
+    "connect": "Connexion",
+    "chat": "Discussion",
+    "documents": "Documents",
+    "audit": "Audit",
+    "plugins": "Greffons",
+    "settings": "Réglages",
+    "status": "État"
+  },
+  "page": {
+    "connect": {
+      "title": "Connexion"
+    },
+    "chat": {
+      "title": "Discussion"
+    },
+    "documents": {
+      "title": "Documents"
+    },
+    "audit": {
+      "title": "Journal d'audit"
+    },
+    "plugins": {
+      "title": "Greffons"
+    },
+    "settings": {
+      "title": "Réglages"
+    },
+    "status": {
+      "title": "État du système"
+    }
+  },
+  "connect": {
+    "token": {
+      "label": "Jeton de passerelle (affiché par declaw start)",
+      "help": "Collez le jeton affiché dans la console pour ouvrir une session."
+    },
+    "submit": "Se connecter"
+  },
+  "chat": {
+    "placeholder": "Demandez à DeClaw…",
+    "send": "Envoyer",
+    "cancel": "Annuler le tour",
+    "disconnected": "Connexion perdue — le tour a été annulé et les approbations en attente ont été refusées.",
+    "sources": "Sources",
+    "sentinel_pending": "En attente",
+    "conversation": "Conversation",
+    "empty_title": "Vos documents, plus clairs.",
+    "empty_help": "Posez une question, explorez un fichier ou développez une idée. Pour lire un fichier, indiquez son chemin dans votre dossier de travail.",
+    "you": "Vous",
+    "activity": "Activité des outils",
+    "connecting": "Connexion…",
+    "ready": "Prêt pour votre prochaine question",
+    "thinking": "DeClaw travaille…",
+    "offline": "Déconnecté",
+    "keyboard_hint": "Entrée pour envoyer · Maj + Entrée pour une nouvelle ligne"
+  },
+  "approval": {
+    "title": "Approbation d'outil requise",
+    "tool": "Outil",
+    "args": "Arguments exacts qui seront exécutés",
+    "approve": "Approuver",
+    "deny": "Refuser",
+    "preview": "Aperçu"
+  },
+  "documents": {
+    "workspace": "Dossier de travail",
+    "reindex": "Réindexer maintenant",
+    "reindexing": "Indexation…",
+    "count": "{count} documents",
+    "columns": {
+      "path": "Chemin",
+      "size": "Taille",
+      "status": "État",
+      "indexed": "Indexé"
+    }
+  },
+  "audit": {
+    "filter": "Filtrer",
+    "export": "Exporter",
+    "event_type": "Type d'événement",
+    "task_id": "ID de tâche",
+    "from": "Du",
+    "to": "Au",
+    "older": "Plus ancien",
+    "newer": "Plus récent",
+    "clear": "Effacer les filtres"
+  },
+  "plugins": {
+    "enable": "Activer",
+    "disable": "Désactiver",
+    "permissions": "Permissions",
+    "requested": "Demandées",
+    "denied_by_author": "Refusées par l'auteur",
+    "granted": "Accordées",
+    "grant": "Accorder",
+    "revoke": "Révoquer",
+    "takes_effect": {
+      "next_gateway_start": "Prend effet au prochain démarrage de la passerelle",
+      "immediate": "Prend effet immédiatement"
+    }
+  },
+  "settings": {
+    "model": "Modèle",
+    "language": "Langue",
+    "workspace_dir": "Dossier de travail",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "applied": {
+      "new_session": "S'applique aux nouvelles sessions de discussion",
+      "restart_required": "Nécessite un redémarrage de la passerelle"
+    }
+  },
+  "status": {
+    "refresh": "Actualiser",
+    "version": "Version",
+    "ollama": "Ollama",
+    "model_present": "Modèle présent",
+    "watcher": "Observateur de fichiers",
+    "egress": "Moniteur de trafic sortant",
+    "plugins": "Greffons",
+    "reachable": {
+      "true": "accessible",
+      "false": "inaccessible",
+      "null": "non mesuré"
+    }
+  },
+  "error": {
+    "unauthorized": "Connexion requise.",
+    "not_found": "Introuvable.",
+    "reindex_in_progress": "Une indexation est déjà en cours.",
+    "documents_unavailable": "Les fonctions documentaires sont indisponibles pour le moment.",
+    "invalid_settings": "Valeur de réglage invalide.",
+    "invalid_settings_file": "Le fichier de réglages est invalide.",
+    "invalid_cursor": "Le curseur de liste est invalide.",
+    "invalid_request": "Requête invalide.",
+    "service_unavailable": "Service indisponible.",
+    "rate_limited": "Trop de requêtes — patientez un instant.",
+    "payload_too_large": "Le corps de la requête est trop volumineux.",
+    "busy": "Un tour est déjà en cours dans cette session.",
+    "bad_frame": "Message non reconnu.",
+    "turn_failed": "Le tour a échoué.",
+    "backpressure": "Le client a cessé de lire ; le tour a été annulé."
+  },
+  "shell": {
+    "workspace": "Votre espace de travail",
+    "local": "Sur cet ordinateur"
+  }
+}

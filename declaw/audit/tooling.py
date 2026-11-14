@@ -10,15 +10,18 @@ Like the confirmation and sanitizer wrappers, the wrapped tool keeps the same
 name / description / args_schema — invisible to ``bind_tools``.
 
 Outcome detection: a denial is recognized by comparing the inner result to the
-localized denial string DeClaw itself generates (``denial_message``); that
-string is ours, deterministic, and never produced by a real tool, so the check
-is exact, not heuristic.
+localized denial string DeClaw itself generates (``denial_message``); a
+validation rejection (validate-before-prompt, spec section 7) by the localized
+observation prefix (``validation_failure_prefix``). Both strings are ours,
+deterministic, and never produced by a real tool, so the checks are exact, not
+heuristic. A call that never ran because its arguments were invalid audits as
+outcome ``"invalid"`` — forensically distinct from one that ran (``"ok"``).
 """
 
 from __future__ import annotations
 
 import time
-from typing import Any
+from typing import Any, Literal
 
 from langchain_core.tools import StructuredTool
 
@@ -26,7 +29,11 @@ from declaw.audit.events import ToolCallEvent, clip_args
 from declaw.audit.logger import AuditLogger
 from declaw.config import Language
 from declaw.tools.base import DeclawTool
-from declaw.tools.confirmation import denial_message
+from declaw.tools.confirmation import (
+    RawArgsStructuredTool,
+    denial_message,
+    validation_failure_prefix,
+)
 
 
 def wrap_tool_with_audit(
@@ -45,6 +52,7 @@ def wrap_tool_with_audit(
     if inner_coroutine is None:  # pragma: no cover - all DeClaw tools are async
         raise ValueError(f"Tool {inner.name!r} has no async coroutine to wrap.")
     denied_marker = denial_message(tool.name, language)
+    invalid_prefix = validation_failure_prefix(tool.name, language)
 
     async def audited_coroutine(**kwargs: Any) -> str:
         start = time.perf_counter()
@@ -62,18 +70,28 @@ def wrap_tool_with_audit(
                 )
             )
             raise
+        if result == denied_marker:
+            outcome: Literal["ok", "invalid", "denied"] = "denied"
+        elif result.startswith(invalid_prefix):
+            outcome = "invalid"
+        else:
+            outcome = "ok"
         await audit.emit(
             ToolCallEvent(
                 tool_name=tool.name,
                 classification=tool.classification.value,
                 args=clip_args(kwargs),
-                outcome="denied" if result == denied_marker else "ok",
+                outcome=outcome,
                 duration_ms=(time.perf_counter() - start) * 1000,
             )
         )
         return str(result)
 
-    return StructuredTool.from_function(
+    # RawArgsStructuredTool, like the confirmation gate it wraps: the gate
+    # owns validation (validate-before-prompt, spec section 7), so a plain
+    # StructuredTool here would re-validate in _parse_input and turn invalid
+    # model arguments back into a raised ValidationError ahead of the gate.
+    return RawArgsStructuredTool(
         coroutine=audited_coroutine,
         name=inner.name,
         description=inner.description,

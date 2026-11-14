@@ -133,5 +133,23 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    """Return the process-wide ``Settings`` singleton."""
-    return Settings()
+    """Freeze the process workspace at cold start (env > saved file > default).
+
+    Every filesystem consumer uses this singleton, including path containment.
+    Model/language remain per-session SettingsService values; no request mutates
+    this cache. A workspace edit takes effect only in the next process.
+    """
+    from declaw.settings_file import SETTINGS_FILENAME, effective_workspace, read_settings_file
+
+    environment = Settings()
+    workspace = effective_workspace(
+        environment.workspace_dir,
+        environment.data_dir,
+        "workspace_dir" in environment.model_fields_set,
+        read_settings_file(environment.data_dir / SETTINGS_FILENAME),
+    )
+    settings = environment.model_copy(update={"workspace_dir": workspace})
+    # model_copy marks updated keys explicit. Keep the original env provenance
+    # so SettingsService can still report a later file edit before restart.
+    settings.model_fields_set.intersection_update(environment.model_fields_set)
+    return settings
