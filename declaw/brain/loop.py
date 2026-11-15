@@ -36,7 +36,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 
 from declaw.brain.state import AgentState
 from declaw.log import logger
-
+from langgraph.checkpoint.memory import InMemorySaver
 # Async "think" step: given the running message list, return the model's next
 # message. The model must already be aware of the available tools (e.g. via
 # ``ChatOllama.bind_tools(tools)``); tests inject a scripted fake.
@@ -88,6 +88,7 @@ def build_agent_graph(
         reply = await model(state.messages)
         return {"messages": [reply]}
 
+    checkpointer = InMemorySaver()
     builder = StateGraph(AgentState)
     builder.add_node("agent", think)
     builder.add_node("tools", ToolNode(list(tools), handle_tool_errors=tool_error_message))
@@ -96,4 +97,4 @@ def build_agent_graph(
     builder.add_conditional_edges("agent", tools_condition)
     builder.add_edge("tools", "agent")
 
-    return builder.compile()
+    return builder.compile(checkpointer=checkpointer)

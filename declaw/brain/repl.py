@@ -46,6 +46,7 @@ from declaw.log import logger
 from declaw.tools.base import DeclawTool
 from declaw.tools.confirmation import ConfirmationProvider
 
+from uuid import uuid4, UUID
 _APPROVALS = {"y", "yes", "o", "oui"}
 
 # Shown when a whole turn fails. Tool refusals never reach here (the graph turns
@@ -169,6 +170,13 @@ async def run_chat(
     failure.
     """
     history: list[BaseMessage] = [] if system is None else [system]
+    thread_ids = []
+    current_config = {}
+
+    thread_id = uuid4()
+    thread_ids.append(thread_id)
+    current_config = {"configurable": {"thread_id": thread_id}}
+    
     while True:
         line = read()
         if line is None:
@@ -178,6 +186,37 @@ async def run_chat(
             continue
         if text in {"/exit", "/quit"}:
             break
+        if text == "/new":
+            thread_id = uuid4()
+            thread_ids.append(thread_id)
+            current_config = {"configurable": {"thread_id": thread_id}}
+            continue
+        if text == "/threads":
+            print(thread_ids)
+            print(current_config["configurable"]["thread_id"])
+            continue
+        if text.split(maxsplit=1)[0] == "/switch":
+            parts = text.split(maxsplit=1)
+
+            if len(parts) < 2:
+                print("Usage: /switch <thread_id>")
+                continue
+
+            try:
+                target_id = UUID(parts[1])
+            except ValueError:
+                print("Invalid UUID")
+                continue
+
+            if target_id not in thread_ids:
+                print("Thread not found")
+                continue
+
+            current_config = {
+            "configurable": {"thread_id": str(target_id)}
+            }
+            print(f"Switched to {target_id}")
+            continue
 
         # Snapshot so a failed turn can be rolled back: history then only ever
         # holds completed turns, and a prompt that blew up cannot silently
@@ -185,8 +224,9 @@ async def run_chat(
         completed = list(history)
         history.append(HumanMessage(content=text))
         before = len(history)
+
         try:
-            result = await graph.ainvoke({"messages": history})
+            result = await graph.ainvoke({"messages": [HumanMessage(content=text)]}, current_config)
         except Exception as exc:
             logger.exception("Chat turn failed")
             history = completed
