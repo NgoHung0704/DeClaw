@@ -87,7 +87,7 @@ async def test_no_compaction_when_nothing_older_than_recent() -> None:
     assert summarizer.calls == []
 
 
-async def test_orphan_tool_message_in_recent_is_folded_into_summary() -> None:
+async def test_drops_orphan_tool_message_in_recent() -> None:
     summarizer = _FakeSummarizer()
     ai = AIMessage(content="", tool_calls=[{"name": "echo", "args": {"message": "x"}, "id": "c1"}])
     tool = ToolMessage(content="echo: x", tool_call_id="c1")
@@ -109,8 +109,6 @@ async def test_orphan_tool_message_in_recent_is_folded_into_summary() -> None:
     # recent would start with the orphan ToolMessage (its AIMessage was folded away)
     assert not any(isinstance(m, ToolMessage) for m in result)
     assert result[-1] is msgs[-1]
-    # The orphan ToolMessage must be shifted into old so its result is preserved in the summary
-    assert tool in summarizer.calls[0]
 
 
 async def test_make_summarizer_uses_model_content() -> None:

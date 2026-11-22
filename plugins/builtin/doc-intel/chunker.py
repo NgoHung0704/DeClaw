@@ -8,10 +8,10 @@ Two rules shape the output:
 * blocks NEVER merge across sheets, because a spreadsheet sheet is a separate
   context and a merged chunk would cite two places at once.
 
-Token counting is ceil(chars / 3), the same conservative constant as
-declaw/brain/context.py (_CHARS_PER_TOKEN). Core's estimate_tokens takes
-messages rather than text, and this plugin cannot import declaw anyway, so the
-one-line formula lives here with core named as its source.
+Token counting uses an independent text-only heuristic, ceil(chars / 3).
+The brain uses LangChain's message-aware counter configured for the same character
+ratio, with additional message overhead; this plugin's chunk sizing is unchanged.
+Neither heuristic is an exact model-tokenizer guarantee.
 """
 
 from __future__ import annotations

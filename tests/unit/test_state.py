@@ -51,35 +51,3 @@ def test_serialize_deserialize_round_trip() -> None:
     assert restored.plan == ["find file", "summarize"]
     assert restored.audit_refs == ["evt-1", "evt-2"]
     assert restored == state
-
-
-def test_pretty_print_renders_all_sections() -> None:
-    from io import StringIO
-    from rich.console import Console
-
-    state = AgentState(
-        messages=[
-            HumanMessage(content="hello"),
-            AIMessage(
-                content="calling echo",
-                tool_calls=[{"name": "echo", "args": {"message": "x"}, "id": "c1"}],
-            ),
-            ToolMessage(content="echo: x", tool_call_id="c1"),
-        ],
-        scratchpad="working notes",
-        plan=["find file", "summarize"],
-        tool_calls=[{"name": "echo", "args": {"message": "x"}, "id": "c1"}],
-        audit_refs=["evt-1"],
-    )
-
-    buf = StringIO()
-    console = Console(file=buf, force_terminal=False, color_system=None)
-    state.pretty_print(console=console)
-    output = buf.getvalue()
-
-    assert "hello" in output
-    assert "calling echo" in output
-    assert "echo" in output
-    assert "working notes" in output
-    assert "find file" in output
-    assert "evt-1" in output

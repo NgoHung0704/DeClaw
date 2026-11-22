@@ -19,7 +19,7 @@ from collections.abc import Awaitable, Callable, Sequence
 
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, ToolMessage
 
-from declaw.brain.context import DEFAULT_SOFT_CAP, TokenCounter, estimate_tokens
+from declaw.brain.context import DEFAULT_SOFT_CAP, DEFAULT_TOKEN_COUNTER
 from declaw.brain.loop import ModelCallable
 
 # Produces a concise summary of a run of messages.
@@ -65,15 +65,14 @@ async def compact_messages(
     summarize: Summarizer,
     threshold: int = DEFAULT_COMPACTION_THRESHOLD,
     keep_recent: int = DEFAULT_KEEP_RECENT,
-    counter: TokenCounter = estimate_tokens,
+    counter: Callable[[Sequence[BaseMessage]], int] = DEFAULT_TOKEN_COUNTER,
 ) -> list[BaseMessage]:
     """Replace the oldest turns with a summary note once over ``threshold``.
 
     No-op while under ``threshold`` or when there is nothing older than the
     ``keep_recent`` most recent messages. A leading ``SystemMessage`` and the
     recent tail are kept verbatim; a leading orphan ``ToolMessage`` in the tail
-    is shifted into the summarized head so its result is preserved while keeping
-    the prompt valid.
+    is dropped to keep the prompt valid.
     """
     msgs = list(messages)
     if counter(msgs) <= threshold:
@@ -87,18 +86,14 @@ async def compact_messages(
 
     recent: list[BaseMessage] = rest[-keep_recent:] if keep_recent > 0 else []
     old = rest[: len(rest) - len(recent)]
-
-    # If the recent tail begins with an orphan ToolMessage (its requesting
-    # AIMessage was sliced into old), shift it into old so its result is
-    # preserved in the summary rather than dropped, keeping recent valid.
-    while recent and isinstance(recent[0], ToolMessage):
-        old.append(recent.pop(0))
-
     if not old:
         return msgs  # nothing old enough to compact
 
     summary = await summarize(old)
     note = SystemMessage(content=f"Summary of earlier conversation:\n{summary}")
+
+    while len(recent) > 1 and isinstance(recent[0], ToolMessage):
+        recent.pop(0)
 
     return [*head, note, *recent]
 
@@ -109,7 +104,7 @@ def with_compaction(
     summarize: Summarizer,
     threshold: int = DEFAULT_COMPACTION_THRESHOLD,
     keep_recent: int = DEFAULT_KEEP_RECENT,
-    counter: TokenCounter = estimate_tokens,
+    counter: Callable[[Sequence[BaseMessage]], int] = DEFAULT_TOKEN_COUNTER,
 ) -> ModelCallable:
     """Wrap ``model`` so its incoming messages are compacted when over threshold.
 

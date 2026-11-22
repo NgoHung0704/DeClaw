@@ -78,14 +78,12 @@ Fernet key to a subprocess and avoids two processes writing one Chroma store.
 | `parsers/text.py` | TXT + Markdown, heading-aware, YAML frontmatter |
 | `chunker.py` | Heading/paragraph-aware chunking to ~512 tokens |
 
-**Token counting** (corrected during spec review): core's
-`declaw/brain/context.py::estimate_tokens` takes a `Sequence[BaseMessage]`, not
-text, so there is nothing for the chunker to reuse even if the plugin could
-import it. What the chunker needs is `ceil(len(text) / 3)` — one line, matching
-core's `_CHARS_PER_TOKEN = 3`, over-estimating by design so a chunk never comes
-out larger than budgeted. The constant is written in the plugin with a comment
-naming `brain/context.py` as its source. No duplication test: a shared
-one-line formula has nothing meaningful to cross-check.
+**Token counting** (updated 2026-11-14): the chunker retains its independent
+text-only `ceil(len(text) / 3)` estimate. The brain now uses LangChain's
+message-aware `count_tokens_approximately` configured with `chars_per_token=3`
+and other library defaults; the chunker cannot import core and does not need
+message counting. Neither estimate is an
+exact tokenizer bound. See [context policy](2026-11-12-context-trimming.md).
 
 **Core — `declaw/documents/`:**
 
