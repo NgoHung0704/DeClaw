@@ -74,7 +74,8 @@ def fit_to_window(
     head: list[BaseMessage] = []
     body = msgs
     if msgs and isinstance(msgs[0], SystemMessage):
-        head, body = [msgs[0]], msgs[1:]
+        head.append(msgs[0])
+        body = msgs[1:]    
 
     while len(body) > 1 and counter([*head, *body]) > soft_cap:
         body.pop(0)

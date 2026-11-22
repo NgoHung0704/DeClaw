@@ -195,5 +195,6 @@ async def run_chat(
         history = list(result["messages"])
 
         if debug:
+            AgentState.model_validate(result).pretty_print()
             _render_debug(history[before:], write)
         write(_reply_text(history))
