@@ -29,6 +29,7 @@ from collections.abc import Awaitable, Callable, Sequence
 from typing import Any
 
 from langchain_core.messages import BaseMessage
+from langchain_core.runnables import Runnable, RunnableConfig
 from langchain_core.tools import BaseTool
 from langgraph.graph import START, StateGraph
 from langgraph.graph.state import CompiledStateGraph
@@ -41,6 +42,31 @@ from declaw.log import logger
 # message. The model must already be aware of the available tools (e.g. via
 # ``ChatOllama.bind_tools(tools)``); tests inject a scripted fake.
 ModelCallable = Callable[[Sequence[BaseMessage]], Awaitable[BaseMessage]]
+
+# The think-step model can also be a LangChain ``Runnable`` (the production
+# Ollama stack). A runnable is invoked WITH its ``RunnableConfig`` propagated
+# (spec section 8) so the model's streaming events escape a running graph
+# through ``astream_events``; a plain callable keeps the injected-fake seam.
+ThinkStepModel = ModelCallable | Runnable[Any, Any]
+
+
+async def invoke_model(
+    model: ThinkStepModel,
+    messages: Sequence[BaseMessage],
+    config: RunnableConfig | None = None,
+) -> BaseMessage:
+    """Invoke the think-step model, propagating the node's ``RunnableConfig``.
+
+    Runnables are invoked as runnables with ``config`` forwarded, so the
+    model's ``on_chat_model_stream`` events reach an outside observer of the
+    running graph (the M4 gate, spec section 8). Plain async callables are
+    invoked as before — they have no events to propagate.
+    """
+    if isinstance(model, Runnable):
+        async_result: BaseMessage = await model.ainvoke(list(messages), config)
+        return async_result
+    result: BaseMessage = await model(list(messages))
+    return result
 
 # Failures that are part of a tool's contract. Their messages are written for
 # this purpose: they name a workspace-relative path and often the way out
@@ -75,17 +101,20 @@ def tool_error_message(exc: Exception) -> str:
 
 def build_agent_graph(
     *,
-    model: ModelCallable,
+    model: ThinkStepModel,
     tools: Sequence[BaseTool],
 ) -> CompiledStateGraph[AgentState, Any, Any, Any]:
     """Compile the think -> tool-call -> observe loop.
 
-    ``model`` is the think step (async, injected). ``tools`` are executed by
-    the observe step and must match the tools the model was made aware of.
+    ``model`` is the think step (a runnable invoked with its ``RunnableConfig``
+    propagated, or an injected async callable). ``tools`` are executed by the
+    observe step and must match the tools the model was made aware of.
     """
 
-    async def think(state: AgentState) -> dict[str, list[BaseMessage]]:
-        reply = await model(state.messages)
+    async def think(
+        state: AgentState, config: RunnableConfig
+    ) -> dict[str, list[BaseMessage]]:
+        reply = await invoke_model(model, state.messages, config)
         return {"messages": [reply]}
 
     builder = StateGraph(AgentState)

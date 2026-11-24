@@ -1,8 +1,14 @@
 # Phase 9 readiness assessment
 
-Reviewed against the current source on 2026-10-25. This is a current handoff
-assessment, not a Phase 9 design approval. The cold DB initialization fix is
-committed as `5f168db`; the remaining gateway/UI gaps below are still open.
+Historical assessment of the 2026-10-25 checkout, superseded for implementation
+status by the [ratified Phase 9 design](specs/2026-11-08-phase-9-gateway-web-ui-design.md),
+[current status](project-status.md) and
+[verification](history/phase-9-verification-2026-11-12.md). Statements below about
+open gateway/UI gaps describe that earlier checkout, not the current source.
+
+Reviewed against the source on 2026-10-25. This was a pre-design handoff
+assessment, not a Phase 9 design approval. The cold DB initialization fix was
+committed as `5f168db`; the remaining gateway/UI gaps below were open at that time.
 
 ## Verdict
 
@@ -116,8 +122,10 @@ safe gateway slice; scope them explicitly in the detailed spec.
    audit/settings/status and the local EN/FR UI. Measure latency rather than
    treating the historical estimates as commitments.
 
-No phase branch was created. Before implementation, identify the previous phase's
-branch/ref and follow the branch-per-phase rule; current checkout is `main`.
+Update 2026-11-08: branch `feat/phase-9-gateway-web-ui` was created from `main`
+(`d1fd05a`), and a
+[draft Phase 9 design](specs/2026-11-08-phase-9-gateway-web-ui-design.md)
+answering the contracts above is awaiting review on that branch.
 
 ## Repository and verification scope
 

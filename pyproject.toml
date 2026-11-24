@@ -28,20 +28,11 @@ dependencies = [
     "chromadb>=0.5.0",
     "cryptography>=43.0.0",
 
-    # Sandbox
-    "docker>=7.1.0",
-
     # Document parsing (doc-intel plugin). No OCR in v0.1: a scanned PDF is
     # reported as unreadable rather than silently indexed as nothing.
     "pypdf>=5.0.0",
     "python-docx>=1.1.0",
     "openpyxl>=3.1.0",
-
-    # Browser (Phase 2)
-    "playwright>=1.48.0",
-
-    # Scheduler (Phase 2)
-    "apscheduler>=4.0.0a5",
 
     # Credentials
     "keyring>=25.5.0",
@@ -57,7 +48,6 @@ dependencies = [
     "rich>=13.9.0",
     "typer>=0.13.0",
     "pyyaml>=6.0.2",
-    "python-multipart>=0.0.12",
     "websockets>=13.0",
     "loguru>=0.7.0",
     "watchdog>=5.0.0",  # file watcher for doc-intel

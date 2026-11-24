@@ -99,5 +99,3 @@ class AgentState(BaseModel):
 
         if self.audit_refs:
             c.print(f"[dim]🔒 Audit Refs: {', '.join(self.audit_refs)}[/dim]")
-
-

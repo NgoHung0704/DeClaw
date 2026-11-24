@@ -111,3 +111,41 @@ async def test_known_paths_is_sorted(catalog: DocumentCatalog) -> None:
             chunk_count=1,
         )
     assert await catalog.known_paths() == ["a.pdf", "m.pdf", "z.pdf"]
+
+
+# --- Failure markers (DCL-128): visible, cleared by recovery ---------------
+
+
+async def test_record_failure_upserts_the_marker(catalog: DocumentCatalog) -> None:
+    await catalog.record_failure(relative_path="bad.pdf", error="parse error", attempts=3)
+    await catalog.record_failure(relative_path="bad.pdf", error="second error", attempts=4)
+    assert await catalog.failures() == [("bad.pdf", "second error", 4)]
+
+
+async def test_clear_failure_removes_the_marker(catalog: DocumentCatalog) -> None:
+    await catalog.record_failure(relative_path="bad.pdf", error="parse error", attempts=3)
+    await catalog.clear_failure("bad.pdf")
+    await catalog.clear_failure("never-had-one.pdf")  # clearing the absent is a no-op
+    assert await catalog.failures() == []
+
+
+async def test_a_successful_record_clears_the_failure_marker(catalog: DocumentCatalog) -> None:
+    # The recovery flow a user actually runs: a failed path that indexes fine
+    # on the next run must not stay marked as failed in the catalog.
+    await catalog.record_failure(relative_path="bad.pdf", error="parse error", attempts=3)
+    await catalog.record(
+        relative_path="bad.pdf",
+        sha256="new",
+        size_bytes=10,
+        mtime=datetime.now(timezone.utc),
+        doc_type="pdf",
+        chunk_count=2,
+    )
+    assert await catalog.failures() == []
+
+
+async def test_forget_clears_the_failure_marker(catalog: DocumentCatalog) -> None:
+    # A deleted file takes its failure marker with it.
+    await catalog.record_failure(relative_path="bad.pdf", error="parse error", attempts=3)
+    await catalog.forget("bad.pdf")
+    assert await catalog.failures() == []

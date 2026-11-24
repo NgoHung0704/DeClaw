@@ -338,3 +338,43 @@ async def test_nothing_is_pruned_when_nothing_changed(
     report = await index.index()
     assert report.removed == 0
     assert report.skipped == 1
+
+
+# --- Single-path operations for the watcher worker (DCL-128) ----------------
+
+
+async def test_index_document_indexes_one_path(
+    indexer: tuple[DocumentIndexer, FakeParser, Path],
+) -> None:
+    index, parser, workspace = indexer
+    _write(workspace, "solo.txt")
+    report = await index.index_document("solo.txt")
+    assert report.indexed == 1
+    assert parser.calls == [str((workspace / "solo.txt").resolve())]
+    # The catalog row exists: the path is now known and skippable.
+    assert (await index.index_document("solo.txt")).indexed == 0  # second run skips
+
+
+async def test_index_document_ignores_unchanged_content(
+    indexer: tuple[DocumentIndexer, FakeParser, Path],
+) -> None:
+    index, parser, workspace = indexer
+    _write(workspace, "solo.txt")
+    await index.index_document("solo.txt")
+    report = await index.index_document("solo.txt")
+    assert report.skipped == 1
+    assert len(parser.calls) == 1
+
+
+async def test_forget_document_removes_chunks_and_the_catalog_row(
+    indexer: tuple[DocumentIndexer, FakeParser, Path],
+) -> None:
+    index, _, workspace = indexer
+    _write(workspace, "solo.txt")
+    await index.index_document("solo.txt")
+    assert any("solo.txt" in p for p in await index.catalog.known_paths())
+
+    await index.forget_document("solo.txt")
+    assert await index.catalog.known_paths() == []
+    # ...and the chunks went with the row: needs_index is True again.
+    assert await index.catalog.needs_index("solo.txt", "does-not-matter") is True

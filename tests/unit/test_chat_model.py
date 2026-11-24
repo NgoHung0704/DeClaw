@@ -35,7 +35,9 @@ def _install_fake_ollama(
     pending = list(replies)
 
     class FakeBound:
-        async def ainvoke(self, messages: Sequence[BaseMessage]) -> BaseMessage:
+        async def ainvoke(
+            self, messages: Sequence[BaseMessage], config: object = None
+        ) -> BaseMessage:
             rec.calls.append(list(messages))
             return pending.pop(0)
 

@@ -13,6 +13,7 @@ here than it was for agent memories because these are the client's documents.
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Sequence
 from typing import Any
 
@@ -79,7 +80,10 @@ class DocumentStore:
             batch = list(chunks[start : start + self._batch_size])
             vectors = await self._embed([c.text for c in batch])
             embeddings: Any = list(vectors)
-            self._collection.add(
+            # Chroma's add is synchronous and not free: it runs in a worker
+            # thread so a reindex cannot stall the event loop (DCL-128).
+            await asyncio.to_thread(
+                self._collection.add,
                 ids=[chunk_id(doc_id, c.ordinal) for c in batch],
                 embeddings=embeddings,
                 documents=[self._encode(c.text) for c in batch],
@@ -89,12 +93,13 @@ class DocumentStore:
 
     async def search(self, query: str, *, k: int = DEFAULT_K) -> list[SearchHit]:
         """Return the ``k`` closest chunks, text decrypted."""
-        stored = self.count()
+        stored = await asyncio.to_thread(self.count)
         if stored == 0:
             return []
         [vector] = await self._embed([query])
         embeddings: Any = [vector]
-        result = self._collection.query(
+        result = await asyncio.to_thread(
+            self._collection.query,
             query_embeddings=embeddings,
             n_results=min(k, stored),
             include=["documents", "metadatas", "distances"],
@@ -123,9 +128,11 @@ class DocumentStore:
             )
         return hits
 
-    def delete_document(self, doc_id: str) -> None:
+    async def delete_document(self, doc_id: str) -> None:
         """Remove every chunk of one document, so re-indexing replaces it."""
-        self._collection.delete(where={"doc_id": doc_id})
+        # Threaded like add/query: callers are async (indexer, worker), and a
+        # big delete must not stall the loop (DCL-128).
+        await asyncio.to_thread(self._collection.delete, where={"doc_id": doc_id})
 
     def count(self) -> int:
         return int(self._collection.count())

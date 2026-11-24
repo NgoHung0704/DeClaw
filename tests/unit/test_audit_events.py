@@ -29,6 +29,7 @@ from declaw.audit.events import (
     event_from_row,
     to_db_row,
 )
+
 from declaw.db.engine import build_engine, build_sessionmaker
 from declaw.db.models import AuditEvent as AuditEventRow
 
@@ -163,3 +164,48 @@ def test_plugin_lifecycle_action_vocabulary_is_closed() -> None:
 
     with pytest.raises(ValidationError):
         PluginLifecycleEvent(plugin="p", action="exploded")  # type: ignore[arg-type]
+
+# --- AuthEvent (DCL-121/DCL-129, spec section 2) --------------------------------
+
+
+def test_auth_event_round_trips_through_a_db_row() -> None:
+    from declaw.audit.events import AuthEvent, event_from_row, to_db_row
+
+    event = AuthEvent(action="login_failure")
+    assert event.event_type == "gateway.auth"
+    assert event.task_id is None
+
+    restored = event_from_row(to_db_row(event))
+    assert isinstance(restored, AuthEvent)
+    assert restored == event
+
+
+def test_auth_event_payload_has_no_token_or_session_fields() -> None:
+    from declaw.audit.events import AuthEvent
+
+    for action in ("login_success", "login_failure", "logout"):
+        payload = AuthEvent(action=action).model_dump(mode="json")
+        assert set(payload) == {
+            "id",
+            "schema_version",
+            "task_id",
+            "created_at",
+            "event_type",
+            "action",
+        }
+
+
+def test_auth_event_action_vocabulary_is_closed() -> None:
+    from declaw.audit.events import AuthEvent
+
+    with pytest.raises(ValidationError):
+        AuthEvent(action="token_dump")  # type: ignore[arg-type]
+
+
+def test_desktop_lifecycle_audit_has_closed_safe_payload() -> None:
+    from declaw.audit.events import DesktopLifecycleEvent
+
+    event = DesktopLifecycleEvent(launch_id="00000000-0000-0000-0000-000000000000", phase="ready")
+    assert event_from_payload(event.model_dump(mode="json")) == event
+    with pytest.raises(ValidationError):
+        DesktopLifecycleEvent(launch_id=event.launch_id, phase="ready", token="fake-secret")

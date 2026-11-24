@@ -16,6 +16,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlmodel import select
 
+from declaw.audit.correlation import TaskCorrelatingAuditLogger, current_task_id
 from declaw.audit.events import (
     NetworkCallEvent,
     PermissionPromptEvent,
@@ -224,3 +225,60 @@ async def test_composite_sink_fans_out() -> None:
     await asyncio.sleep(0)
     assert len(seen) == 1
     assert len(audit.events) == 1
+
+# --- Task correlation (DCL-129, spec section 6) ------------------------------------
+
+
+async def test_correlating_logger_stamps_unset_task_id_from_contextvar() -> None:
+    inner = InMemoryAuditLogger()
+    audit = TaskCorrelatingAuditLogger(inner)
+
+    token = current_task_id.set("task-42")
+    try:
+        await audit.emit(ToolCallEvent(tool_name="t", classification="read", outcome="ok"))
+    finally:
+        current_task_id.reset(token)
+
+    assert inner.events[0].task_id == "task-42"
+
+
+async def test_correlating_logger_preserves_explicit_task_id() -> None:
+    inner = InMemoryAuditLogger()
+    audit = TaskCorrelatingAuditLogger(inner)
+
+    token = current_task_id.set("task-42")
+    try:
+        await audit.emit(
+            ToolCallEvent(tool_name="t", classification="read", outcome="ok", task_id="task-7")
+        )
+    finally:
+        current_task_id.reset(token)
+
+    assert inner.events[0].task_id == "task-7"
+
+
+async def test_correlating_logger_without_contextvar_leaves_task_id_unset() -> None:
+    inner = InMemoryAuditLogger()
+    audit = TaskCorrelatingAuditLogger(inner)
+
+    await audit.emit(ToolCallEvent(tool_name="t", classification="read", outcome="ok"))
+
+    assert inner.events[0].task_id is None
+
+
+async def test_task_id_survives_task_scheduling() -> None:
+    # Review Focus: async work scheduled from within a turn context must
+    # still correlate. asyncio.create_task copies the current context at
+    # creation, so the id survives even once the parent resets it.
+    inner = InMemoryAuditLogger()
+    audit = TaskCorrelatingAuditLogger(inner)
+
+    async def emit_inside_turn() -> None:
+        await audit.emit(ToolCallEvent(tool_name="t", classification="read", outcome="ok"))
+
+    token = current_task_id.set("task-42")
+    task = asyncio.create_task(emit_inside_turn())
+    current_task_id.reset(token)
+    await task
+
+    assert inner.events[0].task_id == "task-42"

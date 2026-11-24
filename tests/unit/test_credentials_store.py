@@ -80,6 +80,17 @@ def test_purge_removes_known_secrets(fake_keyring: InMemoryKeyring) -> None:
     assert all(store.get(name) is None for name in KNOWN_SECRET_NAMES)
 
 
+def test_purge_covers_gateway_token(fake_keyring: InMemoryKeyring) -> None:
+    # DCL-121: the gateway token is a DeClaw-created secret; uninstall must
+    # reach it without backend enumeration.
+    assert "gateway-token" in KNOWN_SECRET_NAMES
+    store = CredentialStore()
+    store.set("gateway-token", "x")
+    removed = store.purge()
+    assert removed == 1  # only the gateway token exists in this fresh vault
+    assert store.get("gateway-token") is None
+
+
 def test_empty_secret_value_rejected(fake_keyring: InMemoryKeyring) -> None:
     with pytest.raises(ValueError):
         CredentialStore().set("token", "")
