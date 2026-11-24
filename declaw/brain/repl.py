@@ -24,8 +24,10 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Sequence
-from typing import Any
-
+from typing import Any, NotRequired, Literal
+from typing_extensions import TypedDict
+from dataclasses import dataclass
+from enum import Enum
 from langchain_core.messages import (
     AIMessage,
     BaseMessage,
@@ -35,7 +37,7 @@ from langchain_core.messages import (
 )
 from langchain_core.tools import BaseTool
 from langgraph.graph.state import CompiledStateGraph
-
+from itertools import count
 from declaw.brain.chat_model import build_ollama_model
 from declaw.brain.context import with_context_window
 from declaw.brain.loop import build_agent_graph
@@ -147,6 +149,16 @@ def _render_debug(messages: Sequence[BaseMessage], write: Callable[[str], None])
         elif isinstance(message, ToolMessage):
             write(f"[tool result] {message.content}")
 
+ConversationStatus = Literal["ready", "retryable", "blocked"]
+
+@dataclass
+class Conversation:
+    thread_id: str
+    status: ConversationStatus = "ready"
+    last_error : str | None = None
+
+    def __str__(self) -> str:
+        return f"Conversation {self.thread_id}, status: {self.status}"
 
 async def run_chat(
     graph: AgentGraph,
@@ -170,13 +182,17 @@ async def run_chat(
     failure.
     """
     history: list[BaseMessage] = [] if system is None else [system]
-    thread_ids = []
-    current_config = {}
+    conversations : dict[int, Conversation] = {}
+    active_conversation: int | None = None
+    conversation_ids = count(start = 1)
 
-    thread_id = uuid4()
-    thread_ids.append(thread_id)
-    current_config = {"configurable": {"thread_id": thread_id}}
+    def new_conversation() -> int:
+        conversation_id = next(conversation_ids)
+        conversations[conversation_id] = Conversation(str(uuid4()))
+        return conversation_id
     
+    active_conversation = new_conversation()
+
     while True:
         line = read()
         if line is None:
@@ -187,13 +203,12 @@ async def run_chat(
         if text in {"/exit", "/quit"}:
             break
         if text == "/new":
-            thread_id = uuid4()
-            thread_ids.append(thread_id)
-            current_config = {"configurable": {"thread_id": thread_id}}
+            active_conversation = new_conversation()
             continue
         if text == "/threads":
-            print(thread_ids)
-            print(current_config["configurable"]["thread_id"])
+            write(f"number of conversations: {len(conversations)}")
+            for i,k in conversations.items():
+                write(f"id :{i}, {k}")
             continue
         if text.split(maxsplit=1)[0] == "/switch":
             parts = text.split(maxsplit=1)
@@ -202,38 +217,29 @@ async def run_chat(
                 print("Usage: /switch <thread_id>")
                 continue
 
-            try:
-                target_id = UUID(parts[1])
-            except ValueError:
-                print("Invalid UUID")
+            target_id = int(parts[1])
+            print(target_id)
+            print(conversations.keys())
+            if target_id not in conversations.keys():
+                write("Thread not found")
                 continue
 
-            if target_id not in thread_ids:
-                print("Thread not found")
-                continue
-
-            current_config = {
-            "configurable": {"thread_id": str(target_id)}
-            }
-            print(f"Switched to {target_id}")
+            active_conversation = target_id
+            write(f"Switched to {target_id}")
             continue
 
         # Snapshot so a failed turn can be rolled back: history then only ever
         # holds completed turns, and a prompt that blew up cannot silently
         # re-trigger on the next invocation.
-        completed = list(history)
-        history.append(HumanMessage(content=text))
-        before = len(history)
 
         try:
-            result = await graph.ainvoke({"messages": [HumanMessage(content=text)]}, current_config)
+            result = await graph.ainvoke({"messages": [HumanMessage(content=text)]}, {"configurable": {"thread_id": conversations[active_conversation].thread_id}})
         except Exception as exc:
             logger.exception("Chat turn failed")
-            history = completed
+            conversations[active_conversation].status = "blocked"
             write(turn_failure_message(exc, language))
             continue
-        history = list(result["messages"])
-
-        if debug:
-            _render_debug(history[before:], write)
-        write(_reply_text(history))
+        
+        # if debug:
+        #     _render_debug(history[before:], write)
+        # write(_reply_text(history))
