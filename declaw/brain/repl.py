@@ -24,10 +24,8 @@ from __future__ import annotations
 
 import asyncio
 from collections.abc import Callable, Sequence
-from typing import Any, NotRequired, Literal
-from typing_extensions import TypedDict
+from typing import Any, Literal
 from dataclasses import dataclass
-from enum import Enum
 from langchain_core.messages import (
     AIMessage,
     BaseMessage,
@@ -35,7 +33,12 @@ from langchain_core.messages import (
     SystemMessage,
     ToolMessage,
 )
+from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import BaseTool
+import httpx
+from ollama import ResponseError
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.types import StateSnapshot
 from langgraph.graph.state import CompiledStateGraph
 from itertools import count
 from declaw.brain.chat_model import build_ollama_model
@@ -48,7 +51,8 @@ from declaw.log import logger
 from declaw.tools.base import DeclawTool
 from declaw.tools.confirmation import ConfirmationProvider
 
-from uuid import uuid4, UUID
+from uuid import uuid4
+
 _APPROVALS = {"y", "yes", "o", "oui"}
 
 # Shown when a whole turn fails. Tool refusals never reach here (the graph turns
@@ -56,12 +60,10 @@ _APPROVALS = {"y", "yes", "o", "oui"}
 # Ollama disappearing mid-conversation, a recursion limit, a bug in DeClaw. The
 # reason is kept short but names the exception type so a user can report it.
 _TURN_FAILED_EN = (
-    "That request could not be completed ({reason}). "
-    "The conversation is still open - you can try again or rephrase."
+    "That request could not be completed ({reason}). Saved progress has been preserved."
 )
 _TURN_FAILED_FR = (
-    "Cette demande n'a pas pu être traitée ({reason}). "
-    "La conversation reste ouverte - vous pouvez réessayer ou reformuler."
+    "Cette demande n'a pas pu être traitée ({reason}). La progression enregistrée a été conservée."
 )
 _MAX_REASON_CHARS = 200
 
@@ -78,7 +80,7 @@ def build_brain(tools: Sequence[BaseTool] | None = None) -> AgentGraph:
     selected = list(tools) if tools is not None else [echo]
     model = build_ollama_model(selected)
     model = with_context_window(model)
-    return build_agent_graph(model=model, tools=selected)
+    return build_agent_graph(model=model, tools=selected, checkpointer=InMemorySaver())
 
 
 def make_console_confirmation_provider(
@@ -133,9 +135,7 @@ def _reply_text(messages: Sequence[BaseMessage]) -> str:
     """Return the most recent assistant message that carries visible text."""
     for message in reversed(messages):
         if isinstance(message, AIMessage):
-            content = (
-                message.content if isinstance(message.content, str) else str(message.content)
-            )
+            content = message.content if isinstance(message.content, str) else str(message.content)
             if content.strip():
                 return content
     return ""
@@ -149,16 +149,41 @@ def _render_debug(messages: Sequence[BaseMessage], write: Callable[[str], None])
         elif isinstance(message, ToolMessage):
             write(f"[tool result] {message.content}")
 
-ConversationStatus = Literal["ready", "retryable", "blocked"]
+
+ConversationStatus = Literal["ready", "interrupted", "blocked"]
+
 
 @dataclass
 class Conversation:
+    """Process-local metadata; graph state belongs to the checkpointer."""
+
     thread_id: str
     status: ConversationStatus = "ready"
-    last_error : str | None = None
+    last_error: str | None = None
 
-    def __str__(self) -> str:
-        return f"Conversation {self.thread_id}, status: {self.status}"
+
+def _failed_agent(snapshot: StateSnapshot) -> bool:
+    return (
+        snapshot.next == ("agent",)
+        and not snapshot.interrupts
+        and any(task.name == "agent" and task.error is not None for task in snapshot.tasks)
+    )
+
+
+def classify_failure(exc: Exception, snapshot: StateSnapshot) -> Literal["interrupted", "blocked"]:
+    """Allow follow-ups after temporary failures of a saved agent task."""
+    if not _failed_agent(snapshot):
+        return "blocked"
+    if isinstance(exc, (ConnectionError, httpx.TimeoutException, httpx.NetworkError)):
+        return "interrupted"
+    if isinstance(exc, ResponseError) and exc.status_code in {429, 502, 503, 504}:
+        return "interrupted"
+    return "blocked"
+
+
+def _chat_text(language: Language, en: str, fr: str) -> str:
+    return fr if language == "fr" else en
+
 
 async def run_chat(
     graph: AgentGraph,
@@ -169,30 +194,38 @@ async def run_chat(
     system: SystemMessage | None = None,
     language: Language = "en",
 ) -> None:
-    """Drive a multi-turn REPL over ``graph``.
+    """Run numbered, checkpoint-backed chats with message-driven recovery.
 
-    ``read`` returns the next user line (or ``None`` to stop); ``write`` emits a
-    line of output. The whole conversation is threaded back into the graph each
-    turn, so the model keeps multi-turn memory. When ``system`` is given it is
-    seeded as the leading message (the localized system prompt, DCL-017).
-
-    One failed turn never ends the session: the error is reported to the user
-    (in ``language``), logged with its traceback for us, and the loop moves on.
-    A user in the middle of a long conversation must not lose it to a transient
-    failure.
+    Commands never enter model context. Failed progress remains checkpointed.
+    A recognized temporary agent failure permits a follow-up message.
     """
-    history: list[BaseMessage] = [] if system is None else [system]
-    conversations : dict[int, Conversation] = {}
-    active_conversation: int | None = None
-    conversation_ids = count(start = 1)
+    if graph.checkpointer is None or isinstance(graph.checkpointer, bool):
+        raise ValueError("run_chat requires a graph with a checkpointer")
+
+    conversations: dict[int, Conversation] = {}
+    conversation_ids = count(start=1)
 
     def new_conversation() -> int:
-        conversation_id = next(conversation_ids)
-        conversations[conversation_id] = Conversation(str(uuid4()))
-        return conversation_id
-    
-    active_conversation = new_conversation()
+        number = next(conversation_ids)
+        conversations[number] = Conversation(str(uuid4()))
+        return number
 
+    def say(en: str, fr: str) -> None:
+        write(_chat_text(language, en, fr))
+
+    def recovery_notice(conversation: Conversation) -> None:
+        if conversation.status == "interrupted":
+            say(
+                "Send a message to continue or change direction.",
+                "Envoyez un message pour reprendre ou changer de direction.",
+            )
+        else:
+            say(
+                "Conversation blocked; investigation is required. Use /switch or /new.",
+                "Conversation bloquée ; une vérification est nécessaire. Utilisez /switch ou /new.",
+            )
+
+    active_conversation = new_conversation()
     while True:
         line = read()
         if line is None:
@@ -200,46 +233,94 @@ async def run_chat(
         text = line.strip()
         if not text:
             continue
+        parts = text.split()
+        command = parts[0]
         if text in {"/exit", "/quit"}:
             break
         if text == "/new":
             active_conversation = new_conversation()
+            say(
+                f"Created conversation {active_conversation}.",
+                f"Conversation {active_conversation} créée.",
+            )
             continue
         if text == "/threads":
-            write(f"number of conversations: {len(conversations)}")
-            for i,k in conversations.items():
-                write(f"id :{i}, {k}")
+            for number, conversation in conversations.items():
+                marker = "*" if number == active_conversation else " "
+                status: str = conversation.status
+                if language == "fr":
+                    status = {
+                        "ready": "prête",
+                        "interrupted": "interrompue",
+                        "blocked": "bloquée",
+                    }[status]
+                write(f"{marker} {number}: {status}")
+                if conversation.last_error:
+                    write(f"  {conversation.last_error}")
             continue
-        if text.split(maxsplit=1)[0] == "/switch":
-            parts = text.split(maxsplit=1)
-
-            if len(parts) < 2:
-                print("Usage: /switch <thread_id>")
-                continue
-
-            target_id = int(parts[1])
-            print(target_id)
-            print(conversations.keys())
-            if target_id not in conversations.keys():
-                write("Thread not found")
-                continue
-
-            active_conversation = target_id
-            write(f"Switched to {target_id}")
+        if command == "/switch":
+            try:
+                target = int(parts[1]) if len(parts) == 2 else None
+            except ValueError:
+                target = None
+            if target is None:
+                say("Usage: /switch <number>", "Utilisation : /switch <numéro>")
+            elif target not in conversations:
+                say("Conversation not found.", "Conversation introuvable.")
+            else:
+                active_conversation = target
+                say(f"Switched to conversation {target}.", f"Conversation {target} sélectionnée.")
+            continue
+        if text.startswith("/"):
+            say(
+                "Commands: /new, /threads, /switch <number>, /exit, /quit",
+                "Commandes : /new, /threads, /switch <numéro>, /exit, /quit",
+            )
             continue
 
-        # Snapshot so a failed turn can be rolled back: history then only ever
-        # holds completed turns, and a prompt that blew up cannot silently
-        # re-trigger on the next invocation.
+        conversation = conversations[active_conversation]
+        if conversation.status == "blocked":
+            recovery_notice(conversation)
+            continue
 
+        config: RunnableConfig = {"configurable": {"thread_id": conversation.thread_id}}
+        may_classify = False
         try:
-            result = await graph.ainvoke({"messages": [HumanMessage(content=text)]}, {"configurable": {"thread_id": conversations[active_conversation].thread_id}})
+            before = await graph.aget_state(config)
+            if conversation.status == "interrupted" and not _failed_agent(before):
+                conversation.status = "blocked"
+                recovery_notice(conversation)
+                continue
+            messages = before.values.get("messages", [])
+            new_messages: list[BaseMessage] = []
+            if system is not None and not messages:
+                new_messages.append(system)
+            new_messages.append(HumanMessage(content=text))
+            debug_start = len(messages) + len(new_messages)
+            may_classify = True
+            result = await graph.ainvoke({"messages": new_messages}, config)
+            may_classify = False
+            after = await graph.aget_state(config)
+            if after.next or after.interrupts:
+                conversation.status = "blocked"
+                recovery_notice(conversation)
+                continue
         except Exception as exc:
             logger.exception("Chat turn failed")
-            conversations[active_conversation].status = "blocked"
-            write(turn_failure_message(exc, language))
+            conversation.status = "blocked"
+            try:
+                snapshot = await graph.aget_state(config)
+                if may_classify:
+                    conversation.status = classify_failure(exc, snapshot)
+            except Exception:
+                logger.exception("Could not inspect failed conversation")
+            conversation.last_error = turn_failure_message(exc, language)
+            write(conversation.last_error)
+            recovery_notice(conversation)
             continue
-        
-        # if debug:
-        #     _render_debug(history[before:], write)
-        # write(_reply_text(history))
+
+        conversation.status = "ready"
+        conversation.last_error = None
+        if debug:
+            _render_debug(result["messages"][debug_start:], write)
+        write(_reply_text(result["messages"]))

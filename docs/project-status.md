@@ -6,7 +6,7 @@ new product-test or model-benchmark run.
 
 | Area | Evidence and current scope |
 | --- | --- |
-| CLI and agent | `declaw/main.py:chat`, `declaw/brain/repl.py:build_brain`, and `declaw/brain/loop.py` assemble model/tool execution. |
+| CLI and agent | `declaw/main.py:chat`, `declaw/brain/repl.py:build_brain`, and `declaw/brain/loop.py` assemble model/tool execution. Chat uses process-local checkpointed conversations, numbered switching and same-thread follow-ups after recognized temporary model failures; see [chat policy](specs/2026-11-24-checkpointed-chat.md). |
 | Filesystem tools | `declaw/tools/registry.py` registers typed tools, confirmation, sanitizer and audit wrappers. |
 | Plugin host | `declaw/plugin_host/host.py` and `declaw_plugin_sdk/` implement supervised subprocesses and IPC. This is not an OS sandbox. |
 | Document intelligence | `declaw/documents/session.py:build_document_stack` shares index/chat assembly; `plugins/builtin/doc-intel/` parses; core owns embedding, storage, retrieval and actions. |
@@ -47,6 +47,13 @@ For any new task, verify the relevant row against the current checkout. Update
 this file when executable behavior changes; put dated measurements in a separate
 report with command, environment and corpus. Do not carry forward old test counts
 as current validation.
+
+## Checkpointed chat maintenance
+
+The checkpointed-chat extension was verified on 2026-11-24; see the
+[dated validation report](history/checkpointed-chat-validation-2026-11-24.md).
+Conversations last for the current process only. After a temporary model failure,
+a new message can continue or redirect the conversation using saved progress. This extension does not begin a new product phase.
 
 ## Phase 9 readiness and maintenance
 

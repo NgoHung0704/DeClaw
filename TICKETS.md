@@ -120,6 +120,8 @@ Checkboxes record delivered ticket scope, not enabled defaults, production readi
 - **Dependencies**: DCL-010
 - **Estimate**: 0.5d
 
+- **Maintenance extension**: Checkpoint-backed numbered chats with follow-up messages after temporary model failures; see [policy](docs/specs/2026-11-24-checkpointed-chat.md). Process-local only; no automatic rollback or tool replay.
+
 ### [x] DCL-017 — System prompt template (FR + EN)
 
 - **Scope**: Template helper exists; current CLI does not seed it into the default graph.

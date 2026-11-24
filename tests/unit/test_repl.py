@@ -10,6 +10,8 @@ from collections.abc import Sequence
 from pathlib import Path
 
 import pytest
+from langgraph.checkpoint.memory import InMemorySaver
+
 from langchain_core.messages import (
     AIMessage,
     BaseMessage,
@@ -63,7 +65,7 @@ def test_build_brain_builds_a_runnable_graph() -> None:
 
 async def test_run_chat_threads_history_across_turns() -> None:
     model = _ScriptedModel([AIMessage(content="first"), AIMessage(content="second")])
-    graph = build_agent_graph(model=model, tools=[echo])
+    graph = build_agent_graph(model=model, tools=[echo], checkpointer=InMemorySaver())
     writer = _Writer()
 
     await run_chat(graph, read=_Reader(["hello", "again", "/exit"]), write=writer)
@@ -77,7 +79,7 @@ async def test_run_chat_threads_history_across_turns() -> None:
 
 async def test_run_chat_exits_without_calling_model() -> None:
     model = _ScriptedModel([AIMessage(content="never")])
-    graph = build_agent_graph(model=model, tools=[echo])
+    graph = build_agent_graph(model=model, tools=[echo], checkpointer=InMemorySaver())
     writer = _Writer()
 
     await run_chat(graph, read=_Reader(["/exit"]), write=writer)
@@ -88,7 +90,7 @@ async def test_run_chat_exits_without_calling_model() -> None:
 
 async def test_run_chat_skips_blank_input() -> None:
     model = _ScriptedModel([AIMessage(content="reply")])
-    graph = build_agent_graph(model=model, tools=[echo])
+    graph = build_agent_graph(model=model, tools=[echo], checkpointer=InMemorySaver())
     writer = _Writer()
 
     await run_chat(graph, read=_Reader(["", "   ", "hi", "/exit"]), write=writer)
@@ -102,7 +104,7 @@ async def test_run_chat_debug_shows_tool_call_and_result() -> None:
         content="", tool_calls=[{"name": "echo", "args": {"message": "hi"}, "id": "c1"}]
     )
     model = _ScriptedModel([tool_call, AIMessage(content="done")])
-    graph = build_agent_graph(model=model, tools=[echo])
+    graph = build_agent_graph(model=model, tools=[echo], checkpointer=InMemorySaver())
     writer = _Writer()
 
     await run_chat(graph, read=_Reader(["please echo", "/exit"]), write=writer, debug=True)
@@ -116,17 +118,17 @@ async def test_run_chat_debug_shows_tool_call_and_result() -> None:
 async def test_run_chat_seeds_system_message() -> None:
     system = SystemMessage(content="rules of the game")
     model = _ScriptedModel([AIMessage(content="ok")])
-    graph = build_agent_graph(model=model, tools=[echo])
+    graph = build_agent_graph(model=model, tools=[echo], checkpointer=InMemorySaver())
 
     await run_chat(graph, read=_Reader(["hi", "/exit"]), write=_Writer(), system=system)
 
     first_turn = model.received[0]
-    assert first_turn[0] is system  # the system prompt leads the conversation
+    assert first_turn[0] == system  # the system prompt leads the conversation
     assert isinstance(first_turn[1], HumanMessage)
 
 
 # ============================================================================
-# A failing turn must not end the session
+# A failing turn preserves progress and leaves other chats usable
 #
 # Tool errors are handled inside the graph (see test_loop.py), but everything
 # else can still blow up mid-turn: Ollama dying, a recursion limit, a bug. The
@@ -150,41 +152,41 @@ class _FlakyModel:
 
 
 async def test_run_chat_survives_a_failing_turn() -> None:
-    model = _FlakyModel(RuntimeError("ollama went away"), AIMessage(content="back again"))
-    graph = build_agent_graph(model=model, tools=[echo])
+    model = _FlakyModel(ConnectionError("ollama went away"), AIMessage(content="back again"))
+    graph = build_agent_graph(model=model, tools=[echo], checkpointer=InMemorySaver())
     writer = _Writer()
 
-    await run_chat(graph, read=_Reader(["first", "second", "/exit"]), write=writer)
+    await run_chat(graph, read=_Reader(["first", "Try again.", "/exit"]), write=writer)
 
     joined = "\n".join(writer.lines)
     assert "could not be completed" in joined  # the user is told, in words
-    assert "RuntimeError" in joined  # with enough detail to report a bug
+    assert "ConnectionError" in joined  # with enough detail to report a bug
     assert "back again" in joined  # and the next turn still works
     assert len(model.received) == 2  # the REPL did not exit on the failure
 
 
 async def test_run_chat_failure_message_localized_french() -> None:
     model = _FlakyModel(RuntimeError("boom"), AIMessage(content="ok"))
-    graph = build_agent_graph(model=model, tools=[echo])
+    graph = build_agent_graph(model=model, tools=[echo], checkpointer=InMemorySaver())
     writer = _Writer()
 
-    await run_chat(
-        graph, read=_Reader(["essai", "/exit"]), write=writer, language="fr"
-    )
+    await run_chat(graph, read=_Reader(["essai", "/exit"]), write=writer, language="fr")
 
     assert any("n'a pas pu être traitée" in line for line in writer.lines)
 
 
-async def test_failed_turn_is_dropped_from_history() -> None:
-    """History only ever holds completed turns, so a dead turn cannot repeat."""
+async def test_failed_turn_blocks_new_input_but_other_chats_work() -> None:
+    """A blocked conversation rejects new input while another chat remains usable."""
     model = _FlakyModel(RuntimeError("boom"), AIMessage(content="ok"))
-    graph = build_agent_graph(model=model, tools=[echo])
+    graph = build_agent_graph(model=model, tools=[echo], checkpointer=InMemorySaver())
 
-    await run_chat(graph, read=_Reader(["doomed", "healthy", "/exit"]), write=_Writer())
+    await run_chat(
+        graph, read=_Reader(["doomed", "ignored", "/new", "healthy", "/exit"]), write=_Writer()
+    )
 
     second_turn = model.received[1]
     texts = [str(m.content) for m in second_turn]
-    assert texts == ["healthy"]  # the failed prompt left no trace
+    assert texts == ["healthy"]  # the new chat is independent
 
 
 # ============================================================================

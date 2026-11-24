@@ -6,7 +6,7 @@ then follow dependencies and tests for the task at hand.
 
 | Task / boundary | Start reading | Relevant tests |
 | --- | --- | --- |
-| CLI session and assembly | `declaw/main.py`, `declaw/brain/repl.py` | `tests/unit/test_repl.py`, `tests/integration/test_chat_repl.py` |
+| CLI session and assembly | `declaw/main.py`, `declaw/brain/repl.py` | `tests/unit/test_repl.py`, `tests/unit/test_chat_conversations.py`, `tests/integration/test_chat_repl.py` |
 | Model, state, execution loop | `declaw/brain/loop.py`, `state.py`, `chat_model.py` | `tests/unit/test_loop.py`, `test_state.py`, `test_chat_model.py` |
 | Context selection, budget overflow and optional memory | `declaw/brain/context.py`, `compaction.py`, `repair.py`, `memory_context.py` | `tests/unit/test_context.py`, `test_compaction.py`, `test_repair.py`, `test_memory_context.py` |
 | Tool contracts and approval | `declaw/tools/base.py`, `registry.py`, `confirmation.py` | `tests/unit/test_tools_base.py`, `test_tools_registry.py`, `test_tools_confirmation.py` |

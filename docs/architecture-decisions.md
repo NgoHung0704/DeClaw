@@ -20,6 +20,7 @@ inspection date: 2026-10-25. A planned decision does not imply implementation.
 | Source attribution and evaluation | Sources derive from retrieval metadata, not model-authored citations. Benchmarks separate development and externally sourced held-out sets; no private client documents in committed fixtures. See `declaw/documents/citations.py`, `declaw/documents/corpus/heldout.py` and the Phase 8b spec. |
 | License | Project metadata declares AGPL-3.0-or-later; see `pyproject.toml`. A possible future commercial license is not an implemented distribution/licensing flow. |
 | Context budgets | LangChain helper selection and approximate counting configured for three characters per token; preserve the current human turn, reject required-context overflow. [Policy](specs/2026-11-12-context-trimming.md). No exact tokenizer guarantee. |
+| Checkpointed CLI conversations | In-memory, per-thread graph history; process-local numbered metadata. A follow-up message can continue a conversation after a recognized temporary model failure. Failed progress is retained; external effects are not rolled back. [Policy](specs/2026-11-24-checkpointed-chat.md). |
 | Brain wrappers and prompts | Repair, compaction, memory retrieval and system-prompt activation require measured validation before default wiring. See `declaw/brain/repl.py` and `declaw/main.py`; old Mistral findings are historical, not proof about current Qwen behavior. |
 
 Phase 9 depends on the completed sanitizer work. The old requirement that Phase 3
