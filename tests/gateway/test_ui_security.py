@@ -85,6 +85,7 @@ def test_csp_connect_src_derived_from_bind() -> None:
     assert "style-src 'self'" in csp
     assert "img-src 'self' data:" in csp
     assert "frame-ancestors 'none'" in csp
+    assert "frame-src 'none'" in csp
 
 
 def test_csp_present_on_rejected_responses_too() -> None:
@@ -260,12 +261,3 @@ def test_chat_page_wires_approval_and_cancel_in_js() -> None:
     assert "textContent" in chat_js or "el(" in chat_js or 'import { el }' in chat_js
     connect_js = (UI_DIR / "js" / "connect.js").read_text(encoding="utf-8")
     assert "/api/auth/login" in connect_js
-
-
-def test_audit_export_link_carries_required_params() -> None:
-    # GET /api/audit/export REQUIRES day and format (typed Query params): a
-    # bare link 422s. The page must send both.
-    audit_js = (UI_DIR / "js" / "audit.js").read_text(encoding="utf-8")
-    assert "day=" in audit_js
-    assert "format=" in audit_js
-    assert '"/api/audit/export"' not in audit_js

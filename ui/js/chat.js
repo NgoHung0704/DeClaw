@@ -8,6 +8,19 @@ import { wsBase } from "./api.js";
 
 let socket = null;
 let activeTurn = null;
+let retainedView = null;
+
+window.addEventListener("declaw:unauthenticated", () => {
+  if (socket) {
+    socket.onmessage = null;
+    socket.onclose = null;
+    socket.close();
+  }
+  socket = null;
+  activeTurn = null;
+  retainedView = null;
+  closeModal();
+});
 
 const closeModal = () => {
   const modal = document.querySelector(".modal");
@@ -89,12 +102,11 @@ const onFrame = (frame, ui) => {
       break;
     }
     case "tool.start": {
-      ui.entry("tool", `${frame.name} …`);
+      ui.startTool(frame.name);
       break;
     }
     case "tool.end": {
-      const preview = frame.result_preview ? ` ${String(frame.result_preview).slice(0, 120)}` : "";
-      ui.entry("tool", `${frame.name}${preview}`);
+      ui.endTool(frame.name, frame.result_preview);
       break;
     }
     case "approval.request": {
@@ -102,6 +114,7 @@ const onFrame = (frame, ui) => {
       break;
     }
     case "chat.final": {
+      ui.finishTools("chat.tool_incomplete");
       if (ui.lastAssistant) {
         ui.lastAssistant.textContent = frame.text;
         renderSources(ui.lastAssistant, frame.sources);
@@ -112,6 +125,8 @@ const onFrame = (frame, ui) => {
       break;
     }
     case "turn.cancelled": {
+      ui.finishTools("chat.cancelled");
+      ui.entry("tool", t("chat.cancelled"));
       ui.endAssistant();
       activeTurn = null;
       ui.setBusy(false);
@@ -122,6 +137,7 @@ const onFrame = (frame, ui) => {
       if ((frame.code === "busy" || frame.code === "rate_limited") && activeTurn) {
         // A rejected control message must not unlock a running turn.
       } else {
+        ui.finishTools("chat.tool_incomplete");
         activeTurn = null;
         ui.endAssistant();
         ui.setBusy(false);
@@ -134,6 +150,12 @@ const onFrame = (frame, ui) => {
 };
 
 const mount = async (main) => {
+  // Route changes detach the view, not the live conversation or pending turn.
+  if (retainedView) {
+    main.replaceChildren(...retainedView.nodes);
+    retainedView.refresh();
+    return;
+  }
   // Only one live chat connection per page instance; drop any previous one.
   if (socket) {
     socket.onclose = null;
@@ -158,14 +180,36 @@ const mount = async (main) => {
   composer.replaceChildren(input, send, cancel);
   const status = el("p", { cls: "chat-status", text: t("chat.connecting"), attrs: { role: "status" } });
   const hint = el("p", { cls: "composer-hint", text: t("chat.keyboard_hint") });
-  main.replaceChildren(h1, banner, log, composer, status, hint);
+  const newSession = el("button", { text: t("chat.new_session"), attrs: { type: "button" } });
+  const heading = el("div", { cls: "page-heading" });
+  heading.replaceChildren(h1, newSession);
+  main.replaceChildren(heading, banner, log, composer, status, hint);
   let busy = false;
   send.disabled = true;
   cancel.disabled = true;
+  newSession.addEventListener("click", async () => {
+    if (busy) return;
+    closeModal();
+    retainedView = null;
+    await mount(main);
+  });
 
   let lastBubble = null;
   let assistantBubble = null;
+  const tools = [];
   const ui = {
+    startTool(name) {
+      tools.push({ name, node: ui.entry("tool", `${name} …`) });
+    },
+    endTool(name, result) {
+      const index = tools.findIndex(tool => tool.name === name);
+      const node = index < 0 ? ui.entry("tool", "") : tools.splice(index, 1)[0].node;
+      const preview = result ? ` ${String(result).slice(0, 120)}` : "";
+      node.textContent = `${name} — ${t("chat.tool_finished")}${preview}`;
+    },
+    finishTools(label) {
+      for (const tool of tools.splice(0)) tool.node.textContent = `${tool.name} — ${t(label)}`;
+    },
     entry(role, text) {
       if (log.children[0] === empty) log.replaceChildren();
       lastBubble = el("div", { cls: "chat-entry", attrs: { "data-role": role, "data-label": role === "user" ? t("chat.you") : role === "tool" ? t("chat.activity") : "DeClaw" }, text });
@@ -183,10 +227,33 @@ const mount = async (main) => {
     },
     setBusy(value) {
       busy = value;
+      newSession.disabled = value;
       send.disabled = value || socket?.readyState !== WebSocket.OPEN;
       cancel.disabled = !value || !activeTurn;
       log.setAttribute("aria-busy", String(value));
       status.textContent = t(value ? "chat.thinking" : "chat.ready");
+    },
+  };
+
+  retainedView = {
+    nodes: Array.from(main.childNodes),
+    refresh() {
+      h1.textContent = t("page.chat.title");
+      empty.children[1].textContent = t("chat.empty_title");
+      empty.children[2].textContent = t("chat.empty_help");
+      newSession.textContent = t("chat.new_session");
+      for (const bubble of log.children) {
+        if (bubble.dataset.role === "user") bubble.setAttribute("data-label", t("chat.you"));
+        else if (bubble.dataset.role === "tool") bubble.setAttribute("data-label", t("chat.activity"));
+      }
+      banner.textContent = t("chat.disconnected");
+      input.setAttribute("placeholder", t("chat.placeholder"));
+      input.setAttribute("aria-label", t("chat.placeholder"));
+      send.textContent = t("chat.send");
+      cancel.textContent = t("chat.cancel");
+      hint.textContent = t("chat.keyboard_hint");
+      log.setAttribute("aria-label", t("chat.conversation"));
+      status.textContent = t(socket?.readyState === WebSocket.OPEN ? (busy ? "chat.thinking" : "chat.ready") : "chat.offline");
     },
   };
 
@@ -215,6 +282,7 @@ const mount = async (main) => {
     if (!openBanner) {
       openBanner = true;
       banner.removeAttribute("hidden");
+      ui.finishTools("chat.tool_incomplete");
       activeTurn = null;
       ui.endAssistant();
       ui.setBusy(false);

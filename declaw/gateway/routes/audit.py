@@ -149,11 +149,14 @@ async def export_audit(
     format: Annotated[Literal["md", "json"], Query()],
 ) -> Response:
     application = application_from(request)
+    headers = {
+        "Content-Disposition": f'attachment; filename="declaw-audit-{day.isoformat()}.{format}"'
+    }
     if format == "md":
         report = await daily_report(
             application.sessionmaker, day, effective_language(application)
         )
-        return Response(content=report, media_type="text/markdown")
+        return Response(content=report, media_type="text/markdown", headers=headers)
 
     events, _unreadable = await events_for_day(application.sessionmaker, day)
     # The shipped exporter stays the single writer of the archive format;
@@ -163,4 +166,4 @@ async def export_audit(
         export_json(events, destination)
         content = destination.read_text(encoding="utf-8")
     logger.debug("Served audit export for day {}", day.isoformat())
-    return Response(content=content, media_type="application/json")
+    return Response(content=content, media_type="application/json", headers=headers)

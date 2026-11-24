@@ -77,9 +77,11 @@ class ApprovalBroker:
         *,
         timeout_seconds: float = APPROVAL_TIMEOUT_SECONDS,
         clock: Callable[[], float] = time.time,
+        pending_notice: Callable[[str], None] | None = None,
     ) -> None:
         self._timeout_seconds = timeout_seconds
         self._clock = clock
+        self._pending_notice = pending_notice
         self._pending: dict[str, _PendingApproval] = {}
         self._answered: dict[str, float] = {}
 
@@ -128,6 +130,11 @@ class ApprovalBroker:
                     "Approval request could not be queued - failing closed"
                 )
                 raise
+            if self._pending_notice is not None:
+                try:
+                    self._pending_notice(request_id)
+                except Exception:
+                    pass  # Optional native notice cannot alter the authoritative request.
             remaining = max(0.0, expires_at - self._clock())
             try:
                 return await asyncio.wait_for(future, remaining)

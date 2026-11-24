@@ -29,6 +29,7 @@ from declaw.audit.events import (
     event_from_row,
     to_db_row,
 )
+
 from declaw.db.engine import build_engine, build_sessionmaker
 from declaw.db.models import AuditEvent as AuditEventRow
 
@@ -199,3 +200,12 @@ def test_auth_event_action_vocabulary_is_closed() -> None:
 
     with pytest.raises(ValidationError):
         AuthEvent(action="token_dump")  # type: ignore[arg-type]
+
+
+def test_desktop_lifecycle_audit_has_closed_safe_payload() -> None:
+    from declaw.audit.events import DesktopLifecycleEvent
+
+    event = DesktopLifecycleEvent(launch_id="00000000-0000-0000-0000-000000000000", phase="ready")
+    assert event_from_payload(event.model_dump(mode="json")) == event
+    with pytest.raises(ValidationError):
+        DesktopLifecycleEvent(launch_id=event.launch_id, phase="ready", token="fake-secret")

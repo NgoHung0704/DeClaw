@@ -27,3 +27,17 @@ jobs:
         with:
           node-version: '22'
       - run: node --experimental-vm-modules --test tests/gateway/ui-behavior.test.cjs
+
+  desktop:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: rustup toolchain install 1.100.0 --profile minimal --component rustfmt --component clippy
+      - run: cargo +1.100.0 fmt --manifest-path tauri/src-tauri/Cargo.toml --check
+      - run: cargo +1.100.0 clippy --manifest-path tauri/src-tauri/Cargo.toml --locked --all-targets -- -D warnings
+      - run: cargo +1.100.0 test --manifest-path tauri/src-tauri/Cargo.toml --locked
+      - run: cargo +1.100.0 build --manifest-path tauri/src-tauri/Cargo.toml --locked

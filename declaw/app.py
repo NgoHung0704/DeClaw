@@ -39,7 +39,9 @@ from declaw.log import logger
 from declaw.plugin_host.grants_helper import load_grants, load_state
 from declaw.plugin_host.host import PluginHost
 from declaw.sanitizer.classifier import build_ollama_classifier
-from declaw.sanitizer.quarantine import QuarantineStore, log_audit_sink, user_notice_sink
+from declaw.sanitizer.quarantine import (
+    QuarantineEvent, QuarantineStore, log_audit_sink, user_notice_sink,
+)
 from declaw.sanitizer.sanitizer import Sanitizer
 from declaw.settings_service import SettingsService
 from declaw.tools.confirmation import ConfirmationProvider
@@ -77,6 +79,7 @@ class Application:
         *,
         mode: AppMode = "gateway",
         quarantine_notice: Callable[[str], None] | None = None,
+        quarantine_event: Callable[[str], None] | None = None,
         confirmation_provider: ConfirmationProvider | None = None,
         stop_accepting_sessions: ShutdownStep | None = None,
         cancel_in_flight_turns: ShutdownStep | None = None,
@@ -105,6 +108,14 @@ class Application:
             # unreliably, so the application itself tells the user (seeded
             # rationale for user_notice_sink in declaw/sanitizer/quarantine.py).
             sinks.append(user_notice_sink(quarantine_notice, self.settings.language))
+        if quarantine_event is not None:
+            def optional_notice(event: QuarantineEvent) -> None:
+                try:
+                    quarantine_event(event.id)
+                except Exception:
+                    pass  # Preserve authoritative audit/sanitizer behavior on notice loss.
+
+            sinks.append(optional_notice)
         self.quarantine = QuarantineStore(audit_sink=composite_sink(*sinks))
 
         # No sanitizer when the setting is off: tools then run unsanitized by

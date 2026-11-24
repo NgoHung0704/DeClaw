@@ -1,0 +1,28 @@
+[package]
+name = "declaw-desktop"
+version = "0.1.0"
+description = "DeClaw source-development desktop shell"
+edition = "2021"
+rust-version = "1.100"
+license = "AGPL-3.0-or-later"
+
+[lib]
+name = "declaw_desktop"
+
+[build-dependencies]
+tauri-build = { version = "=2.7.4", features = [] }
+
+[dependencies]
+tauri = { version = "=2.12.5", features = ["tray-icon"] }
+tauri-plugin-dialog = "=2.8.4"
+tauri-plugin-single-instance = "=2.5.5"
+serde = { version = "=1.0.229", features = ["derive"] }
+serde_json = "=1.0.154"
+uuid = { version = "=1.29.2", features = ["v4", "serde"] }
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "=0.61.2", features = [
+  "Win32_Foundation", "Win32_Security", "Win32_Storage_FileSystem",
+  "Win32_System_Console", "Win32_System_JobObjects", "Win32_System_Pipes",
+  "Win32_System_Threading", "Win32_System_IO",
+] }

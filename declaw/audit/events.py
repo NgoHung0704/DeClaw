@@ -188,6 +188,15 @@ class AuthEvent(_BaseAuditEvent):
     action: Literal["login_success", "login_failure", "logout"]
 
 
+class DesktopLifecycleEvent(_BaseAuditEvent):
+    """Observed readiness/stop intent, never a claim of crash-time audit flushing."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+    event_type: Literal["desktop.lifecycle"] = "desktop.lifecycle"
+    launch_id: str
+    phase: Literal["ready", "stop_requested"]
+
+
 AnyAuditEvent = Annotated[
     ToolCallEvent
     | NetworkCallEvent
@@ -197,7 +206,8 @@ AnyAuditEvent = Annotated[
     | MemoryWipeEvent
     | PluginPermissionEvent
     | PluginLifecycleEvent
-    | AuthEvent,
+    | AuthEvent
+    | DesktopLifecycleEvent,
     Field(discriminator="event_type"),
 ]
 

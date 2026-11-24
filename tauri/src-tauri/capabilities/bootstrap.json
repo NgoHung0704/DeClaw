@@ -1,0 +1,10 @@
+{
+  "identifier": "bootstrap",
+  "description": "Bundled bootstrap lifecycle and explicit token reveal only",
+  "local": true,
+  "windows": ["bootstrap"],
+  "permissions": [
+    "allow-desktop-status", "allow-desktop-start", "allow-desktop-stop",
+    "allow-desktop-restart", "allow-bootstrap-token"
+  ]
+}

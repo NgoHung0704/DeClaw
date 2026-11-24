@@ -21,6 +21,25 @@ The root README introduces the product; this file indexes contributor context.
 
 Historical results are not fresh measurements. Source and current wiring take precedence.
 
+## Phase 10 planning (decisions settled)
+
+- [Desktop specification](specs/2026-11-12-phase-10-tauri-desktop-design.md)
+- [Desktop implementation plan](superpowers/plans/2026-11-12-phase-10-desktop.md)
+- [Documentation re-review, 2026-11-12](history/phase-10-spec-plan-review-2026-11-12.md)
+- [Implementation progress, 2026-11-13](history/phase-10-implementation-2026-11-13.md)
+- [Architecture review, 2026-11-13](history/phase-10-architecture-review-2026-11-13.md)
+- [Architecture repair evidence, 2026-11-14](history/phase-10-architecture-repairs-2026-11-14.md)
+- [Hands-on usability review, 2026-11-14](history/phase-10-usability-review-2026-11-14.md)
+- [Usability repair evidence, 2026-11-14](history/phase-10-usability-repairs-2026-11-14.md)
+- [Desktop acceptance checklist](phase-10-review.md)
+- [Source run guide](../tauri/README.md)
+- [Release-boundary dossier](phase-10-release-boundaries.md)
+
+Seven architecture/scope decisions were settled under explicit owner delegation
+on 2026-11-12. Implementation is in progress on the integrated Phase 9 maintenance
+baseline; open acceptance is tracked separately. Installed native-notification
+acceptance remains at Phase 14. Historical results remain dated.
+
 ## Specifications and maintenance
 
 - [Phase 7 plugin host](specs/2026-08-23-phase-7-plugin-host-design.md)
