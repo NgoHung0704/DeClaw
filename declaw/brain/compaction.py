@@ -19,7 +19,7 @@ from collections.abc import Awaitable, Callable, Sequence
 
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, ToolMessage
 
-from declaw.brain.context import DEFAULT_SOFT_CAP, TokenCounter, estimate_tokens
+from declaw.brain.context import DEFAULT_SOFT_CAP, DEFAULT_TOKEN_COUNTER
 from declaw.brain.loop import ModelCallable
 
 # Produces a concise summary of a run of messages.
@@ -65,7 +65,7 @@ async def compact_messages(
     summarize: Summarizer,
     threshold: int = DEFAULT_COMPACTION_THRESHOLD,
     keep_recent: int = DEFAULT_KEEP_RECENT,
-    counter: TokenCounter = estimate_tokens,
+    counter: Callable[[Sequence[BaseMessage]], int] = DEFAULT_TOKEN_COUNTER,
 ) -> list[BaseMessage]:
     """Replace the oldest turns with a summary note once over ``threshold``.
 
@@ -81,7 +81,8 @@ async def compact_messages(
     head: list[BaseMessage] = []
     rest = msgs
     if msgs and isinstance(msgs[0], SystemMessage):
-        head, rest = [msgs[0]], msgs[1:]
+        head.append(msgs[0])
+        rest = msgs[1:]
 
     recent: list[BaseMessage] = rest[-keep_recent:] if keep_recent > 0 else []
     old = rest[: len(rest) - len(recent)]
@@ -103,7 +104,7 @@ def with_compaction(
     summarize: Summarizer,
     threshold: int = DEFAULT_COMPACTION_THRESHOLD,
     keep_recent: int = DEFAULT_KEEP_RECENT,
-    counter: TokenCounter = estimate_tokens,
+    counter: Callable[[Sequence[BaseMessage]], int] = DEFAULT_TOKEN_COUNTER,
 ) -> ModelCallable:
     """Wrap ``model`` so its incoming messages are compacted when over threshold.
 

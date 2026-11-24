@@ -2,13 +2,14 @@
 
 Eviction logic is exercised with an injected ``counter`` (one token per
 message) so the caps are crisp; a separate test uses the real
-``estimate_tokens`` to prove a long conversation stays under the 32k window.
+library approximate counter to check the configured budget on a long conversation.
 """
 
 from __future__ import annotations
 
 from collections.abc import Sequence
 
+import pytest
 from langchain_core.messages import (
     AIMessage,
     BaseMessage,
@@ -19,8 +20,9 @@ from langchain_core.messages import (
 
 from declaw.brain.context import (
     DEFAULT_HARD_CAP,
+    DEFAULT_TOKEN_COUNTER,
     MISTRAL_CONTEXT_TOKENS,
-    estimate_tokens,
+    ContextWindowExceededError,
     fit_to_window,
     with_context_window,
 )
@@ -31,10 +33,10 @@ def _count_messages(messages: Sequence[BaseMessage]) -> int:
     return len(messages)
 
 
-def test_estimate_tokens_basics() -> None:
-    assert estimate_tokens([]) == 0
-    short = estimate_tokens([HumanMessage(content="hi")])
-    long = estimate_tokens([HumanMessage(content="word " * 500)])
+def test_configured_token_counter_basics() -> None:
+    assert DEFAULT_TOKEN_COUNTER([]) == 0
+    short = DEFAULT_TOKEN_COUNTER([HumanMessage(content="hi")])
+    long = DEFAULT_TOKEN_COUNTER([HumanMessage(content="word " * 500)])
     assert short > 0
     assert long > short
 
@@ -59,10 +61,10 @@ def test_fit_to_window_preserves_system_message() -> None:
     assert result == [system, *msgs[-2:]]
 
 
-def test_fit_to_window_keeps_last_message_even_if_oversized() -> None:
+def test_fit_to_window_rejects_oversized_current_message() -> None:
     only = HumanMessage(content="huge")
-    result = fit_to_window([only], hard_cap=0, soft_cap=0, counter=_count_messages)
-    assert result == [only]  # never drop the current turn
+    with pytest.raises(ContextWindowExceededError):
+        fit_to_window([only], hard_cap=0, soft_cap=0, counter=_count_messages)
 
 
 def test_fit_to_window_drops_orphan_tool_message() -> None:
@@ -102,9 +104,9 @@ def test_long_conversation_stays_under_32k() -> None:
     chunk = "lorem ipsum dolor sit amet " * 200  # a few hundred tokens each
     msgs: list[BaseMessage] = [SystemMessage(content="system rules")]
     msgs += [HumanMessage(content=chunk) for _ in range(100)]
-    assert estimate_tokens(msgs) > MISTRAL_CONTEXT_TOKENS  # genuinely over the window
+    assert DEFAULT_TOKEN_COUNTER(msgs) > MISTRAL_CONTEXT_TOKENS  # genuinely over the window
 
-    fitted = fit_to_window(msgs)  # real estimate_tokens + default caps
+    fitted = fit_to_window(msgs)  # configured library counter + default caps
 
-    assert estimate_tokens(fitted) <= DEFAULT_HARD_CAP
+    assert DEFAULT_TOKEN_COUNTER(fitted) <= DEFAULT_HARD_CAP
     assert fitted[0].content == "system rules"  # system prompt preserved
